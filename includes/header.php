@@ -12,7 +12,7 @@ if (!defined('BASE_URL')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StarClean - Sistema de Limpeza</title>
 
-    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/img/Logo1-removebg-preview (1).png">
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/img/favcon_starclean.png">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 

@@ -18,6 +18,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="<?= BASE_URL ?>/pages/avaliacoes.php">Avaliações</a>
                 </li>
+                <li class="nav-item">
+                    <a href="<?= BASE_URL ?>/pages/servicos.php" class="nav-link">Serviços</a>
+                </li>
             </ul>
 
             <?php
