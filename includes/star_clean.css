@@ -1,0 +1,30 @@
+.hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(../img/Logo_slider.jpg) center;
+    background-size: cover;
+    color: white;
+    padding: 80px 0;
+    text-align: end;    
+}
+
+.team-member img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 5px solid #eee;
+}
+
+.card-body {
+    min-height: 220px;
+
+}
+
+/* Media query para telas menores que 768px (tablets e celulares) */
+@media (max-width: 767.98px) {
+    .display-4-mobile-friendly {
+        /* Reduz o tamanho da fonte do display-4 em 40% em telas pequenas */
+        font-size: 2.1rem;
+        /* O padrão do display-4 é 3.5rem */
+        font-weight: 300;
+        line-height: 1.2;
+    }
+}
