@@ -93,6 +93,22 @@ if (isset($_GET['id']) && isset($_GET['tipo'])) {
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';   
 ?>
+<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+    aria-controls="sidebarMenu">
+    <i class="fas fa-bars"></i> Menu
+</button>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarMenuLabel">Navegação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <?php include '../includes/menu.php'; ?>
+    </div>
+</div>
+<main class="d-flex">
+    <?php include '../includes/sidebar.php'; ?>
 
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
@@ -112,60 +128,60 @@ include '../includes/navbar_logged_in.php';
                     <?php if ($tipo === 'cliente'): ?>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="nome" class="form-label">Nome:</label>
+                                <label for="nome" class="form-label" placeholder="Digite seu nome:">Nome:</label>
                                 <input type="text" class="form-control" id="nome" name="nome" value="<?= htmlspecialchars($utilizador['nome']) ?>" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="sobrenome" class="form-label">Sobrenome:</label>
+                                <label for="sobrenome" class="form-label" placeholder="Digite seu sobrenome:">Sobrenome:</label>
                                 <input type="text" class="form-control" id="sobrenome" name="sobrenome" value="<?= htmlspecialchars($utilizador['sobrenome']) ?>" required>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email:</label>
+                            <label for="email" class="form-label" placeholder="Digite seu e-mail:">Email:</label>
                             <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($utilizador['email']) ?>" required>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="telefone" class="form-label">Telefone:</label>
+                                <label for="telefone" class="form-label" placeholder="Digite seu telefone:">Telefone:</label>
                                 <input type="tel" class="form-control" id="telefone" name="telefone" value="<?= htmlspecialchars($utilizador['telefone']) ?>">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="cpf" class="form-label">CPF:</label>
+                                <label for="cpf" class="form-label" placeholder="Digite seu CPF:">CPF:</label>
                                 <input type="text" class="form-control" id="cpf" name="cpf" value="<?= htmlspecialchars($utilizador['cpf']) ?>" required>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="data_nascimento" class="form-label">Data de Nascimento:</label>
+                            <label for="data_nascimento" class="form-label" placeholder="Digite sua data de nascimento:">Data de Nascimento:</label>
                             <input type="date" class="form-control" id="data_nascimento" name="data_nascimento" value="<?= htmlspecialchars($utilizador['data_nascimento']) ?>" required>
                         </div>
 
                     <?php elseif ($tipo === 'prestador'): ?>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="nome_razão_social" class="form-label">Nome / Razão Social:</label>
+                                <label for="nome_razão_social" class="form-label" placeholder="Digite seu nome:">Nome:</label>
                                 <input type="text" class="form-control" id="nome_razão_social" name="nome_razão_social" value="<?= htmlspecialchars($utilizador['nome_razão_social']) ?>" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="sobrenome_nome_fantasia" class="form-label">Sobrenome / Nome Fantasia:</label>
+                                <label for="sobrenome_nome_fantasia" class="form-label" placeholder="Digite seu sobrenome:">Sobrenome:</label>
                                 <input type="text" class="form-control" id="sobrenome_nome_fantasia" name="sobrenome_nome_fantasia" value="<?= htmlspecialchars($utilizador['sobrenome_nome_fantasia']) ?>">
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email:</label>
+                            <label for="email" class="form-label" placeholder="Digite seu e-mail:">Email:</label>
                             <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($utilizador['email']) ?>" required>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="telefone" class="form-label">Telefone:</label>
+                                <label for="telefone" class="form-label" placeholder="Digite seu telefone:">Telefone:</label>
                                 <input type="tel" class="form-control" id="telefone" name="telefone" value="<?= htmlspecialchars($utilizador['telefone']) ?>">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="cpf_cnpj" class="form-label">CPF / CNPJ:</label>
+                                <label for="cpf_cnpj" class="form-label" placeholder="Digite seu CPF:">CPF:</label>
                                 <input type="text" class="form-control" id="cpf_cnpj" name="cpf_cnpj" value="<?= htmlspecialchars($utilizador['cpf_cnpj']) ?>" required>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="especialidade" class="form-label">Especialidade:</label>
+                            <label for="especialidade" class="form-label" placeholder="Digite sua especialidade:">Especialidade:</label>
                             <input type="text" class="form-control" id="especialidade" name="especialidade" value="<?= htmlspecialchars($utilizador['especialidade']) ?>" required>
                         </div>
                     <?php endif; ?>
@@ -179,3 +195,34 @@ include '../includes/navbar_logged_in.php';
     </div>
 </main>
 <?php include '../includes/footer.php'; ?>
+<script>
+ // --- MÁSCARA DE TELEFONE ---
+    function mascaraTelefone(evento) {
+        if (evento.key === "Backspace") return;
+        let valor = evento.target.value.replace(/\D/g, '');
+        valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2');
+        valor = valor.replace(/(\d)(\d{4})$/, '$1-$2');
+        evento.target.value = valor;
+    }
+    const inputTelefoneCliente = document.getElementById('cliente_telefone');
+    const inputTelefonePrestador = document.getElementById('prestador_telefone');
+    if (inputTelefoneCliente) inputTelefoneCliente.addEventListener('keyup', mascaraTelefone);
+    if (inputTelefonePrestador) inputTelefonePrestador.addEventListener('keyup', mascaraTelefone);
+    
+
+    function validaCPF(cpf) {
+        cpf = cpf.replace(/[^\d]+/g, '');
+        if (cpf === '' || cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+        let soma = 0, resto;
+        for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+        resto = (soma * 10) % 11;
+        if ((resto === 10) || (resto === 11)) resto = 0;
+        if (resto !== parseInt(cpf.substring(9, 10))) return false;
+        soma = 0;
+        for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+        resto = (soma * 10) % 11;
+        if ((resto === 10) || (resto === 11)) resto = 0;
+        if (resto !== parseInt(cpf.substring(10, 11))) return false;
+        return true;
+    }
+</script>

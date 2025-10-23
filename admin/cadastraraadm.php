@@ -35,12 +35,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
+
+<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+    aria-controls="sidebarMenu">
+    <i class="fas fa-bars"></i> Menu
+</button>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarMenuLabel">Navegação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <?php include '../includes/menu.php'; ?>
+    </div>
+</div>
+
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
+
+
     <div class="container-fluid p-4">
         <h1 class="text-center mb-4">Cadastrar Administrador</h1>
-    
+
         <?php if ($mensagem): ?>
             <div class="alert alert-info">
                 <?= htmlspecialchars($mensagem) ?>
@@ -50,21 +68,21 @@ include '../includes/navbar_logged_in.php';
         <div class="card p-4 shadow-sm" style="width: 100%; max-width: 600px; margin: auto;">
             <form action="cadastraraadm.php" method="post">
                 <div class="mb-3">
-                    <label for="nome_admin" class="form-label">Nome:</label>
+                    <label for="nome_admin" class="form-label" placeholder="Digite seu nome:">Nome:</label>
                     <input type="text" class="form-control" name="nome" id="nome_admin">
                 </div>
                 <div class="mb-3">
-                    <label for="sobrenome_admin" class="form-label">Sobrenome:</label>
+                    <label for="sobrenome_admin" class="form-label" placeholder="Digite seu sobrenome:">Sobrenome:</label>
                     <input type="text" class="form-control" name="sobrenome" id="sobrenome_admin">
                 </div>
 
                 <div class="mb-3">
-                    <label for="email" class="form-label">E-mail:</label>
+                    <label for="email" class="form-label" placeholder="Digite seu e-mail:">E-mail:</label>
                     <input type="email" class="form-control" name="email" id="email" required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="senha" class="form-label">Senha:</label>
+                    <label for="senha" class="form-label" placeholder="Digite sua senha:">Senha:</label>
                     <input type="password" class="form-control" name="senha" id="senha" required>
                 </div>
                 <div class="mb-3">

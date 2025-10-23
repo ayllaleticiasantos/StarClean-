@@ -114,7 +114,7 @@ include '../includes/navbar_logged_in.php';
                 <div class="card h-100 shadow-sm border-danger">
                     <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-danger"></i>
                         <h5 class="card-title">Relatórios</h5>
-                        <p class="card-text">Visualize e gere relatórios.</p><a href="relatorios.php"
+                        <p class="card-text">Visualize relatórios.</p><a href="relatorios.php"
                             class="btn btn-danger">Acessar</a>
                     </div>
                 </div>

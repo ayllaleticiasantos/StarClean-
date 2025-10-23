@@ -68,10 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
-include '../includes/sidebar.php'; 
+include '../includes/sidebar.php';
 ?>
 
-<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+
+<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+    aria-controls="sidebarMenu">
     <i class="fas fa-bars"></i> Menu
 </button>
 
@@ -84,6 +86,7 @@ include '../includes/sidebar.php';
         <?php include '../includes/menu.php'; ?>
     </div>
 </div>
+
 
 <div class="container-fluid p-4">
     <h1 class="mb-4">Cadastrar Novo Serviço</h1>
