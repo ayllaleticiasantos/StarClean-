@@ -17,7 +17,8 @@ include 'includes/navbar.php';
                 <img src="img/sliderbar_1.png" class="d-block w-100" style="max-height: 500px; object-fit: cover;"
                     alt="Seja bem-vindo à StarClean">
                 <div class="carousel-caption d-none d-md-block">
-                    <h2 class="display-3 fw-bold text-white text-shadow align-self-center">Bem-vindos à StarClean</h2>
+                    <h2 class="display-3 fw-bold text-white text-shadow 
+                    align-self-center">Bem-vindos à StarClean</h2>
                     <p class="lead col-lg-8 mx-auto text-white">A sua plataforma para agendar serviços de limpeza com qualidade e
                         confiança.</p>
                 </div>
