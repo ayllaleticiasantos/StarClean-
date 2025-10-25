@@ -6,11 +6,10 @@ include '../includes/navbar.php';
 
 ?>
 
-<header class="hero-section" style="background: url(../img/cleaning.jpeg) center/cover no-repeat; height: 400px; display: flex; align-items: start; color: black; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
+<header class="hero-section" style="background: url(../img/cleaning.jpeg) center/cover no-repeat; height: 400px; display: flex; align-items: start; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
     <div class="container">
-        <h1 class="display-4 fw-bold">Conheça a StarClean</h1>
-        <p class="lead">Eficiência na prestação de serviços de limpeza para empresas, escritórios e
-            residências.</p>
+        <h1 class="display-4 fw-bold text-center color-white">Conheça a StarClean</h1>
+        <p><h4 class="text-center color-white">Eficiência na prestação de serviços de limpeza para empresas, escritórios e residências.</h4></p>
     </div>
 </header>
 

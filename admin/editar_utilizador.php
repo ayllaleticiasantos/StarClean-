@@ -110,9 +110,6 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-<main class="d-flex">
-    <?php include '../includes/sidebar.php'; ?>
-
     <div class="container-fluid p-4">
         <h1 class="mb-4">Editar Utilizador</h1>
 

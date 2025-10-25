@@ -6,9 +6,9 @@ include '../includes/navbar.php';
 
 ?>
 
-<header class="hero-section" style="background: url(../img/cleaning.jpeg) center/cover no-repeat; height: 400px; display: flex; align-items: center; color: black; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
+<header class="hero-section" style="background: url(../img/cleaning.jpeg) center/cover no-repeat; height: 400px; display: flex; align-items: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
     <div class="container">
-      <h1 class="display-3 fw-bold text-center">Conheça alguns dos nossos serviços disponíveis</h1>
+      <h1 class="display-3 fw-bold text-center color-white">Conheça alguns dos nossos serviços</h1>
     <!-- <p class="lead col-lg-8 mx-auto text-center text-white">Na StarClean, oferecemos uma variedade de serviços de limpeza para atender às suas necessidades. Confira alguns deles:</p> -->
     </div>
 </header>

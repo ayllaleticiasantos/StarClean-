@@ -21,12 +21,14 @@ try {
         SELECT 
             (SELECT COUNT(*) FROM Cliente) AS total_clientes,
             (SELECT COUNT(*) FROM Prestador) AS total_prestadores,
-            (SELECT COUNT(*) FROM Agendamento) AS total_agendamentos
+            (SELECT COUNT(*) FROM Agendamento) AS total_agendamentos,
+            (SELECT COUNT(*) FROM Servico) AS total_servicos
     ");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $counts['clientes'] = $result['total_clientes'];
     $counts['prestadores'] = $result['total_prestadores'];
     $counts['agendamentos'] = $result['total_agendamentos'];
+    $counts['servicos'] = $result['total_servicos'];
 } catch (PDOException $e) {
     error_log("Erro ao buscar dados do dashboard do admin: " . $e->getMessage());
 }
@@ -152,6 +154,17 @@ include '../includes/navbar_logged_in.php';
                         <h2 class="card-text display-4"><?= $counts['agendamentos'] ?></h2>
                         <p>
                         <h4>Agendamentos registados no sistema.</h4>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
+                <div class="card h-100 shadow-sm border-warning text-center">
+                    <div class="card-body">
+                        <h2 class="card-title text-warning">Total de serviços cadastrados</h2>
+                        <h2 class="card-text display-4"><?= $counts['servicos'] ?></h2>
+                        <p>
+                        <h4>Serviços registados no sistema.</h4>
                         </p>
                     </div>
                 </div>

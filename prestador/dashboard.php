@@ -8,9 +8,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador'
     exit();
 }
 
-$id_prestador_logado = $_SESSION['usuario_id'];
-
 // Lógica para buscar as contagens de agendamentos
+$id_prestador_logado = $_SESSION['usuario_id'];
 $counts = [
     'pendente' => 0,
     'aceito' => 0,
@@ -35,6 +34,20 @@ include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
 
+<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+    aria-controls="sidebarMenu">
+    <i class="fas fa-bars"></i> Menu
+</button>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarMenuLabel">Navegação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <?php include '../includes/menu.php'; ?>
+    </div>
+</div>
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
@@ -44,38 +57,42 @@ include '../includes/navbar_logged_in.php';
         <hr>
 
         <div class="row text-center">
-            <div class="col-md-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-warning">
                     <div class="card-body">
                         <h5 class="card-title text-warning">Agendamentos Pendentes</h5>
                         <h2 class="card-text display-4"><?= $counts['pendente'] ?></h2>
+                        <p class="card-text">Acompanhe os agendamentos pendentes.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-success">
                     <div class="card-body">
-                        <h5 class="card-title text-success">Agendamentos Aceites</h5>
+                        <h5 class="card-title text-success">Agendamentos Aceitos</h5>
                         <h2 class="card-text display-4"><?= $counts['aceito'] ?></h2>
+                        <p class="card-text">Acompanhe os agendamentos aceitos.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-primary">
                     <div class="card-body">
                         <h5 class="card-title text-primary">Serviços Concluídos</h5>
                         <h2 class="card-text display-4"><?= $counts['realizado'] ?></h2>
+                        <p class="card-text">Acompanhe os serviços concluídos.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-danger">
                     <div class="card-body">
                         <h5 class="card-title text-danger">Agendamentos Cancelados</h5>
                         <h2 class="card-text display-4"><?= $counts['cancelado'] ?></h2>
+                        <p class="card-text">Acompanhe os agendamentos cancelados.</p>
                     </div>
                 </div>
             </div>
@@ -83,7 +100,7 @@ include '../includes/navbar_logged_in.php';
 
         <div class="row mt-4">
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-primary">
                     <div class="card-body text-center">
                         <i class="fas fa-list fa-3x text-primary mb-3"></i>
                         <h5 class="card-title">Meus Serviços</h5>
@@ -94,7 +111,7 @@ include '../includes/navbar_logged_in.php';
             </div>
 
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-success">
                     <div class="card-body text-center">
                         <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
                         <h5 class="card-title">Gerir Agendamentos</h5>
@@ -105,7 +122,7 @@ include '../includes/navbar_logged_in.php';
             </div>
 
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-warning">
                     <div class="card-body text-center">
                         <i class="fas fa-user-edit fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">Meu Perfil</h5>
@@ -114,6 +131,7 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
+            
         </div>
     </div>
 </main>
