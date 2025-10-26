@@ -1,7 +1,8 @@
 <?php
 session_start();
 require_once '../config/db.php';
-require_once '../config/config.php'; // Garante que BASE_URL está definida
+require_once '../config/config.php';
+require_once '../config/enviar_email.php'; // Incluir o novo script
 
 $mensagem = '';
 
@@ -15,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo = obterConexaoPDO();
             $usuario_encontrado = false;
             
-            // CORREÇÃO: Usando os nomes corretos das tabelas (singular)
             foreach (['Cliente', 'Prestador', 'Administrador'] as $tabela) {
                 $stmt = $pdo->prepare("SELECT id FROM `$tabela` WHERE email = ?");
                 $stmt->execute([$email]);
@@ -26,33 +26,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($usuario_encontrado) {
-                // Antes de inserir um novo token, remove os antigos para o mesmo email
                 $stmt = $pdo->prepare("DELETE FROM redefinicao_senha WHERE email = ?");
                 $stmt->execute([$email]);
 
-                // Gera um token seguro
                 $token = bin2hex(random_bytes(50));
-                
-                // Define o tempo de expiração (1 hora a partir de agora)
                 $data_expiracao = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-                // Salva o novo token na base de dados
                 $stmt = $pdo->prepare("INSERT INTO redefinicao_senha (email, token, data_expiracao) VALUES (?, ?, ?)");
                 $stmt->execute([$email, $token, $data_expiracao]);
 
-                // --- SIMULAÇÃO DO ENVIO DE E-MAIL ---
                 $link_redefinicao = BASE_URL . "/pages/redefinir-senha.php?token=" . $token;
                 
-                // CORREÇÃO DE SEGURANÇA APLICADA: Apenas mensagem genérica exibida.
+                // --- CHAMADA REAL PARA ENVIAR O E-MAIL ---
+                $email_enviado = enviarEmailRecuperacao($email, $link_redefinicao);
+                
+                // A mensagem genérica é exibida por segurança, mesmo que o envio falhe.
                 $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, um link para redefinir a senha foi enviado.</div>';
                 
             } else {
-                // Mensagem genérica para segurança (não revela se um e-mail existe no sistema)
                 $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, receberá as instruções para redefinir a sua senha.</div>';
             }
 
         } catch (PDOException $e) {
-            // Verifica se o erro é "tabela não encontrada" e dá uma instrução clara
             if ($e->getCode() == '42S02') {
                  $mensagem = '<div class="alert alert-danger">Erro: A tabela `redefinicao_senha` não foi encontrada. Por favor, execute o script SQL para criar a tabela.</div>';
             } else {

@@ -148,7 +148,6 @@ include '../includes/navbar.php';
             </div>
         </div>
     </section>
-
 </main>
 
-<? include '../includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

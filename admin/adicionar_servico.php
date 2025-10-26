@@ -68,9 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
-include '../includes/sidebar.php';
-?>
 
+/* REMOVIDA A INCLUSÃO DE SIDEBAR AQUI
+include '../includes/sidebar.php'; 
+*/
+?>
 
 <button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
     aria-controls="sidebarMenu">
@@ -87,49 +89,56 @@ include '../includes/sidebar.php';
     </div>
 </div>
 
+<main class="d-flex">
+    <?php 
+    // CORREÇÃO: A inclusão correta da sidebar e o início da div de conteúdo
+    // é feita dentro da tag <main>
+    include '../includes/sidebar.php'; 
+    ?>
 
-<div class="container-fluid p-4">
-    <h1 class="mb-4">Cadastrar Novo Serviço</h1>
-    <?= $mensagem_sucesso ?>
-    <?= $mensagem_erro ?>
+    <div class="container-fluid p-4">
+        <h1 class="mb-4">Cadastrar Novo Serviço</h1>
+        <?= $mensagem_sucesso ?>
+        <?= $mensagem_erro ?>
 
-    <div class="card border-0 shadow-sm" style="max-width: 600px;">
-        <div class="card-body">
-            <form action="adicionar_servico.php" method="post">
-                
-                <div class="mb-3">
-                    <label for="prestador_id" class="form-label">Prestador de Serviço</label>
-                    <select class="form-select" id="prestador_id" name="prestador_id" required>
-                        <option value="">-- Selecione o Prestador --</option>
-                        <?php foreach ($prestadores as $prestador): ?>
-                            <option value="<?= htmlspecialchars($prestador['id']) ?>">
-                                [ID: <?= htmlspecialchars($prestador['id']) ?>] <?= htmlspecialchars($prestador['nome_razão_social']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+        <div class="card border-0 shadow-sm" style="max-width: 600px;">
+            <div class="card-body">
+                <form action="adicionar_servico.php" method="post">
+                    
+                    <div class="mb-3">
+                        <label for="prestador_id" class="form-label">Prestador de Serviço</label>
+                        <select class="form-select" id="prestador_id" name="prestador_id" required>
+                            <option value="">-- Selecione o Prestador --</option>
+                            <?php foreach ($prestadores as $prestador): ?>
+                                <option value="<?= htmlspecialchars($prestador['id']) ?>">
+                                    [ID: <?= htmlspecialchars($prestador['id']) ?>] <?= htmlspecialchars($prestador['nome_razão_social']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
-                <div class="mb-3">
-                    <label for="titulo" class="form-label" placeholder="Titulo do Serviço">Título do Serviço</label>
-                    <input type="text" class="form-control" id="titulo" name="titulo" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="descricao" class="form-label" placeholder="Descrição do Serviço">Descrição</label>
-                    <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="preco" class="form-label" placeholder="Digite o preço do Serviço">Preço (R$)</label>
-                    <input type="number" class="form-control" id="preco" name="preco" step="0.01" min="0" required placeholder="Ex: 50.00">
-                </div>
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label" placeholder="Titulo do Serviço">Título do Serviço</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label" placeholder="Descrição do Serviço">Descrição</label>
+                        <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="preco" class="form-label" placeholder="Digite o preço do Serviço">Preço (R$)</label>
+                        <input type="number" class="form-control" id="preco" name="preco" step="0.01" min="0" required placeholder="Ex: 50.00">
+                    </div>
 
-                <button type="submit" class="btn btn-primary">Salvar Serviço</button>
-                <a href="dashboard.php" class="btn btn-secondary">Voltar ao Painel</a>
-            </form>
+                    <button type="submit" class="btn btn-primary">Salvar Serviço</button>
+                    <a href="dashboard.php" class="btn btn-secondary">Voltar ao Painel</a>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
 <?php 
 include '../includes/footer.php'; 

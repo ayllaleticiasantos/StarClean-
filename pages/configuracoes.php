@@ -53,54 +53,76 @@ if ($tabela) {
 // --- Inclusão dos ficheiros de layout ---
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
-include '../includes/sidebar.php'; // O sidebar já abre a coluna de conteúdo principal
+// CORREÇÃO: Removida a inclusão de sidebar aqui.
 ?>
 
-<!-- O conteúdo da página começa diretamente aqui -->
-<h1>Configurações</h1>
-<hr>
+<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+    aria-controls="sidebarMenu">
+    <i class="fas fa-bars"></i> Menu
+</button>
 
-<?php 
-if (isset($_SESSION['mensagem_sucesso'])) {
-    echo '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_sucesso'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
-    unset($_SESSION['mensagem_sucesso']);
-}
-if (isset($_SESSION['mensagem_erro'])) {
-    echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_erro'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
-    unset($_SESSION['mensagem_erro']);
-}
-?>
-    
-<div class="alert alert-info">
-    <p class="mb-0">Aqui você pode configurar suas preferências de notificação, privacidade e outras opções da conta.</p>
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarMenuLabel">Navegação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <?php include '../includes/menu.php'; ?>
+    </div>
 </div>
 
-<form action="configuracoes.php" method="POST">
-    <div class="card mt-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Preferências de Notificação</h5>
-            
-            <div class="form-check form-switch">
-                <input 
-                    class="form-check-input" 
-                    type="checkbox" 
-                    role="switch"
-                    id="notificacaoEmail" 
-                    name="notificacaoEmail"
-                    <?php if ($prefere_email == 1) echo 'checked'; ?>
-                >
-                <label class="form-check-label" for="notificacaoEmail">Receber notificações por e-mail sobre agendamentos</label>
-            </div>
-            
-            <div class="form-check form-switch mt-2">
-                <input class="form-check-input" type="checkbox" role="switch" id="notificacaoPush" disabled>
-                <label class="form-check-label text-muted" for="notificacaoPush">Receber notificações no app (em breve)</label>
-            </div>
+<main class="d-flex">
+    <?php include '../includes/sidebar.php'; ?>
+    
+    <!-- CORREÇÃO: Abrindo a div de conteúdo aqui, que é fechada implicitamente no footer -->
+    <div class="container-fluid p-4"> 
+        <h1>Configurações</h1>
+        <hr>
 
-            <button type="submit" class="btn btn-primary mt-4">Salvar Preferências</button>
+        <?php 
+        if (isset($_SESSION['mensagem_sucesso'])) {
+            echo '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_sucesso'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+            unset($_SESSION['mensagem_sucesso']);
+        }
+        if (isset($_SESSION['mensagem_erro'])) {
+            echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_erro'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+            unset($_SESSION['mensagem_erro']);
+        }
+        ?>
+            
+        <div class="alert alert-info">
+            <p class="mb-0">Aqui você pode configurar suas preferências de notificação, privacidade e outras opções da conta.</p>
         </div>
+
+        <form action="configuracoes.php" method="POST">
+            <div class="card mt-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Preferências de Notificação</h5>
+                    
+                    <div class="form-check form-switch">
+                        <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            role="switch"
+                            id="notificacaoEmail" 
+                            name="notificacaoEmail"
+                            <?php if ($prefere_email == 1) echo 'checked'; ?>
+                        >
+                        <label class="form-check-label" for="notificacaoEmail">Receber notificações por e-mail sobre agendamentos</label>
+                    </div>
+                    
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="notificacaoPush" disabled>
+                        <label class="form-check-label text-muted" for="notificacaoPush">Receber notificações no app (em breve)</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-4">Salvar Preferências</button>
+                </div>
+            </div>
+        </form>
+
     </div>
-</form>
+</main>
 
 <?php 
 // O footer fechará a estrutura principal que foi aberta no header e sidebar

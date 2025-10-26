@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/db.php';
+require_once '../config/db.php'; 
 
 // Lógica para buscar avaliações
 $avaliacoes = [];
@@ -24,7 +24,7 @@ try {
     $erro_banco = '<div class="alert alert-danger text-center">Não foi possível carregar as avaliações no momento.</div>';
 }
 
-include '../config/config.php';
+// CORREÇÃO: Removido include '../config/config.php';
 include '../includes/header.php';
 include '../includes/navbar.php';
 
