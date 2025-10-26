@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
         $mensagem = '<div class="alert alert-danger">Por favor, selecione um endereço para o serviço.</div>';
     } else {
         
-        // >>> ADIÇÃO DE VALIDAÇÃO DE DATA/HORA AQUI <<<
+        // >>> VALIDAÇÃO DE DATA/HORA APLICADA <<<
         $data_hora_agendada = $data . ' ' . $hora;
         $data_hora_atual = date('Y-m-d H:i:s');
 
@@ -75,8 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
             $dt_agendada = new DateTime($data_hora_agendada);
             $dt_atual = new DateTime($data_hora_atual);
 
-            // Adiciona um buffer de 5 minutos para evitar problemas de tempo de processamento
-            // Caso o agendamento seja para o minuto exato do envio
+            // Adiciona um buffer de 5 minutos
             $dt_atual->modify('+5 minutes'); 
 
             if ($dt_agendada < $dt_atual) {

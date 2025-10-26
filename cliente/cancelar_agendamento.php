@@ -23,8 +23,6 @@ try {
     $pdo = obterConexaoPDO();
     
     // 3. Verificação de Propriedade e Status Atual
-    // Verifica se o agendamento existe, pertence ao cliente logado
-    // E se o status NÃO É "cancelado" ou "concluído" (não faz sentido cancelar algo que já passou ou já está cancelado)
     $stmt_check = $pdo->prepare(
         "SELECT status, data, hora FROM Agendamento 
          WHERE id = ? AND Cliente_id = ?"
@@ -41,29 +39,25 @@ try {
     // 4. Lógica de Cancelamento
     if ($agendamento['status'] === 'cancelado') {
          $_SESSION['mensagem_alerta'] = "Este agendamento já está cancelado.";
-    } 
-    // Opcional: Impedir cancelamento se estiver muito próximo da data
-    // Exemplo: Bloquear cancelamento 24 horas antes do serviço.
-    
-    $data_servico = new DateTime($agendamento['data'] . ' ' . $agendamento['hora']);
-    $agora = new DateTime();
-    $limite_cancelamento = $data_servico->modify('-24 hours');
-    
-    if ($limite_cancelamento < $agora) {
-        $_SESSION['mensagem_erro'] = "Não é possível cancelar. O prazo de 24 horas antes do serviço já passou.";
-        header("Location: meus_agendamentos.php");
-        exit();
-    }
-    
-    
-    else {
-        // Executa a atualização do status
-        $stmt_update = $pdo->prepare(
-            "UPDATE Agendamento SET status = 'cancelado' WHERE id = ? AND Cliente_id = ?"
-        );
-        $stmt_update->execute([$agendamento_id, $cliente_id]);
+    } elseif ($agendamento['status'] === 'realizado') {
+         $_SESSION['mensagem_alerta'] = "Não é possível cancelar um agendamento que já foi realizado.";
+    } else {
+        // Verifica o prazo de 24 horas
+        $data_servico = new DateTime($agendamento['data'] . ' ' . $agendamento['hora']);
+        $agora = new DateTime();
+        $limite_cancelamento = $data_servico->modify('-24 hours');
         
-        $_SESSION['mensagem_sucesso'] = "Agendamento cancelado com sucesso.";
+        if ($limite_cancelamento < $agora) {
+            $_SESSION['mensagem_erro'] = "Não é possível cancelar. O prazo de 24 horas antes do serviço já passou.";
+        } else {
+            // Executa a atualização do status
+            $stmt_update = $pdo->prepare(
+                "UPDATE Agendamento SET status = 'cancelado' WHERE id = ? AND Cliente_id = ?"
+            );
+            $stmt_update->execute([$agendamento_id, $cliente_id]);
+            
+            $_SESSION['mensagem_sucesso'] = "Agendamento cancelado com sucesso.";
+        }
     }
 
 } catch (PDOException $e) {

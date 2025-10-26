@@ -173,7 +173,7 @@ include '../includes/navbar_logged_in.php';
                                 <input type="tel" class="form-control" id="telefone" name="telefone" value="<?= htmlspecialchars($utilizador['telefone']) ?>">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="cpf_cnpj" class="form-label" placeholder="Digite seu CPF:">CPF:</label>
+                                <label for="cpf_cnpj" class="form-label" placeholder="Digite seu CPF:">CPF/CNPJ:</label>
                                 <input type="text" class="form-control" id="cpf_cnpj" name="cpf_cnpj" value="<?= htmlspecialchars($utilizador['cpf_cnpj']) ?>" required>
                             </div>
                         </div>
@@ -193,7 +193,8 @@ include '../includes/navbar_logged_in.php';
 </main>
 <?php include '../includes/footer.php'; ?>
 <script>
- // --- MÁSCARA DE TELEFONE ---
+ // CORREÇÃO APLICADA AQUI: O script foi ajustado para procurar o ID correto (telefone)
+    // --- MÁSCARA DE TELEFONE ---
     function mascaraTelefone(evento) {
         if (evento.key === "Backspace") return;
         let valor = evento.target.value.replace(/\D/g, '');
@@ -201,10 +202,10 @@ include '../includes/navbar_logged_in.php';
         valor = valor.replace(/(\d)(\d{4})$/, '$1-$2');
         evento.target.value = valor;
     }
-    const inputTelefoneCliente = document.getElementById('cliente_telefone');
-    const inputTelefonePrestador = document.getElementById('prestador_telefone');
-    if (inputTelefoneCliente) inputTelefoneCliente.addEventListener('keyup', mascaraTelefone);
-    if (inputTelefonePrestador) inputTelefonePrestador.addEventListener('keyup', mascaraTelefone);
+    
+    // Procura por todos os campos com ID 'telefone'
+    const inputTelefone = document.getElementById('telefone');
+    if (inputTelefone) inputTelefone.addEventListener('keyup', mascaraTelefone);
     
 
     function validaCPF(cpf) {

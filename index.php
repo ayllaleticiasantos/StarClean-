@@ -118,6 +118,7 @@ include 'includes/navbar.php';
                 <div class="card-body">
                     <h5 class="card-title">Outros Serviços</h5>
                     <p class="card-text">Na Star Clean, oferecemos uma variedade de serviços adicionais para atender às suas necessidades específicas.</p>
+                    <a href="<?= BASE_URL ?>/pages/servicos.php">Ver mais</a>
                 </div>
             </div>
         </div>

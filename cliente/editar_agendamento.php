@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
-// require 'agendar.php'; // Inclui para usar a função obterConexaoPDO e a lógica de data
+// Removido o include de agendar.php pois as funções necessárias estão aqui
 
 // Segurança: Apenas clientes logados podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
@@ -44,8 +44,8 @@ try {
         exit();
     }
     
-    // Verificar se o agendamento pode ser editado (ex: não cancelado, não concluído)
-    if ($agendamento_detalhes['status'] === 'cancelado' || $agendamento_detalhes['status'] === 'concluído') {
+    // CORREÇÃO APLICADA AQUI: Verificar se o agendamento pode ser editado (não cancelado, não realizado)
+    if ($agendamento_detalhes['status'] === 'cancelado' || $agendamento_detalhes['status'] === 'realizado') {
         $_SESSION['mensagem_alerta'] = "Este agendamento não pode ser editado pois está com o status '{$agendamento_detalhes['status']}'.";
         header("Location: meus_agendamentos.php");
         exit();
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento_detalhes) {
     $observacoes_novas = $_POST['observacoes'];
     
     // =========================================================
-    // Reutilizando a lógica de validação de data futura do agendar.php
+    // Lógica de validação de data futura
     // =========================================================
     $data_hora_agendada = $data_nova . ' ' . $hora_nova;
     $dt_agendada = new DateTime($data_hora_agendada);

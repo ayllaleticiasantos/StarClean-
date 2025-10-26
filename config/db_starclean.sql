@@ -33,7 +33,8 @@ CREATE TABLE `administrador` (
   `sobrenome` varchar(45) NOT NULL,
   `email` varchar(150) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `tipo` varchar(50) DEFAULT 'adminmaster''adminusuario''adminmoderador',
+  /* CORREÇÃO APLICADA AQUI: Tipo ENUM para evitar erro de sintaxe */
+  `tipo` ENUM('adminmaster','adminusuario','adminmoderador') DEFAULT 'adminmaster',
   `receber_notificacoes_email` tinyint(1) NOT NULL DEFAULT 1,
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp(),
   `atualizado_em` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()

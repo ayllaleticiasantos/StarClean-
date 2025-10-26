@@ -8,13 +8,30 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
     exit();
 }
 
+// Lógica para exibir mensagens de feedback
+$mensagem_sucesso = '';
+if (isset($_SESSION['mensagem_sucesso'])) {
+    $mensagem_sucesso = '<div class="alert alert-success">' . $_SESSION['mensagem_sucesso'] . '</div>';
+    unset($_SESSION['mensagem_sucesso']);
+}
+$mensagem_erro = '';
+if (isset($_SESSION['mensagem_erro'])) {
+    $mensagem_erro = '<div class="alert alert-danger">' . $_SESSION['mensagem_erro'] . '</div>';
+    unset($_SESSION['mensagem_erro']);
+}
+$mensagem_alerta = '';
+if (isset($_SESSION['mensagem_alerta'])) {
+    $mensagem_alerta = '<div class="alert alert-warning">' . $_SESSION['mensagem_alerta'] . '</div>';
+    unset($_SESSION['mensagem_alerta']);
+}
+
+
 // Buscar agendamentos do cliente logado
 $id_cliente_logado = $_SESSION['usuario_id'];
 $agendamentos = [];
 try {
     $pdo = obterConexaoPDO();
     $stmt = $pdo->prepare(
-        // CORREÇÃO: Revertendo para os nomes de coluna 'data' e 'hora'
         "SELECT a.id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome_razão_social AS nome_prestador, s.descricao AS descricao_servico
          FROM Agendamento a
          JOIN Servico s ON a.Servico_id = s.id
@@ -25,7 +42,9 @@ try {
     $stmt->execute([$id_cliente_logado]);
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("Erro ao buscar agendamentos: " . $e->getMessage());
+    // CORREÇÃO: Usando error_log e mensagem amigável
+    error_log("Erro ao buscar agendamentos: " . $e->getMessage());
+    $mensagem_erro = '<div class="alert alert-danger">Erro ao buscar agendamentos.</div>';
 }
 
 include '../includes/header.php';
@@ -52,6 +71,10 @@ include '../includes/navbar_logged_in.php';
     <div class="container-fluid p-4">
         <h1 class="mb-4">Meus Agendamentos</h1>
         
+        <?= $mensagem_sucesso ?>
+        <?= $mensagem_erro ?>
+        <?= $mensagem_alerta ?>
+        
         <div class="card border-0 shadow-sm">
             <div class="card-body">
                 <div class="table-responsive">
@@ -70,7 +93,7 @@ include '../includes/navbar_logged_in.php';
                         <tbody>
                             <?php if (empty($agendamentos)): ?>
                                 <tr>
-                                    <td colspan="6" class="text-center">Nenhum agendamento encontrado.</td>
+                                    <td colspan="7" class="text-center">Nenhum agendamento encontrado.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($agendamentos as $agendamento): ?>
@@ -85,6 +108,12 @@ include '../includes/navbar_logged_in.php';
                                             <a href="cancelar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-danger">Cancelar</a>
                                             <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-info">Visualizar</a>
                                             <a href="editar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-warning">Editar</a>
+                                            
+                                            <?php 
+                                            // CORREÇÃO APLICADA AQUI: Botão de avaliação
+                                            if ($agendamento['status'] === 'realizado'): ?>
+                                                <a href="avaliar_servico.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-success mt-1">Avaliar</a>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

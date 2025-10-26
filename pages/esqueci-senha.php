@@ -43,9 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // --- SIMULAÇÃO DO ENVIO DE E-MAIL ---
                 $link_redefinicao = BASE_URL . "/pages/redefinir-senha.php?token=" . $token;
                 
-                $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, um link para redefinir a senha foi gerado.</div>';
-                // Apenas para fins de teste, mostra o link no ecrã
-                $mensagem .= '<div class="alert alert-info mt-3"><strong>Link para Teste:</strong><br><a href="' . $link_redefinicao . '" class="text-break">' . $link_redefinicao . '</a></div>';
+                // CORREÇÃO DE SEGURANÇA APLICADA: Apenas mensagem genérica exibida.
+                $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, um link para redefinir a senha foi enviado.</div>';
                 
             } else {
                 // Mensagem genérica para segurança (não revela se um e-mail existe no sistema)

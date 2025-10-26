@@ -3,6 +3,7 @@
 if (!defined('BASE_URL')) {
     require_once __DIR__ . '/../config/config.php';
 }
+// session_start() deve ser chamada na primeira linha de CADA ARQUIVO PHP que utiliza sessões.
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -29,16 +30,6 @@ if (!defined('BASE_URL')) {
     <?php
     // Inicia a sessão se ainda não tiver sido iniciada para verificar o login
     if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+        // Nada aqui, session_start() está no topo de cada script
     }
-
-    // // Inclui a navbar correta dependendo se o utilizador está logado ou não
-    // if (isset($_SESSION['usuario_id'])) {
-    //     include 'navbar_logged_in.php';
-    // } else {
-    //     include 'navbar.php';
-    // }
-    // ?>
-
-    <div class="container-fluid flex-grow-1">
-        <div class="row h-100">
+    ?>
