@@ -31,7 +31,7 @@ try {
     $params = [];
     
     // --- BUSCA DE CLIENTES COM FILTRO ---
-    $sql_clientes = "SELECT id, nome, sobrenome, telefone, email, criado_em FROM Cliente";
+    $sql_clientes = "SELECT id, nome, sobrenome, telefone, cpf, email, criado_em FROM Cliente";
     if (!empty($termo_pesquisa)) {
         $sql_clientes .= " WHERE nome LIKE ? OR sobrenome LIKE ? OR email LIKE ?";
         $params_clientes = ["%$termo_pesquisa%", "%$termo_pesquisa%", "%$termo_pesquisa%"];
@@ -109,6 +109,7 @@ include '../includes/navbar_logged_in.php';
                             <tr>
                                 <th>ID</th>
                                 <th>Nome Completo</th>
+                                <th>CPF</th>
                                 <th>Email</th>
                                 <th>Telefone</th>
                                 <th>Data de Criação</th>
@@ -117,12 +118,13 @@ include '../includes/navbar_logged_in.php';
                         </thead>
                         <tbody>
                             <?php if (empty($clientes)): ?>
-                                <tr><td colspan="6" class="text-center">Nenhum cliente encontrado.</td></tr>
+                                <tr><td colspan="7" class="text-center">Nenhum cliente encontrado.</td></tr>
                             <?php else: ?>
                                 <?php foreach ($clientes as $cliente): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($cliente['id']) ?></td>
                                         <td><?= htmlspecialchars($cliente['nome'] . ' ' . $cliente['sobrenome']) ?></td>
+                                        <td><?= htmlspecialchars($cliente['cpf']) ?></td>
                                         <td><?= htmlspecialchars($cliente['email']) ?></td>
                                         <td><?= htmlspecialchars($cliente['telefone']) ?></td>
                                         <td><?= date('d/m/Y H:i', strtotime($cliente['criado_em'])) ?></td>
@@ -148,8 +150,8 @@ include '../includes/navbar_logged_in.php';
                         <thead class="thead-dark">
                             <tr>
                                 <th>ID</th>
-                                <th>Razão Social</th>
-                                <th>CPF/CNPJ</th>
+                                <th>Prestador</th>
+                                <th>CPF</th>
                                 <th>Email</th>
                                 <th>Especialidade</th>
                                 <th>Ações</th>

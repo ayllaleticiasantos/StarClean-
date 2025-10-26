@@ -16,7 +16,7 @@ try {
     $stmt = $pdo->query(
         // CORREÇÃO FINAL: Usando nomes de coluna simples (data e hora)
         "SELECT a.id, c.nome AS nome_cliente, p.nome_razão_social AS nome_prestador, 
-          s.titulo AS titulo_servico, a.data, a.hora, a.status 
+          s.titulo AS titulo_servico, a.data, a.hora, a.status, s.descricao AS descricao_servico
          FROM Agendamento a
          JOIN Cliente c ON a.Cliente_id = c.id
          JOIN Prestador p ON a.Prestador_id = p.id
@@ -66,6 +66,7 @@ include '../includes/navbar_logged_in.php';
                         <th>Cliente</th>
                         <th>Prestador</th>
                         <th>Serviço</th>
+                        <th>Descrição</th>
                         <th>Data</th>
                         <th>Hora</th>
                         <th>Estado</th>
@@ -83,6 +84,7 @@ include '../includes/navbar_logged_in.php';
                                 <td><?= htmlspecialchars($agendamento['nome_cliente']) ?></td>
                                 <td><?= htmlspecialchars($agendamento['nome_prestador']) ?></td>
                                 <td><?= htmlspecialchars($agendamento['titulo_servico']) ?></td>
+                                <td><?= htmlspecialchars($agendamento['descricao_servico']) ?></td>
                                 <td><?= date('d/m/Y', strtotime($agendamento['data'])) ?></td>
                                 <td><?= htmlspecialchars(substr($agendamento['hora'], 0, 5)) ?></td>
                                 <td>

@@ -65,24 +65,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
     if (empty($endereco_id)) {
         $mensagem = '<div class="alert alert-danger">Por favor, selecione um endereço para o serviço.</div>';
     } else {
-        try {
-            $pdo = obterConexaoPDO();
-            // CORREÇÃO FINAL: Usando nomes de coluna simples (data e hora) para o INSERT
-            $stmt = $pdo->prepare(
-                "INSERT INTO Agendamento (cliente_id, prestador_id, servico_id, endereco_id, data, hora, status, observacoes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-            );
-            $stmt->execute([$id_cliente, $prestador_id, $servico['id'], $endereco_id, $data, $hora, $status, $observacoes]);
+        
+        // >>> ADIÇÃO DE VALIDAÇÃO DE DATA/HORA AQUI <<<
+        $data_hora_agendada = $data . ' ' . $hora;
+        $data_hora_atual = date('Y-m-d H:i:s');
 
-            $_SESSION['mensagem_sucesso'] = "Agendamento solicitado com sucesso! Aguarde a confirmação do prestador.";
-            header("Location: meus_agendamentos.php");
-            exit();
-        } catch (PDOException $e) {
-            $mensagem = '<div class="alert alert-danger">Erro ao solicitar o agendamento. Verifique se a data e hora são válidas.</div>';
-            error_log("Erro no INSERT de Agendamento: " . $e->getMessage());
+        // Cria objetos DateTime para comparação precisa
+        try {
+            $dt_agendada = new DateTime($data_hora_agendada);
+            $dt_atual = new DateTime($data_hora_atual);
+
+            // Adiciona um buffer de 5 minutos para evitar problemas de tempo de processamento
+            // Caso o agendamento seja para o minuto exato do envio
+            $dt_atual->modify('+5 minutes'); 
+
+            if ($dt_agendada < $dt_atual) {
+                // A data e hora escolhidas estão no passado ou muito próximas do presente.
+                $mensagem = '<div class="alert alert-danger">Não é possível agendar serviços para datas ou horários que já passaram. Escolha uma data e hora futura.</div>';
+            } else {
+                // Se a validação da data/hora passar, prossegue com o INSERT
+                try {
+                    $pdo = obterConexaoPDO();
+                    
+                    $stmt = $pdo->prepare(
+                        "INSERT INTO Agendamento (cliente_id, prestador_id, servico_id, endereco_id, data, hora, status, observacoes)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                    );
+                    $stmt->execute([$id_cliente, $prestador_id, $servico['id'], $endereco_id, $data, $hora, $status, $observacoes]);
+
+                    $_SESSION['mensagem_sucesso'] = "Agendamento solicitado com sucesso! Aguarde a confirmação do prestador.";
+                    header("Location: meus_agendamentos.php");
+                    exit();
+                } catch (PDOException $e) {
+                    $mensagem = '<div class="alert alert-danger">Erro ao solicitar o agendamento. Verifique se a data e hora são válidas.</div>';
+                    error_log("Erro no INSERT de Agendamento: " . $e->getMessage());
+                }
+            }
+
+        } catch (Exception $e) {
+             $mensagem = '<div class="alert alert-danger">Formato de data/hora inválido.</div>';
+             error_log("Erro de data/hora: " . $e->getMessage());
         }
     }
 }
+
+// Obtém a data mínima de hoje no formato YYYY-MM-DD para o input HTML (Frontend)
+$min_date = date('Y-m-d'); 
 
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
@@ -142,7 +170,7 @@ include '../includes/navbar_logged_in.php';
                         
                         <div class="mb-3">
                             <label for="data" class="form-label">Data do Serviço:</label>
-                            <input type="date" class="form-control" id="data" name="data" required>
+                            <input type="date" class="form-control" id="data" name="data" required min="<?= $min_date ?>">
                         </div>
                         <div class="mb-3">
                             <label for="hora" class="form-label">Hora do Serviço:</label>

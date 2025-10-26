@@ -28,7 +28,7 @@ try {
     $pdo = obterConexaoPDO();
     $stmt = $pdo->prepare(
         // CORREÇÃO FINAL: Usando nomes de coluna simples (data e hora)
-        "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, a.data, a.hora, a.status 
+        "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, a.data, a.hora, a.status, s.descricao as descricao_servico
          FROM Agendamento a
          JOIN Cliente c ON a.Cliente_id = c.id
          JOIN Servico s ON a.Servico_id = s.id
@@ -78,9 +78,10 @@ include '../includes/navbar_logged_in.php';
                             <tr>
                                 <th>Cliente</th>
                                 <th>Serviço</th>
+                                <th>Descrição</th>
                                 <th>Data</th>
                                 <th>Hora</th>
-                                <th>Estado</th>
+                                <th>Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -94,6 +95,7 @@ include '../includes/navbar_logged_in.php';
                                     <tr>
                                         <td><?= htmlspecialchars($agendamento['nome_cliente']) ?></td>
                                         <td><?= htmlspecialchars($agendamento['titulo_servico']) ?></td>
+                                        <td><?= htmlspecialchars($agendamento['descricao_servico']) ?></td>
                                         <td><?= date('d/m/Y', strtotime($agendamento['data'])) ?></td>
                                         <td><?= htmlspecialchars($agendamento['hora']) ?></td>
                                         <td>

@@ -15,7 +15,7 @@ try {
     $pdo = obterConexaoPDO();
     $stmt = $pdo->prepare(
         // CORREÇÃO: Revertendo para os nomes de coluna 'data' e 'hora'
-        "SELECT a.id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome_razão_social AS nome_prestador
+        "SELECT a.id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome_razão_social AS nome_prestador, s.descricao AS descricao_servico
          FROM Agendamento a
          JOIN Servico s ON a.Servico_id = s.id
          JOIN Prestador p ON a.Prestador_id = p.id
@@ -59,6 +59,7 @@ include '../includes/navbar_logged_in.php';
                         <thead>
                             <tr>
                                 <th>Serviço</th>
+                                <th>Descrição</th>
                                 <th>Prestador</th>
                                 <th>Data</th>
                                 <th>Hora</th>
@@ -75,12 +76,15 @@ include '../includes/navbar_logged_in.php';
                                 <?php foreach ($agendamentos as $agendamento): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($agendamento['titulo_servico']) ?></td>
+                                        <td><?= htmlspecialchars($agendamento['descricao_servico']) ?></td>
                                         <td><?= htmlspecialchars($agendamento['nome_prestador']) ?></td>
                                         <td><?= date('d/m/Y', strtotime($agendamento['data'])) ?></td>
                                         <td><?= htmlspecialchars($agendamento['hora']) ?></td>
                                         <td><span class="badge bg-secondary"><?= htmlspecialchars($agendamento['status']) ?></span></td>
                                         <td>
                                             <a href="cancelar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-danger">Cancelar</a>
+                                            <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-info">Visualizar</a>
+                                            <a href="editar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-warning">Editar</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

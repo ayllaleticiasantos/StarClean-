@@ -107,7 +107,8 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-<div class="container mt-5" style="max-width: 800px; padding: bottom 20px;">
+<div class="container-fluid">
+    
     <h1>Meu Perfil</h1>
     <hr>
 
@@ -123,7 +124,7 @@ include '../includes/navbar_logged_in.php';
     ?>
 
     <div class="card shadow-sm mb-5">
-        <div class="card-header">
+        <div class="card-header responsive">
             <h5>Dados Pessoais</h5>
         </div>
         <div class="card-body">
@@ -142,7 +143,7 @@ include '../includes/navbar_logged_in.php';
     </div>
 
     <div class="card shadow-sm mb-5">
-        <div class="card-header">
+        <div class="card-header responsive">
             <h5>Alterar Senha</h5>
         </div>
         <div class="card-body">

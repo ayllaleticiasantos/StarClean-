@@ -56,6 +56,41 @@ include '../includes/navbar_logged_in.php';
         <h3>Bem-vindo(a), <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!</h3>
         <hr>
 
+        <div class="row mt-4">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-primary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-list fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Meus Serviços</h5>
+                        <p class="card-text">Visualize os serviços que você oferece.</p>
+                        <a href="gerir_servicos.php" class="btn btn-primary">Ver Serviços</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-success">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Gerir Agendamentos</h5>
+                        <p class="card-text">Veja seus agendamentos pendentes e aceitos.</p>
+                        <a href="gerir_agendamentos.php" class="btn btn-success">Ver Agendamentos</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-edit fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Meu Perfil</h5>
+                        <p class="card-text">Mantenha seus dados de contato e de acesso atualizados.</p>
+                        <a href="../pages/perfil.php" class="btn btn-warning">Editar Perfil</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
         <div class="row text-center">
             <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-warning">
@@ -98,41 +133,8 @@ include '../includes/navbar_logged_in.php';
             </div>
         </div>
 
-        <div class="row mt-4">
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-primary">
-                    <div class="card-body text-center">
-                        <i class="fas fa-list fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Meus Serviços</h5>
-                        <p class="card-text">Visualize os serviços que você oferece.</p>
-                        <a href="gerir_servicos.php" class="btn btn-primary">Ver Serviços</a>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-success">
-                    <div class="card-body text-center">
-                        <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
-                        <h5 class="card-title">Gerir Agendamentos</h5>
-                        <p class="card-text">Veja seus agendamentos pendentes e aceitos.</p>
-                        <a href="gerir_agendamentos.php" class="btn btn-success">Ver Agendamentos</a>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-warning">
-                    <div class="card-body text-center">
-                        <i class="fas fa-user-edit fa-3x text-warning mb-3"></i>
-                        <h5 class="card-title">Meu Perfil</h5>
-                        <p class="card-text">Mantenha seus dados de contato e de acesso atualizados.</p>
-                        <a href="../pages/perfil.php" class="btn btn-warning">Editar Perfil</a>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
     </div>
 </main>
 
