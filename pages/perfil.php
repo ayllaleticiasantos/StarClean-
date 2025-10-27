@@ -165,5 +165,6 @@ include '../includes/navbar_logged_in.php';
         </div>
     </div>
 </div>
+</main>
 
 <?php include '../includes/footer.php'; ?>

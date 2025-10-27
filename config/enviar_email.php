@@ -17,14 +17,14 @@ function enviarEmailRecuperacao($destinatarioEmail, $linkRedefinicao) {
         $mail->Host = 'smtp.gmail.com'; 
         $mail->SMTPAuth = true;
         // Seu e-mail (remetente)
-        $mail->Username = 'SEU_EMAIL@gmail.com'; 
+        $mail->Username = 'starclean.prest.servicos@gmail.com'; 
         // Sua senha de app ou senha do e-mail
-        $mail->Password = 'SUA_SENHA_DO_EMAIL'; 
+        $mail->Password = 'Starclean123'; 
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Usar SSL/TLS (porta 465)
         $mail->Port = 465;
 
         // --- Configurações do E-mail ---
-        $mail->setFrom('SEU_EMAIL@gmail.com', 'StarClean Suporte');
+        $mail->setFrom('starclean.prest.servicos@gmail.com', 'StarClean Suporte');
         $mail->addAddress($destinatarioEmail);
         $mail->isHTML(true);
         $mail->Subject = 'StarClean: Redefinicao de Senha';
