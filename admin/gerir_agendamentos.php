@@ -15,7 +15,7 @@ try {
     $pdo = obterConexaoPDO();
     $stmt = $pdo->query(
         // CORREÇÃO FINAL: Usando nomes de coluna simples (data e hora)
-        "SELECT a.id, c.nome AS nome_cliente, p.nome_razão_social AS nome_prestador, 
+        "SELECT a.id, c.nome AS nome_cliente, p.nome AS nome_prestador, 
           s.titulo AS titulo_servico, a.data, a.hora, a.status, s.descricao AS descricao_servico
          FROM Agendamento a
          JOIN Cliente c ON a.Cliente_id = c.id

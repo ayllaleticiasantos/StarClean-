@@ -20,7 +20,7 @@ if (isset($_SESSION['usuario_id'])) {
             $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($tipo_usuario === 'cliente') {
             // CORREÇÃO FINAL: Usando nomes de coluna simples (data)
-            $stmt = $pdo->prepare("SELECT a.data as data, p.nome_razão_social AS nome_prestador, s.titulo AS titulo_servico FROM Agendamento a JOIN Prestador p ON a.Prestador_id = p.id JOIN Servico s ON a.Servico_id = s.id WHERE a.Cliente_id = ? AND a.status = 'aceito' ORDER BY a.data DESC LIMIT 5");
+            $stmt = $pdo->prepare("SELECT a.data as data, p.nome AS nome_prestador, s.titulo AS titulo_servico FROM Agendamento a JOIN Prestador p ON a.Prestador_id = p.id JOIN Servico s ON a.Servico_id = s.id WHERE a.Cliente_id = ? AND a.status = 'aceito' ORDER BY a.data DESC LIMIT 5");
             $stmt->execute([$id_usuario]);
             $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $link_destino = BASE_URL . '/cliente/meus_agendamentos.php';
@@ -63,7 +63,7 @@ if (isset($_SESSION['usuario_id'])) {
                                         <?= htmlspecialchars($notification['nome_cliente']) ?> agendou um serviço.
                                     <?php elseif ($tipo_usuario === 'cliente'): ?>
                                         <b>Agendamento Aceito!</b><br>
-                                        Seu serviço com <?= htmlspecialchars($notification['nome_prestador']) ?> foi aceite.
+                                        Seu serviço com <?= htmlspecialchars($notification['nome_prestador']) ?> foi aceito.
                                     <?php endif; ?>
                                 </small>
                                 <br>

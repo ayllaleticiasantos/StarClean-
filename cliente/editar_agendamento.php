@@ -29,7 +29,7 @@ try {
     // Buscar agendamento e prestador
     $stmt = $pdo->prepare(
         "SELECT a.id, a.servico_id, a.endereco_id, a.data, a.hora, a.status, a.observacoes, 
-                s.titulo AS titulo_servico, p.nome_razão_social AS nome_prestador
+                s.titulo AS titulo_servico, p.nome AS nome_prestador
          FROM Agendamento a
          JOIN Servico s ON a.Servico_id = s.id
          JOIN Prestador p ON a.Prestador_id = p.id

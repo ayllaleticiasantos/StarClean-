@@ -53,9 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // --- CASO PRESTADOR ---
                 case 'prestador':
-                    $nomeRazao = trim($_POST['prestador_nome_razao']);
-                    $sobrenomeFantasia = trim($_POST['prestador_sobrenome_fantasia']);
-                    $cpfCnpj = trim($_POST['cpf_cnpj']);
+                    $nomeRazao = trim($_POST['nome']);
+                    $sobrenomeFantasia = trim($_POST['sobrenome']);
+                    $cpfCnpj = trim($_POST['cpf']);
                     $telefone = trim($_POST['prestador_telefone']);
                     $especialidade = trim($_POST['especialidade']);
                     $descricao = trim($_POST['descricao']);
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         break;
                     }
 
-                    $stmt = $pdo->prepare("SELECT id FROM Prestador WHERE email = ? OR cpf_cnpj = ?");
+                    $stmt = $pdo->prepare("SELECT id FROM Prestador WHERE email = ? OR cpf = ?");
                     $stmt->execute([$email, $cpfCnpj]);
 
                     if ($stmt->fetch()) {
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $admin_id_responsavel = 1; // ID do admin padrão
 
                         $stmt = $pdo->prepare(
-                            "INSERT INTO Prestador (nome_razão_social, sobrenome_nome_fantasia, cpf_cnpj, email, telefone, especialidade, descricao, password, Administrador_id) 
+                            "INSERT INTO Prestador (nome, sobrenome, cpf, email, telefone, especialidade, descricao, password, Administrador_id) 
                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                         );
                         $stmt->execute([$nomeRazao, $sobrenomeFantasia, $cpfCnpj, $email, $telefone, $especialidade, $descricao, $senhaHash, $admin_id_responsavel]);
@@ -125,7 +125,7 @@ include '../includes/navbar.php';
                 </div>
                 <div class="form-check"><input class="form-check-input" type="radio" name="tipo" id="tipoPrestador"
                         value="prestador"><label class="form-check-label" for="tipoPrestador">Sou Prestador</label>
-                </div>
+              </div>
             </div>
 
             <div id="camposCliente">
@@ -150,13 +150,13 @@ include '../includes/navbar.php';
             </div>
 
             <div id="camposPrestador" style="display: none;">
-                <div class="mb-3"><label for="prestador_nome_razao" class="form-label"
-                        placeholder="Dígite Seu Nome ou Razão Social">Nome:</label><input
-                        type="text" class="form-control" name="prestador_nome_razao" id="prestador_nome_razao" placeholder="Dígite Seu Nome ou Razão Social"></div>
-                <div class="mb-3"><label for="prestador_sobrenome_fantasia" class="form-label"
+                <div class="mb-3"><label for="nome" class="form-label"
+                        placeholder="Dígite Seu Nome:">Nome:</label><input
+                        type="text" class="form-control" name="nome" id="nome" placeholder="Dígite Seu Nome:"></div>
+                <div class="mb-3"><label for="sobrenome" class="form-label"
                         placeholder="Digite Seu Sobrenome ou Nome Fantasia">Sobrenome:</label><input
-                        type="text" class="form-control" name="prestador_sobrenome_fantasia"
-                        id="prestador_sobrenome_fantasia" placeholder="Digite Seu Sobrenome ou Nome Fantasia"></div>
+                        type="text" class="form-control" name="sobrenome"
+                        id="sobrenome" placeholder="Digite Seu Sobrenome ou Nome Fantasia"></div>
 
             <div class="mb-3">
                 <label class="form-label">Tipo de Documento:</label>
@@ -168,8 +168,8 @@ include '../includes/navbar.php';
                 </div>
 
             <div class="mb-3">
-                <label for="cpf_cnpj" class="form-label" id="label_cpf_cnpj">CPF:</label>
-                <input type="text" class="form-control" name="cpf_cnpj" id="cpf_cnpj" placeholder="000.000.000-00"
+                <label for="cpf" class="form-label" id="label_cpf">CPF:</label>
+                <input type="text" class="form-control" name="cpf" id="cpf" placeholder="000.000.000-00"
                     maxlength="14">
                 <div id="docError" class="text-danger mt-1" style="display: none; font-size: 0.9em;">Documento inválido.
                 </div>

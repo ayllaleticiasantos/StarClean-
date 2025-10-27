@@ -23,7 +23,7 @@ if (!isset($_GET['servico_id']) || !is_numeric($_GET['servico_id'])) {
         
         // 1. Buscar detalhes do Serviço e do Prestador
         $stmt = $pdo->prepare(
-            "SELECT s.id, s.titulo, s.descricao, s.preco, s.prestador_id, p.nome_razão_social AS nome_prestador
+            "SELECT s.id, s.titulo, s.descricao, s.preco, s.prestador_id, p.nome AS nome_prestador
              FROM Servico s
              JOIN Prestador p ON s.prestador_id = p.id
              WHERE s.id = ?"

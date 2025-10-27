@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $destino = $dados['destino'];
 
                 // Ajusta a coluna do nome para a tabela Prestador
-                $coluna_nome_db = ($tipo === 'prestador') ? 'nome_razão_social' : 'nome';
+                $coluna_nome_db = ($tipo === 'prestador') ? 'nome' : 'nome';
                 
                 // Busca o usuário pelo e-mail
                 $stmt = $pdo->prepare("SELECT id, $coluna_nome_db AS nome, email, password FROM `$tabela` WHERE email = ?");

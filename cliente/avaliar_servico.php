@@ -27,7 +27,7 @@ try {
 
     // Buscar detalhes do agendamento (incluindo Prestador_id para a avaliação)
     $stmt = $pdo->prepare(
-        "SELECT a.id, a.Prestador_id, a.Servico_id, a.status, s.titulo AS titulo_servico, p.nome_razão_social AS nome_prestador
+        "SELECT a.id, a.Prestador_id, a.Servico_id, a.status, s.titulo AS titulo_servico, p.nome AS nome_prestador
          FROM Agendamento a
          JOIN Servico s ON a.Servico_id = s.id
          JOIN Prestador p ON a.Prestador_id = p.id

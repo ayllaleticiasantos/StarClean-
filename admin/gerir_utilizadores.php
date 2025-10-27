@@ -42,12 +42,12 @@ try {
     $clientes = $stmt_clientes->fetchAll();
 
     // --- BUSCA DE PRESTADORES COM FILTRO ---
-    $sql_prestadores = "SELECT id, nome_razão_social, cpf_cnpj, email, especialidade FROM Prestador";
+    $sql_prestadores = "SELECT id, nome, sobrenome, cpf, email, especialidade FROM Prestador";
     if (!empty($termo_pesquisa)) {
-        $sql_prestadores .= " WHERE nome_razão_social LIKE ? OR email LIKE ? OR especialidade LIKE ?";
-        $params_prestadores = ["%$termo_pesquisa%", "%$termo_pesquisa%", "%$termo_pesquisa%"];
+        $sql_prestadores .= " WHERE nome LIKE ? OR sobrenome LIKE ? OR email LIKE ? OR especialidade LIKE ?";
+        $params_prestadores = ["%$termo_pesquisa%", "%$termo_pesquisa%", "%$termo_pesquisa%", "%$termo_pesquisa%"];
     }
-    $sql_prestadores .= " ORDER BY nome_razão_social ASC";
+    $sql_prestadores .= " ORDER BY nome ASC";
     $stmt_prestadores = $pdo->prepare($sql_prestadores);
     $stmt_prestadores->execute($params_prestadores ?? []);
     $prestadores = $stmt_prestadores->fetchAll();
@@ -151,6 +151,7 @@ include '../includes/navbar_logged_in.php';
                             <tr>
                                 <th>ID</th>
                                 <th>Prestador</th>
+                                <th>Sobrenome</th>
                                 <th>CPF</th>
                                 <th>Email</th>
                                 <th>Especialidade</th>
@@ -164,8 +165,9 @@ include '../includes/navbar_logged_in.php';
                                 <?php foreach ($prestadores as $prestador): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($prestador['id']) ?></td>
-                                        <td><?= htmlspecialchars($prestador['nome_razão_social']) ?></td>
-                                        <td><?= htmlspecialchars($prestador['cpf_cnpj']) ?></td>
+                                        <td><?= htmlspecialchars($prestador['nome']) ?></td>
+                                        <td><?= htmlspecialchars($prestador['sobrenome']) ?></td>
+                                        <td><?= htmlspecialchars($prestador['cpf']) ?></td>
                                         <td><?= htmlspecialchars($prestador['email']) ?></td>
                                         <td><?= htmlspecialchars($prestador['especialidade']) ?></td>
                                         <td>

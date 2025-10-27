@@ -32,7 +32,7 @@ $agendamentos = [];
 try {
     $pdo = obterConexaoPDO();
     $stmt = $pdo->prepare(
-        "SELECT a.id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome_razão_social AS nome_prestador, s.descricao AS descricao_servico
+        "SELECT a.id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome AS nome_prestador, s.descricao AS descricao_servico
          FROM Agendamento a
          JOIN Servico s ON a.Servico_id = s.id
          JOIN Prestador p ON a.Prestador_id = p.id

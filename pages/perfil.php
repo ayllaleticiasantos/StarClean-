@@ -21,7 +21,7 @@ switch ($tipo_usuario) {
         break;
     case 'prestador':
         $tabela = 'Prestador';
-        $coluna_nome = 'nome_razão_social';
+        $coluna_nome = 'nome';
         break;
     case 'admin':
         $tabela = 'Administrador';

@@ -14,7 +14,7 @@ try {
     $pdo = obterConexaoPDO();
     // Consulta corrigida para buscar todos os serviços e os seus prestadores
     $stmt = $pdo->prepare(
-        "SELECT s.id, s.titulo, s.descricao, s.preco, p.nome_razão_social AS nome_prestador
+        "SELECT s.id, s.titulo, s.descricao, s.preco, p.nome AS nome_prestador
          FROM Servico s
          JOIN Prestador p ON s.prestador_id = p.id
          ORDER BY s.titulo"

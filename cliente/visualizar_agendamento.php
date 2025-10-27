@@ -27,7 +27,7 @@ try {
     $stmt = $pdo->prepare(
         "SELECT a.id, s.titulo AS titulo_servico, s.descricao AS descricao_servico, 
                 a.data, a.hora, a.status, a.observacoes, a.data_criacao,
-                p.nome_razão_social AS nome_prestador, p.email AS email_prestador,
+                p.nome AS nome_prestador, p.email AS email_prestador,
                 e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep
          FROM Agendamento a
          JOIN Servico s ON a.Servico_id = s.id

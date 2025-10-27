@@ -16,7 +16,7 @@ try {
     $pdo = obterConexaoPDO();
     
     // Buscar todos os prestadores para o campo de seleção
-    $stmt = $pdo->query("SELECT id, nome_razão_social FROM Prestador ORDER BY nome_razão_social ASC");
+    $stmt = $pdo->query("SELECT id, nome FROM Prestador ORDER BY nome ASC");
     $prestadores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Lógica para exibir mensagens de feedback
@@ -111,7 +111,7 @@ include '../includes/sidebar.php';
                             <option value="">-- Selecione o Prestador --</option>
                             <?php foreach ($prestadores as $prestador): ?>
                                 <option value="<?= htmlspecialchars($prestador['id']) ?>">
-                                    [ID: <?= htmlspecialchars($prestador['id']) ?>] <?= htmlspecialchars($prestador['nome_razão_social']) ?>
+                                    [ID: <?= htmlspecialchars($prestador['id']) ?>] <?= htmlspecialchars($prestador['nome']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
