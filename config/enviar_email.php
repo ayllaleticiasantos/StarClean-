@@ -16,15 +16,24 @@ function enviarEmailRecuperacao($destinatarioEmail, $linkRedefinicao) {
         // Servidor SMTP (Ex: Gmail)
         $mail->Host = 'smtp.gmail.com'; 
         $mail->SMTPAuth = true;
-        // Seu e-mail (remetente)
-        $mail->Username = 'starclean.prest.servicos@gmail.com'; 
-        // Sua senha de app ou senha do e-mail
-        $mail->Password = 'Starclean123'; 
+        
+        // **********************************************
+        // ********* PREENCHA SEUS DADOS AQUI ***********
+        // **********************************************
+        
+        // 1. Seu e-mail (remetente)
+        $mail->Username = 'starclean.prest.servicos@gmail.com'; // <-- PREENCHER
+        
+        // 2. Sua Senha de Aplicativo (App Password) ou senha do e-mail
+        $mail->Password = 'Starclean123'; // <-- PREENCHER
+        
+        // **********************************************
+        
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Usar SSL/TLS (porta 465)
         $mail->Port = 465;
 
         // --- Configurações do E-mail ---
-        $mail->setFrom('starclean.prest.servicos@gmail.com', 'StarClean Suporte');
+        $mail->setFrom('starclean.prest.servicos@gmail.com', 'StarClean Suporte'); // <-- PREENCHER (mesmo e-mail do Username)
         $mail->addAddress($destinatarioEmail);
         $mail->isHTML(true);
         $mail->Subject = 'StarClean: Redefinicao de Senha';
@@ -59,9 +68,9 @@ function enviarEmailRecuperacao($destinatarioEmail, $linkRedefinicao) {
         return true;
 
     } catch (Exception $e) {
-        // Loga o erro real (para você ver no log)
+        // A mensagem de erro detalhada será registrada no log do servidor
         error_log("Erro no envio de e-mail para {$destinatarioEmail}: {$mail->ErrorInfo}");
-        // Retorna falso para que a página continue exibindo a mensagem genérica ao usuário
+        // Retorna falso para a página de 'esqueci-senha'
         return false;
     }
 }
