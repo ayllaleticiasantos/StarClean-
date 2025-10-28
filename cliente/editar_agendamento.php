@@ -131,7 +131,7 @@ include '../includes/navbar_logged_in.php';
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="container-fluid p-4">
-        <h1 class="mb-4">Editar Agendamento <?= htmlspecialchars($agendamento_id) ?></h1>
+        <h1 class="mb-4">Editar Agendamento</h1>
         <hr>
 
         <?= $mensagem ?>

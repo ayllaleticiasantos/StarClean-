@@ -157,7 +157,7 @@ include '../includes/navbar_logged_in.php';
                         
                         <div class="mb-3">
                             <label for="comentario" class="form-label">Comentário (Opcional):</label>
-                            <textarea class="form-control" id="comentario" name="comentario" rows="3" placeholder="Compartilhe sua experiência..."><?= htmlspecialchars($avaliacao_existente['comentario'] ?? '') ?></textarea>
+                            <textarea class="form-control" id="comentario" name="comentario" rows="3" placeholder="Compartilhe sua experiência..." maxlength="300"><?= htmlspecialchars($avaliacao_existente['comentario'] ?? '') ?></textarea>
                         </div>
                         
                         <button type="submit" class="btn btn-primary">Enviar Avaliação</button>

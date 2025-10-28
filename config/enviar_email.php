@@ -2,6 +2,7 @@
 // Enviar e-mail de recuperação de senha
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
 // Incluir a biblioteca PHPMailer (assumindo que você usou o Composer)
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -25,7 +26,7 @@ function enviarEmailRecuperacao($destinatarioEmail, $linkRedefinicao) {
         $mail->Username = 'starclean.prest.servicos@gmail.com'; // <-- PREENCHER
         
         // 2. Sua Senha de Aplicativo (App Password) ou senha do e-mail
-        $mail->Password = 'Starclean123'; // <-- PREENCHER
+        $mail->Password = 'gymu xvvl wzen cftm'; // <-- PREENCHER
         
         // **********************************************
         
@@ -63,8 +64,9 @@ function enviarEmailRecuperacao($destinatarioEmail, $linkRedefinicao) {
         
         $mail->Body = $corpo_email;
         $mail->AltBody = "Clique no link para redefinir sua senha: " . $linkRedefinicao;
-
+        // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
         $mail->send();
+        // exit();
         return true;
 
     } catch (Exception $e) {

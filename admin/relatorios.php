@@ -1,6 +1,13 @@
 <?php
 // Inclui o arquivo de conexão PDO
-require_once '../config/db.php'; 
+require '../config/db.php';
+
+session_start();
+// Segurança: Apenas administradores podem acessar
+if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
+    header("Location: ../pages/login.php");
+    exit();
+}
 
 // Variáveis para armazenar os resultados
 $counts = [
@@ -14,7 +21,7 @@ $mensagem_erro = '';
 
 try {
     $pdo = obterConexaoPDO();
-    
+
     // --- 1. CONTAGEM DE LIMPEZAS REALIZADAS ---
     $stmt = $pdo->query("SELECT COUNT(*) AS total FROM Agendamento WHERE status = 'realizado'");
     $counts['limpezas_realizadas'] = $stmt->fetchColumn();
@@ -30,7 +37,7 @@ try {
     // --- 4. CONTAGEM DE PRESTADORES CADASTRADOS ---
     $stmt = $pdo->query("SELECT COUNT(*) AS total FROM Prestador");
     $counts['prestadores_cadastrados'] = $stmt->fetchColumn();
-    
+
     // --- 5. CONTAGEM DE PRESTADORES DISPONÍVEIS ---
     // Conta quantos IDs de prestador têm o status 'livre' na tabela Disponibilidade
     $stmt = $pdo->query("SELECT COUNT(DISTINCT prestador_id) AS total FROM Disponibilidade WHERE status = 'livre'");
@@ -63,10 +70,13 @@ include '../includes/navbar_logged_in.php';
         <?php include '../includes/menu.php'; ?>
     </div>
 </div>
-<main class="d-flex">
-    <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container">
+<main class="d-flex">
+    <?php 
+    include '../includes/sidebar.php'; 
+    ?>
+
+    <div class="container-fluid p-4">
         <h1 class="mb-4">Relatório de Estatísticas do StarClean</h1>
         <hr>
 
@@ -82,7 +92,7 @@ include '../includes/navbar_logged_in.php';
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card bg-warning text-dark">
                         <div class="card-body">
@@ -121,6 +131,7 @@ include '../includes/navbar_logged_in.php';
             </div>
         <?php endif; ?>
     </div>
+</main>
 
 <?php
 include "../includes/footer.php";

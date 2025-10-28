@@ -18,7 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
         try {
-            $pdo = obterConexaoPDO();
+            // Assume-se que obterConexaoPDO() retorna um objeto PDO configurado
+            $pdo = obterConexaoPDO(); 
 
             switch ($tipo) {
                 // --- CASO CLIENTE ---
@@ -27,21 +28,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $sobrenome = trim($_POST['cliente_sobrenome']);
                     $data_nascimento = $_POST['data_nascimento'];
                     $telefone = trim($_POST['cliente_telefone']);
-                    $cpf = trim($_POST['cpf']);
+                    // Corrigido para o novo nome do campo do Cliente no POST
+                    $cpf = trim($_POST['cpf_cliente']); 
 
                     if (empty($nome) || empty($sobrenome) || empty($data_nascimento) || empty($cpf)) {
                         $mensagem = '<div class="alert alert-danger">Todos os campos do cliente são obrigatórios!</div>';
                         break;
                     }
 
-                    $stmt = $pdo->prepare("SELECT id FROM Cliente WHERE email = ? OR cpf = ?");
+                    // Verifica duplicidade de email ou cpf
+                    $stmt = $pdo->prepare("SELECT id FROM cliente WHERE email = ? OR cpf = ?");
                     $stmt->execute([$email, $cpf]);
 
                     if ($stmt->fetch()) {
                         $mensagem = '<div class="alert alert-danger">E-mail ou CPF já cadastrados!</div>';
                     } else {
                         $stmt = $pdo->prepare(
-                            "INSERT INTO Cliente (nome, sobrenome, email, data_nascimento, telefone, cpf, password) 
+                            "INSERT INTO cliente (nome, sobrenome, email, data_nascimento, telefone, cpf, password) 
                              VALUES (?, ?, ?, ?, ?, ?, ?)"
                         );
                         $stmt->execute([$nome, $sobrenome, $email, $data_nascimento, $telefone, $cpf, $senhaHash]);
@@ -55,28 +58,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 case 'prestador':
                     $nomeRazao = trim($_POST['nome']);
                     $sobrenomeFantasia = trim($_POST['sobrenome']);
-                    $cpfCnpj = trim($_POST['cpf']);
+                    // Corrigido para o novo nome do campo do Prestador no POST
+                    $cpfCnpj = trim($_POST['doc_prestador']); 
                     $telefone = trim($_POST['prestador_telefone']);
                     $especialidade = trim($_POST['especialidade']);
                     $descricao = trim($_POST['descricao']);
 
                     if (empty($nomeRazao) || empty($cpfCnpj) || empty($especialidade)) {
-                        $mensagem = '<div class="alert alert-danger">Nome, CPF e Especialidade são obrigatórios!</div>';
+                        $mensagem = '<div class="alert alert-danger">Nome, CPF/CNPJ e Especialidade são obrigatórios!</div>';
                         break;
                     }
 
-                    $stmt = $pdo->prepare("SELECT id FROM Prestador WHERE email = ? OR cpf = ?");
+                    // Verifica duplicidade de email ou cpf/cnpj
+                    $stmt = $pdo->prepare("SELECT id FROM prestador WHERE email = ? OR cpf = ?");
                     $stmt->execute([$email, $cpfCnpj]);
 
                     if ($stmt->fetch()) {
                         $mensagem = '<div class="alert alert-danger">E-mail ou CPF/CNPJ já cadastrados!</div>';
                     } else {
-                        $admin_id_responsavel = 1; // ID do admin padrão
+                        $admin_id_responsavel = 1; // ID do admin padrão (deve existir na tabela administrador)
 
                         $stmt = $pdo->prepare(
-                            "INSERT INTO Prestador (nome, sobrenome, cpf, email, telefone, especialidade, descricao, password, Administrador_id) 
+                            "INSERT INTO prestador (nome, sobrenome, cpf, email, telefone, especialidade, descricao, password, Administrador_id) 
                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                         );
+                        // Observação: a coluna 'descricao' não é NOT NULL no seu PHP, mas é NOT NULL no seu SQL, o que pode causar erro se estiver vazia. O PHP original já a trata.
                         $stmt->execute([$nomeRazao, $sobrenomeFantasia, $cpfCnpj, $email, $telefone, $especialidade, $descricao, $senhaHash, $admin_id_responsavel]);
                         $_SESSION['mensagem_sucesso'] = "Prestador cadastrado com sucesso! Faça o login.";
                         header("Location: login.php");
@@ -90,7 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } catch (PDOException $e) {
             $mensagem = '<div class="alert alert-danger">Ocorreu um erro no sistema. Tente novamente.</div>';
-            error_log('Erro no cadastro: ' . $e->getMessage());
+            // É crucial registrar o erro para debug!
+            error_log('Erro no cadastro: ' . $e->getMessage()); 
         }
     }
 }
@@ -125,7 +132,7 @@ include '../includes/navbar.php';
                 </div>
                 <div class="form-check"><input class="form-check-input" type="radio" name="tipo" id="tipoPrestador"
                         value="prestador"><label class="form-check-label" for="tipoPrestador">Sou Prestador</label>
-              </div>
+                </div>
             </div>
 
             <div id="camposCliente">
@@ -136,8 +143,8 @@ include '../includes/navbar.php';
                         class="form-control" name="cliente_sobrenome" id="cliente_sobrenome"
                         placeholder="Digite seu sobrenome"></div>
                 <div class="mb-3">
-                    <label for="cpf" class="form-label">CPF:</label>
-                    <input type="text" class="form-control" name="cpf" id="cpf" placeholder="000.000.000-00"
+                    <label for="cpf_cliente" class="form-label">CPF:</label>
+                    <input type="text" class="form-control" name="cpf_cliente" id="cpf_cliente" placeholder="000.000.000-00"
                         maxlength="14">
                     <div id="cpfError" class="text-danger mt-1" style="display: none; font-size: 0.9em;">CPF inválido.
                     </div>
@@ -154,41 +161,46 @@ include '../includes/navbar.php';
                         placeholder="Dígite Seu Nome:">Nome:</label><input
                         type="text" class="form-control" name="nome" id="nome" placeholder="Dígite Seu Nome:"></div>
                 <div class="mb-3"><label for="sobrenome" class="form-label"
-                        placeholder="Digite Seu Sobrenome ou Nome Fantasia">Sobrenome:</label><input
+                        placeholder="Digite Seu Sobrenome">Sobrenome:</label><input
                         type="text" class="form-control" name="sobrenome"
-                        id="sobrenome" placeholder="Digite Seu Sobrenome ou Nome Fantasia"></div>
+                        id="sobrenome" placeholder="Digite Seu Sobrenome"></div>
 
-            <div class="mb-3">
-                <label class="form-label">Tipo de Documento:</label>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="tipo_documento_prestador" id="tipoDocCpf"
-                        value="cpf" checked>
-                    <label class="form-check-label" for="tipoDocCpf">Pessoa Física (CPF)</label>
-                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Documento:</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="tipo_documento_prestador" id="tipoDocCpf"
+                            value="cpf" checked>
+                        <label class="form-check-label" for="tipoDocCpf">Pessoa Física (CPF)</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="tipo_documento_prestador" id="tipoDocCnpj"
+                            value="cnpj">
+                        <label class="form-check-label" for="tipoDocCnpj">Pessoa Jurídica (CNPJ)</label>
+                    </div>
                 </div>
 
-            <div class="mb-3">
-                <label for="cpf" class="form-label" id="label_cpf">CPF:</label>
-                <input type="text" class="form-control" name="cpf" id="cpf" placeholder="000.000.000-00"
-                    maxlength="14">
-                <div id="docError" class="text-danger mt-1" style="display: none; font-size: 0.9em;">Documento inválido.
+                <div class="mb-3">
+                    <label for="doc_prestador" class="form-label" id="label_doc_prestador">CPF:</label>
+                    <input type="text" class="form-control" name="doc_prestador" id="doc_prestador" placeholder="000.000.000-00"
+                        maxlength="14">
+                    <div id="docError" class="text-danger mt-1" style="display: none; font-size: 0.9em;">Documento inválido.
+                    </div>
                 </div>
+
+                <div class="mb-3"><label for="prestador_telefone" class="form-label">Telefone:</label><input type="tel"
+                        class="form-control" name="prestador_telefone" id="prestador_telefone" placeholder="(XX) XXXXX-XXXX"
+                        maxlength="15"></div>
+                <div class="mb-3"><label for="especialidade" class="form-label"
+                        placeholder="Digite Sua Especialidade">Especialidade:</label><input type="text" class="form-control"
+                        name="especialidade" id="especialidade" placeholder="Ex: Limpeza residencial"></div>
+                <div class="mb-3"><label for="descricao" class="form-label"
+                        placeholder="Digite uma descrição">Descrição:</label><textarea class="form-control" name="descricao"
+                        id="descricao" placeholder="Fale um pouco sobre seus serviços"></textarea></div>
             </div>
 
-            <div class="mb-3"><label for="prestador_telefone" class="form-label">Telefone:</label><input type="tel"
-                    class="form-control" name="prestador_telefone" id="prestador_telefone" placeholder="(XX) XXXXX-XXXX"
-                    maxlength="15"></div>
-            <div class="mb-3"><label for="especialidade" class="form-label"
-                    placeholder="Digite Sua Especialidade">Especialidade:</label><input type="text" class="form-control"
-                    name="especialidade" id="especialidade" placeholder="Ex: Limpeza residencial"></div>
-            <div class="mb-3"><label for="descricao" class="form-label"
-                    placeholder="Digite uma descrição">Descrição:</label><textarea class="form-control" name="descricao"
-                    id="descricao" placeholder="Fale um pouco sobre seus serviços"></textarea></div>
+            <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+        </form>
     </div>
-
-    <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
-    </form>
-</div>
 </div>
 
 <script>
@@ -202,6 +214,10 @@ include '../includes/navbar.php';
             const tipoSelecionado = document.querySelector('input[name="tipo"]:checked').value;
             camposCliente.style.display = tipoSelecionado === 'cliente' ? 'block' : 'none';
             camposPrestador.style.display = tipoSelecionado === 'prestador' ? 'block' : 'none';
+            // Garante que o campo de documento do Prestador seja configurado ao mudar
+            if (tipoSelecionado === 'prestador') {
+                configurarCampoDocumento();
+            }
         }
         radios.forEach(radio => radio.addEventListener('change', toggleCampos));
         toggleCampos();
@@ -280,7 +296,7 @@ include '../includes/navbar.php';
     }
 
     // --- LÓGICA DO CAMPO DE CPF (CLIENTE) ---
-    const inputCpfCliente = document.getElementById('cpf');
+    const inputCpfCliente = document.getElementById('cpf_cliente');
     const cpfError = document.getElementById('cpfError');
     if (inputCpfCliente) {
         inputCpfCliente.addEventListener('keyup', mascaraCPF);
@@ -297,13 +313,17 @@ include '../includes/navbar.php';
 
     // --- LÓGICA DINÂMICA PARA O CAMPO CPF/CNPJ (PRESTADOR) ---
     const tipoDocRadios = document.querySelectorAll('input[name="tipo_documento_prestador"]');
-    const inputCpfCnpjPrestador = document.getElementById('cpf_cnpj');
-    const labelCpfCnpj = document.getElementById('label_cpf_cnpj');
+    // IDs CORRIGIDOS PARA PRESTADOR
+    const inputCpfCnpjPrestador = document.getElementById('doc_prestador');
+    const labelCpfCnpj = document.getElementById('label_doc_prestador');
     const docError = document.getElementById('docError');
 
     function configurarCampoDocumento() {
+        if (!inputCpfCnpjPrestador || tipoDocRadios.length === 0) return;
+
         const tipoSelecionado = document.querySelector('input[name="tipo_documento_prestador"]:checked').value;
 
+        // Limpa listeners e valor/erros ao trocar
         inputCpfCnpjPrestador.removeEventListener('keyup', mascaraCPF);
         inputCpfCnpjPrestador.removeEventListener('keyup', mascaraCNPJ);
         inputCpfCnpjPrestador.value = '';
@@ -315,7 +335,7 @@ include '../includes/navbar.php';
             inputCpfCnpjPrestador.placeholder = '000.000.000-00';
             inputCpfCnpjPrestador.maxLength = 14;
             inputCpfCnpjPrestador.addEventListener('keyup', mascaraCPF);
-        } else {
+        } else { // CNPJ
             labelCpfCnpj.textContent = 'CNPJ:';
             inputCpfCnpjPrestador.placeholder = '00.000.000/0000-00';
             inputCpfCnpjPrestador.maxLength = 18;
@@ -324,6 +344,7 @@ include '../includes/navbar.php';
     }
 
     function validarDocumentoPrestador() {
+        if (!inputCpfCnpjPrestador) return;
         const tipoSelecionado = document.querySelector('input[name="tipo_documento_prestador"]:checked').value;
         const docValido = (tipoSelecionado === 'cpf') ? validaCPF(inputCpfCnpjPrestador.value) : validaCNPJ(inputCpfCnpjPrestador.value);
 
@@ -337,29 +358,38 @@ include '../includes/navbar.php';
     }
 
     tipoDocRadios.forEach(radio => radio.addEventListener('change', configurarCampoDocumento));
-    inputCpfCnpjPrestador.addEventListener('blur', validarDocumentoPrestador);
-    configurarCampoDocumento();
+    if (inputCpfCnpjPrestador) inputCpfCnpjPrestador.addEventListener('blur', validarDocumentoPrestador);
+    if (tipoDocRadios.length > 0) configurarCampoDocumento();
+
 
     // --- VALIDAÇÃO GERAL DO FORMULÁRIO ANTES DO ENVIO ---
     const formCadastro = document.getElementById('formCadastro');
     if (formCadastro) {
         formCadastro.addEventListener('submit', function (evento) {
-            const camposClienteVisivel = document.getElementById('camposCliente').style.display !== 'none';
-            const camposPrestadorVisivel = document.getElementById('camposPrestador').style.display !== 'none';
+            const tipoSelecionado = document.querySelector('input[name="tipo"]:checked').value;
 
-            if (camposClienteVisivel && inputCpfCliente.value.length > 0 && !validaCPF(inputCpfCliente.value)) {
-                evento.preventDefault();
-                alert('Por favor, corrija o CPF do cliente antes de continuar.');
-                inputCpfCliente.focus();
+            // Validação do Cliente
+            if (tipoSelecionado === 'cliente') {
+                if (inputCpfCliente && inputCpfCliente.value.length > 0 && !validaCPF(inputCpfCliente.value)) {
+                    evento.preventDefault();
+                    alert('Por favor, corrija o CPF do cliente antes de continuar.');
+                    inputCpfCliente.focus();
+                    return;
+                }
             }
 
-            if (camposPrestadorVisivel) {
-                const tipoDoc = document.querySelector('input[name="tipo_documento_prestador"]:checked').value;
-                const docValido = (tipoDoc === 'cpf') ? validaCPF(inputCpfCnpjPrestador.value) : validaCNPJ(inputCpfCnpjPrestador.value);
-                if (inputCpfCnpjPrestador.value.length > 0 && !docValido) {
-                    evento.preventDefault();
-                    alert('Por favor, corrija o ' + tipoDoc.toUpperCase() + ' do prestador antes de continuar.');
-                    inputCpfCnpjPrestador.focus();
+            // Validação do Prestador
+            if (tipoSelecionado === 'prestador') {
+                if (inputCpfCnpjPrestador && inputCpfCnpjPrestador.value.length > 0) {
+                    const tipoDoc = document.querySelector('input[name="tipo_documento_prestador"]:checked').value;
+                    const docValido = (tipoDoc === 'cpf') ? validaCPF(inputCpfCnpjPrestador.value) : validaCNPJ(inputCpfCnpjPrestador.value);
+
+                    if (!docValido) {
+                        evento.preventDefault();
+                        alert('Por favor, corrija o ' + tipoDoc.toUpperCase() + ' do prestador antes de continuar.');
+                        inputCpfCnpjPrestador.focus();
+                        return;
+                    }
                 }
             }
         });

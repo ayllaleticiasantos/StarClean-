@@ -23,6 +23,13 @@ if (!defined('BASE_URL')) {
 
     <link rel="stylesheet" href="<?= BASE_URL ?>/includes/star_clean.css">
 
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.js" integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css" />
+
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+
+
 </head>
 
 <body class="d-flex flex-column min-vh-100" style="background-color: #acd0f5ff;">
