@@ -121,6 +121,25 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-danger">
+                    <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-danger"></i>
+                        <h5 class="card-title">Gerenciar Site</h5>
+                        <p class="card-text">Visualize e gerencie o conteúdo do site.</p><a href="relatorios.php"
+                            class="btn btn-danger">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-danger">
+                    <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-danger"></i>
+                        <h5 class="card-title">Gerenciar Serviços</h5>
+                        <p class="card-text">Visualize e gerencie os serviços cadastrados.</p><a href="gerir_servicos.php"
+                            class="btn btn-danger">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            
 
         </div>
 

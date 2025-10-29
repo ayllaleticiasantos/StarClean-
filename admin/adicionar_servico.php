@@ -91,8 +91,6 @@ include '../includes/sidebar.php';
 
 <main class="d-flex">
     <?php 
-    // CORREÇÃO: A inclusão correta da sidebar e o início da div de conteúdo
-    // é feita dentro da tag <main>
     include '../includes/sidebar.php'; 
     ?>
 
@@ -104,7 +102,8 @@ include '../includes/sidebar.php';
         <div class="card border-0 shadow-sm" style="max-width: 600px;">
             <div class="card-body">
                 <form action="adicionar_servico.php" method="post">
-                    
+                    <a href="dashboard.php" class="btn btn-secondary m-1">Voltar ao Painel</a>
+
                     <div class="mb-3">
                         <label for="prestador_id" class="form-label">Prestador de Serviço</label>
                         <select class="form-select" id="prestador_id" name="prestador_id" required>
@@ -133,7 +132,10 @@ include '../includes/sidebar.php';
                     </div>
 
                     <button type="submit" class="btn btn-primary">Salvar Serviço</button>
-                    <a href="dashboard.php" class="btn btn-secondary">Voltar ao Painel</a>
+
+                    <a href="editar_servico.php" class="btn btn-warning">Editar Serviço</a>
+                    <a href="excluir_servico.php" class="btn btn-danger">Excluir Serviço</a>
+                    <a href="listar_servicos.php" class="btn btn-info">Listar Serviços</a>
                 </form>
             </div>
         </div>
