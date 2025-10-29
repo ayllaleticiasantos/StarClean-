@@ -41,10 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email_enviado = enviarEmailRecuperacao($email, $link_redefinicao);
                 
                 // A mensagem genérica é exibida por segurança, mesmo que o envio falhe.
-                $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, um link para redefinir a senha foi enviado1.</div>';
+                $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, um link para redefinir a senha foi enviado.</div>';
                 
             } else {
-                $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, receberá as instruções para redefinir a sua senha2.</div>';
+                $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, receberá as instruções para redefinir a sua senha.</div>';
             }
 
         } catch (PDOException $e) {

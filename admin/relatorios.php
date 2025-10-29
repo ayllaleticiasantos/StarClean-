@@ -120,14 +120,14 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
 
-                <div class="col-md-6 col-lg-4 mb-4">
+                <!-- <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card bg-secondary text-white">
                         <div class="card-body">
                             <h5 class="card-title">Prestadores Disponíveis Hoje</h5>
                             <p class="card-text display-4"><?= $counts['prestadores_disponiveis'] ?></p>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         <?php endif; ?>
     </div>
