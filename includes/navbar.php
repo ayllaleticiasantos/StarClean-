@@ -3,7 +3,7 @@
         <ul></ul>
         <a class="navbar-brand" href="<?= BASE_URL ?>/index.php"><b></b>
         <a href="<?= BASE_URL ?>/index.php">
-        <img src="../img/logoPrimary.png" alt="StarClean" height="100" width="100" class="d-inline-block align-text-top"></a>
+        <img src="<?= BASE_URL ?>/img/logoPrimary.png" alt="StarClean" height="100" width="100" class="d-inline-block align-text-top"></a>
 </ul>
         <!-- <i class="bi bi-star fs-3 me-2 bg-circle p-2 text-white">StarClean</i></a> -->
         
