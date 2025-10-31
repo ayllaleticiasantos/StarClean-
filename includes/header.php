@@ -13,7 +13,7 @@ if (!defined('BASE_URL')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StarClean - Sistema de Limpeza</title>
 
-    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/img/favcon_starclean.png">
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/img/logoBranca.png">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
@@ -28,7 +28,41 @@ if (!defined('BASE_URL')) {
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css" />
 
     <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pega o caminho completo da URL atual (ex: /star_clean/pages/sobre.php)
+        const path = window.location.pathname;
 
+        // Mapeamento simples de caminhos para IDs de LI
+        // NOTE: Use a parte final do caminho ou o nome do arquivo para o mapeamento
+        let activeId;
+        
+        if (path.endsWith('/index.php') || path.endsWith('/star_clean/')) {
+            activeId = 'nav-home';
+        } else if (path.includes('/pages/sobre.php')) {
+            activeId = 'nav-sobre';
+        } else if (path.includes('/pages/avaliacoes.php')) {
+            activeId = 'nav-avaliacoes';
+        } else if (path.includes('/pages/servicos.php')) {
+            activeId = 'nav-servicos';
+        }
+
+        // Adiciona a classe 'active' ao item de navegação correto
+        if (activeId) {
+            const activeElement = document.getElementById(activeId);
+            if (activeElement) {
+                // Remove a classe 'active' de todos os links para evitar duplicidade
+                document.querySelectorAll('.navbar-nav .nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Adiciona a classe 'active' ao item da página atual
+                activeElement.classList.add('active');
+            }
+        }
+    });
+</script>
+<!-- O restante do cabeçalho e a tag </head> seguem aqui -->
 
 </head>
 

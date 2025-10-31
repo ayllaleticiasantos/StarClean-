@@ -1,7 +1,11 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
+        <ul></ul>
         <a class="navbar-brand" href="<?= BASE_URL ?>/index.php"><b></b>
-        <i class="bi bi-star fs-3 me-2 bg-circle p-2 text-white">StarClean</i></a>
+        <a href="<?= BASE_URL ?>/index.php">
+        <img src="../img/logoPrimary.png" alt="StarClean" height="100" width="100" class="d-inline-block align-text-top"></a>
+</ul>
+        <!-- <i class="bi bi-star fs-3 me-2 bg-circle p-2 text-white">StarClean</i></a> -->
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -9,16 +13,16 @@
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" href="<?= BASE_URL ?>/index.php">Home</a>
+                <li class="nav-item" id="nav-home">
+                    <a class="nav-link" href="<?= BASE_URL ?>/index.php">Home</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" id="nav-sobre">
                     <a class="nav-link" href="<?= BASE_URL ?>/pages/sobre.php">Sobre Nós</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" id="nav-avaliacoes">
                     <a class="nav-link" href="<?= BASE_URL ?>/pages/avaliacoes.php">Avaliações</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" id="nav-servicos">
                     <a href="<?= BASE_URL ?>/pages/servicos.php" class="nav-link">Serviços</a>
                 </li>
             </ul>
