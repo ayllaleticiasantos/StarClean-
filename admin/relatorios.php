@@ -53,7 +53,6 @@ try {
 <?php
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
-
 ?>
 
 <button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
