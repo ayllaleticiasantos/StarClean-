@@ -23,19 +23,29 @@ if (isset($_SESSION['mensagem_erro'])) {
 
 // Buscar TODOS os serviços, juntando-os com o nome do Prestador
 $servicos = [];
+$termo_busca = $_GET['q'] ?? '';
+
 try {
     $pdo = obterConexaoPDO();
+    $params = [];
     
     // Juntando a tabela Servico com a tabela Prestador para obter o nome 
-    $stmt = $pdo->prepare(
-        "SELECT s.id, s.titulo, s.descricao, s.preco, p.nome AS nome_prestador, p.id AS prestador_id
+    $sql = "SELECT s.id, s.titulo, s.descricao, s.preco, p.nome AS nome_prestador, p.id AS prestador_id
          FROM Servico s
-         JOIN Prestador p ON s.prestador_id = p.id
-         ORDER BY p.nome, s.titulo ASC"
-    );
+         JOIN Prestador p ON s.prestador_id = p.id";
 
-    $stmt->execute();
+    if (!empty($termo_busca)) {
+        $sql .= " WHERE s.titulo LIKE ? OR s.descricao LIKE ? OR p.nome LIKE ?";
+        $like_term = "%" . $termo_busca . "%";
+        $params = [$like_term, $like_term, $like_term];
+    }
+
+    $sql .= " ORDER BY p.nome, s.titulo ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     error_log("Erro ao buscar os serviços do Admin: " . $e->getMessage());
     $mensagem_erro = '<div class="alert alert-danger">Erro ao carregar a lista de serviços.</div>';
@@ -64,8 +74,16 @@ include '../includes/navbar_logged_in.php';
 
     <div class="container-fluid p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Gestão de Serviços</h1>
-            <a href="adicionar_servico.php" class="btn btn-primary">Adicionar Novo Serviço</a>
+            <div>
+                <h1>Gestão de Serviços</h1>
+                <p class="lead">Visualize, filtre e gerencie todos os serviços cadastrados.</p>
+            </div>
+            <form method="GET" action="gerir_servicos.php" class="d-flex align-items-center">
+                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por serviço ou prestador..." value="<?= htmlspecialchars($termo_busca) ?>" style="width: 300px;">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                <?php if (!empty($termo_busca)): ?><a href="gerir_servicos.php" class="btn btn-outline-secondary ms-2">Limpar</a><?php endif; ?>
+            </form>
+            <a href="adicionar_servico.php" class="btn btn-primary ms-3">Adicionar Novo</a>
         </div>
         
         <?= $mensagem_sucesso ?>
@@ -101,6 +119,7 @@ include '../includes/navbar_logged_in.php';
                                         <td>
                                             <a href="editar_servico.php?id=<?= $servico['id'] ?>" class="btn btn-sm btn-warning">Editar</a>
                                             <a href="excluir_servico.php?id=<?= $servico['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja EXCLUIR este serviço? Esta ação é permanente.');">Excluir</a>
+                                            <a href="vizualizar_servico.php?id=<?= $servico['id'] ?>" class="btn btn-sm btn-info">Visualizar</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

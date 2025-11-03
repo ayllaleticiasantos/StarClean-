@@ -1,10 +1,10 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-    <div class="container">
-        <ul></ul>
+    <div class="container m-fluid">
+        <ul>
         <a class="navbar-brand" href="<?= BASE_URL ?>/index.php"><b></b>
         <a href="<?= BASE_URL ?>/index.php">
-        <img src="<?= BASE_URL ?>/img/logoPrimary.png" alt="StarClean" height="100" width="100" class="d-inline-block align-text-top"></a>
-</ul>
+        <img src="<?= BASE_URL ?>/img/logoPrimary.png" alt="StarClean" height="100" width="100" class="d-inline-block align-text-top m-3"></a>
+        </ul>
         <!-- <i class="bi bi-star fs-3 me-2 bg-circle p-2 text-white">StarClean</i></a> -->
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -12,7 +12,7 @@
         </button>
         
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto m-3">
                 <li class="nav-item" id="nav-home">
                     <a class="nav-link" href="<?= BASE_URL ?>/index.php">Home</a>
                 </li>

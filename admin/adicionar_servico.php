@@ -132,13 +132,11 @@ include '../includes/sidebar.php';
                     </div>
 
                     <button type="submit" class="btn btn-primary">Salvar Serviço</button>
+                    <a href="gerir_servicos.php" class="btn btn-info">Ver Todos os Serviços</a>
 
-                    <a href="editar_servico.php" class="btn btn-warning">Editar Serviço</a>
-                    <a href="excluir_servico.php" class="btn btn-danger">Excluir Serviço</a>
-                    <a href="listar_servicos.php" class="btn btn-info">Listar Serviços</a>
                 </form>
             </div>
-        </div>
+        </div>      
     </div>
 </main>
 

@@ -64,26 +64,29 @@ include '../includes/navbar_logged_in.php';
                 <?= htmlspecialchars($mensagem) ?>
             </div>
         <?php endif; ?>
+            
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#ajudaModal">Precisa de ajuda?</button>
+            <a href="gerenciar_adm.php" class="btn btn-secondary">Gerenciar Administradores</a>
 
         <div class="card p-4 shadow-sm" style="width: 100%; max-width: 600px; margin: auto;">
             <form action="cadastraraadm.php" method="post">
                 <div class="mb-3">
                     <label for="nome_admin" class="form-label" placeholder="Digite seu nome:">Nome:</label>
-                    <input type="text" class="form-control" name="nome" id="nome_admin">
+                    <input type="text" class="form-control" placeholder="Digite seu nome" name="nome" id="nome_admin">
                 </div>
                 <div class="mb-3">
                     <label for="sobrenome_admin" class="form-label" placeholder="Digite seu sobrenome:">Sobrenome:</label>
-                    <input type="text" class="form-control" name="sobrenome" id="sobrenome_admin">
+                    <input type="text" class="form-control" placeholder="Digite seu sobrenome" name="sobrenome" id="sobrenome_admin">
                 </div>
 
                 <div class="mb-3">
                     <label for="email" class="form-label" placeholder="Digite seu e-mail:">E-mail:</label>
-                    <input type="email" class="form-control" name="email" id="email" required>
+                    <input type="email" class="form-control" placeholder="Digite seu e-mail" name="email" id="email" required>
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3"> 
                     <label for="senha" class="form-label" placeholder="Digite sua senha:">Senha:</label>
-                    <input type="password" class="form-control" name="senha" id="senha" required>
+                    <input type="password" class="form-control" placeholder="Digite sua senha" name="senha" id="senha" required>
                 </div>
                 <div class="mb-3">
                     <label for="tipo" class="form-label">Tipo:</label>
@@ -94,8 +97,9 @@ include '../includes/navbar_logged_in.php';
                         <option value="adminmoderador">Administrador Moderador</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+                <button type="submit" class="btn btn-primary w-20">Cadastrar</button>
             </form>
+            
         </div>
     </div>
 </main>

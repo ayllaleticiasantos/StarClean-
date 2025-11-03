@@ -197,7 +197,18 @@ include '../includes/navbar.php';
                         placeholder="Digite uma descrição">Descrição:</label><textarea class="form-control" name="descricao"
                         id="descricao" placeholder="Fale um pouco sobre seus serviços"></textarea></div>
             </div>
-
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" value="" id="checkTermos" required>
+    <label class="form-check-label" for="checkTermos">
+        Eu li e concordo com os 
+        <a href="termos_de_uso.php" class="text-primary" data-bs-toggle="modal" data-bs-target="#modalTermosDeUso">
+            Termos de Uso
+        </a>.
+    </label>
+    <div class="invalid-feedback">
+        Você deve aceitar os termos para continuar.
+    </div>
+</div>
             <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
         </form>
     </div>

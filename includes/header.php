@@ -62,7 +62,30 @@ if (!defined('BASE_URL')) {
         }
     });
 </script>
-<!-- O restante do cabeçalho e a tag </head> seguem aqui -->
+
+<style>
+    /* Estilos para a impressão */
+    @media print {
+        /* Oculta tudo que não deve aparecer na impressão */
+        body {
+            background-color: #fff !important; /* Fundo branco para economizar tinta */
+        }
+        .navbar, #sidebar, .offcanvas, .btn, footer, #btn-print, form, .no-print {
+            display: none !important;
+        }
+        /* Garante que o conteúdo principal ocupe toda a página */
+        main, .container-fluid {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+        }
+    }
+</style>
+
 
 </head>
 

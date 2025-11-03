@@ -89,6 +89,16 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-warning">
+                    <div class="card-body text-center">
+                        <i class="bi bi-currency-dollar fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Meu Financeiro</h5>
+                        <p class="card-text">Veja os serviços concluídos, e prestes a concluir </p>
+                        <a href="meu_financeiro.php" class="btn btn-warning">Ver Dados</a>
+                    </div>
+                </div>
+            </div>
 
         </div>
         <div class="row text-center">

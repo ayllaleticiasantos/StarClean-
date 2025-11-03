@@ -26,19 +26,23 @@ $id_prestador_logado = $_SESSION['usuario_id'];
 $agendamentos = [];
 try {
     $pdo = obterConexaoPDO();
+    // SQL CORRIGIDO: Usando as tabelas e colunas corretas (Cliente, data, hora) e buscando as coordenadas.
     $stmt = $pdo->prepare(
-        // CORREÇÃO FINAL: Usando nomes de coluna simples (data e hora)
-        "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, a.data, a.hora, a.status, s.descricao as descricao_servico
+        "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, s.descricao as descricao_servico, 
+                a.data, a.hora, a.status, e.logradouro, e.numero, e.bairro, e.cidade, e.uf, e.cep, 
+                e.latitude, e.longitude
          FROM Agendamento a
          JOIN Cliente c ON a.Cliente_id = c.id
          JOIN Servico s ON a.Servico_id = s.id
+         JOIN Endereco e ON a.Endereco_id = e.id
          WHERE a.Prestador_id = ?
-         ORDER BY a.status DESC, a.data, a.hora"
+         ORDER BY a.data, a.hora"
     );
     $stmt->execute([$id_prestador_logado]);
-    $agendamentos = $stmt->fetchAll();
+    $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("Erro ao buscar os agendamentos: " . $e->getMessage());
+    error_log("Erro ao buscar os agendamentos: " . $e->getMessage());
+    $mensagem_erro = '<div class="alert alert-danger">Erro ao carregar agendamentos. Tente novamente.</div>';
 }
 
 include '../includes/header.php';
@@ -66,7 +70,7 @@ include '../includes/navbar_logged_in.php';
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Meus Agendamentos</h1>
         </div>
-        
+
         <?= $mensagem_sucesso ?>
         <?= $mensagem_erro ?>
 
@@ -79,6 +83,7 @@ include '../includes/navbar_logged_in.php';
                                 <th>Cliente</th>
                                 <th>Serviço</th>
                                 <th>Descrição</th>
+                                <th>Endereço</th>
                                 <th>Data</th>
                                 <th>Hora</th>
                                 <th>Status</th>
@@ -88,42 +93,72 @@ include '../includes/navbar_logged_in.php';
                         <tbody>
                             <?php if (empty($agendamentos)): ?>
                                 <tr>
-                                    <td colspan="6" class="text-center">Nenhum agendamento encontrado.</td>
+                                    <td colspan="8" class="text-center">Nenhum agendamento encontrado.</td>
                                 </tr>
                             <?php else: ?>
-                                <?php foreach ($agendamentos as $agendamento): ?>
+                                <?php foreach ($agendamentos as $agendamento):
+                                    // ... dentro do loop foreach ...
+                            
+                                    $latitude = htmlspecialchars($agendamento['latitude'] ?? '');
+                                    $longitude = htmlspecialchars($agendamento['longitude'] ?? '');
+                                    $map_url = '';
+
+                                    if (!empty($latitude) && !empty($longitude)) {
+                                        // Link direto para as coordenadas
+                                        $map_url = "https://www.google.com/maps/search/?api=1&query={$latitude},{$longitude}";
+                                    } else {
+                                        // Fallback: Pesquisa o endereço completo
+                                        $endereco_formatado = "{$agendamento['logradouro']}, {$agendamento['numero']} - {$agendamento['bairro']}, {$agendamento['cidade']} - {$agendamento['uf']}";
+                                        $endereco_uri = urlencode($endereco_formatado);
+                                        $map_url = "https://www.google.com/maps/search/?api=1&query={$endereco_uri}";
+                                    }
+
+                                    $status = strtolower($agendamento['status']);
+                                    ?>
                                     <tr>
                                         <td><?= htmlspecialchars($agendamento['nome_cliente']) ?></td>
                                         <td><?= htmlspecialchars($agendamento['titulo_servico']) ?></td>
                                         <td><?= htmlspecialchars($agendamento['descricao_servico']) ?></td>
+                                        <td><?= htmlspecialchars($agendamento['logradouro']) ?>,
+                                            <?= htmlspecialchars($agendamento['numero']) ?>
+                                            (<?= htmlspecialchars($agendamento['bairro']) ?>)</td>
                                         <td><?= date('d/m/Y', strtotime($agendamento['data'])) ?></td>
-                                        <td><?= htmlspecialchars($agendamento['hora']) ?></td>
+                                        <td><?= htmlspecialchars(substr($agendamento['hora'], 0, 5)) ?></td>
                                         <td>
                                             <?php
-                                                $badge_class = 'bg-secondary';
-                                                switch ($agendamento['status']) {
-                                                    case 'pendente':
-                                                        $badge_class = 'bg-warning';
-                                                        break;
-                                                    case 'aceito':
-                                                        $badge_class = 'bg-success';
-                                                        break;
-                                                    case 'realizado':
-                                                        $badge_class = 'bg-primary';
-                                                        break;
-                                                    case 'cancelado':
-                                                        $badge_class = 'bg-danger';
-                                                        break;
-                                                }
+                                            $badge_class = 'bg-secondary';
+                                            switch ($status) {
+                                                case 'pendente':
+                                                    $badge_class = 'bg-warning text-dark';
+                                                    break;
+                                                case 'aceito':
+                                                    $badge_class = 'bg-success';
+                                                    break;
+                                                case 'realizado':
+                                                    $badge_class = 'bg-primary';
+                                                    break;
+                                                case 'cancelado':
+                                                    $badge_class = 'bg-danger';
+                                                    break;
+                                            }
                                             ?>
-                                            <span class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>
+                                            <span
+                                                class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>
                                         </td>
                                         <td>
-                                            <?php if ($agendamento['status'] === 'pendente'): ?>
-                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceitar" class="btn btn-sm btn-success">Aceitar</a>
-                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=recusar" class="btn btn-sm btn-danger">Recusar</a>
-                                            <?php elseif ($agendamento['status'] === 'aceito'): ?>
-                                                <a href="concluir_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-primary">Marcar como Concluído</a>
+                                            <a href="<?= $map_url ?>" target="_blank" class="btn btn-sm btn-info me-2"
+                                                title="Abrir no Google Maps">
+                                                <i class="fas fa-map-marker-alt"></i> Localizar
+                                            </a>
+
+                                            <?php if ($status === 'pendente'): ?>
+                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito"
+                                                    class="btn btn-sm btn-success">Aceitar</a>
+                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado"
+                                                    class="btn btn-sm btn-danger">Recusar</a>
+                                            <?php elseif ($status === 'aceito'): ?>
+                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado"
+                                                    class="btn btn-sm btn-primary">Concluído</a>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

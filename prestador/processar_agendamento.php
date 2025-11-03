@@ -13,12 +13,15 @@ if (isset($_GET['id']) && isset($_GET['acao'])) {
     $acao = $_GET['acao'];
 
     $novo_status = '';
-    if ($acao === 'aceitar') {
-        $novo_status = 'aceito'; // Corrigido para "aceito"
+    if ($acao === 'aceito') {
+        $novo_status = 'aceito';
         $_SESSION['mensagem_sucesso'] = "Agendamento aceito com sucesso!";
-    } elseif ($acao === 'recusar') {
+    } elseif ($acao === 'cancelado') {
         $novo_status = 'cancelado';
-        $_SESSION['mensagem_erro'] = "Agendamento recusado.";
+        $_SESSION['mensagem_sucesso'] = "Agendamento recusado com sucesso.";
+    } elseif ($acao === 'realizado') {
+        $novo_status = 'realizado';
+        $_SESSION['mensagem_sucesso'] = "Serviço marcado como concluído!";
     }
 
     if ($novo_status !== '') {

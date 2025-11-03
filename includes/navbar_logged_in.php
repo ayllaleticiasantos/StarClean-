@@ -34,8 +34,11 @@ if (isset($_SESSION['usuario_id'])) {
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid">
         
-       <a class="navbar-brand" href="<?= BASE_URL ?>/index.php"><b></b>
-        <i class="bi bi-star fs-3 me-2 bg-circle p-2 text-dark">StarClean</i></a>
+       <ul>
+        <a class="navbar-brand" href="<?= BASE_URL ?>/index.php"><b></b>
+        <a href="<?= BASE_URL ?>/index.php">
+        <img src="<?= BASE_URL ?>/img/LogoBranca.png" alt="StarClean" height="100" width="100" class="d-inline-block align-text-top m-3"></a>
+        </ul>
 
         <div class="d-flex align-items-center">
 

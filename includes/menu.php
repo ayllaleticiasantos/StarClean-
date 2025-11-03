@@ -19,7 +19,13 @@ $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_agendamentos.php"><i class="fas fa-calendar-check fa-fw me-2"></i>Gerir Agendamentos</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/adicionar_servico.php"><i class="fas fa-briefcase fa-fw me-2"></i>Cadastrar Serviço</a>
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/adicionar_servico.php"><i class="fas bi bi-plus-square-fill fa-fw me-2"></i>Cadastrar Serviço</a>
+        </li>
+        <li class="nav-item">     
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_servicos.php"><i class="fas fa-briefcase fa-fw me-2"></i>Gerir Serviços</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerenciar_adm.php"><i class="fas fa-user-shield fa-fw me-2"></i>Gerir Administradores</a>
         </li>
 
     <?php // Menu para Prestador ?>

@@ -10,20 +10,32 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
 }
 
 $agendamentos = [];
+$termo_busca = $_GET['q'] ?? '';
 $mensagem_erro = '';
+
 try {
     $pdo = obterConexaoPDO();
-    $stmt = $pdo->query(
-        // CORREÇÃO FINAL: Usando nomes de coluna simples (data e hora)
-        "SELECT a.id, c.nome AS nome_cliente, p.nome AS nome_prestador, 
+    $params = [];
+
+    $sql = "SELECT a.id, c.nome AS nome_cliente, p.nome AS nome_prestador, 
           s.titulo AS titulo_servico, a.data, a.hora, a.status, s.descricao AS descricao_servico
          FROM Agendamento a
          JOIN Cliente c ON a.Cliente_id = c.id
          JOIN Prestador p ON a.Prestador_id = p.id
-         JOIN Servico s ON a.Servico_id = s.id
-         ORDER BY a.data DESC, a.hora DESC"
-    );
+         JOIN Servico s ON a.Servico_id = s.id";
+
+    if (!empty($termo_busca)) {
+        $sql .= " WHERE c.nome LIKE ? OR p.nome LIKE ? OR s.titulo LIKE ? OR a.status LIKE ?";
+        $like_term = "%" . $termo_busca . "%";
+        $params = [$like_term, $like_term, $like_term, $like_term];
+    }
+
+    $sql .= " ORDER BY a.data DESC, a.hora DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     // Melhor prática: logar o erro e mostrar uma mensagem amigável
     error_log("Erro ao buscar agendamentos: " . $e->getMessage());
@@ -53,8 +65,19 @@ include '../includes/navbar_logged_in.php';
     <?php include '../includes/sidebar.php'; ?>
     
     <div class="container-fluid p-4">
-        <h1 class="mb-4">Gestão de Agendamentos</h1>
-        <p>Visualize todos os agendamentos e o estado atual de cada serviço.</p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1>Gestão de Agendamentos</h1>
+                <p class="lead">Visualize e filtre todos os agendamentos do sistema.</p>
+            </div>
+            <form method="GET" action="gerir_agendamentos.php" class="d-flex align-items-center">
+                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por cliente, prestador, serviço..." value="<?= htmlspecialchars($termo_busca) ?>" style="width: 300px;">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                <?php if (!empty($termo_busca)): ?>
+                    <a href="gerir_agendamentos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
+                <?php endif; ?>
+            </form>
+        </div>
 
         <?= $mensagem_erro ?>
 
@@ -69,13 +92,13 @@ include '../includes/navbar_logged_in.php';
                         <th>Descrição</th>
                         <th>Data</th>
                         <th>Hora</th>
-                        <th>Estado</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($agendamentos)): ?>
                         <tr>
-                            <td colspan="7" class="text-center">Nenhum agendamento encontrado.</td>
+                            <td colspan="8" class="text-center">Nenhum agendamento encontrado.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($agendamentos as $agendamento): ?>
