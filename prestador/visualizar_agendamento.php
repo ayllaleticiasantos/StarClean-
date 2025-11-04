@@ -27,8 +27,8 @@ try {
     $stmt = $pdo->prepare("
         SELECT a.id, s.titulo AS titulo_servico, s.descricao AS descricao_servico,
                a.data, a.hora, a.status, a.observacoes,
-               c.nome AS nome_cliente, c.telefone AS telefone_cliente,
-               e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep
+               c.nome AS nome_cliente, c.telefone AS telefone_cliente, e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep,
+               e.latitude, e.longitude
         FROM Agendamento a
         JOIN Servico s ON a.Servico_id = s.id
         JOIN Cliente c ON a.Cliente_id = c.id
@@ -126,9 +126,45 @@ include '../includes/navbar_logged_in.php';
                 <?php if ($agendamento_detalhes['complemento']): ?>
                     <p><strong>Complemento:</strong> <?= htmlspecialchars($agendamento_detalhes['complemento']) ?></p>
                 <?php endif; ?>
+                
+                <div id="map" style="height: 300px; width: 100%; border-radius: 8px;"></div>
             </div>
         </div>
     </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Passa os dados do PHP para o JavaScript de forma segura
+    const lat = <?= json_encode($agendamento_detalhes['latitude'] ?? null) ?>;
+    const lon = <?= json_encode($agendamento_detalhes['longitude'] ?? null) ?>;
+    const enderecoCompleto = `<?= htmlspecialchars($agendamento_detalhes['logradouro'] . ', ' . $agendamento_detalhes['numero'] . ' - ' . $agendamento_detalhes['bairro']) ?>`;
+    const mapContainer = document.getElementById('map');
+
+    // Verifica se temos coordenadas válidas
+    if (lat && lon) {
+        // Inicializa o mapa com as coordenadas do endereço
+        var map = L.map('map').setView([lat, lon], 16); // Zoom 16 para uma visão mais próxima
+
+        // Adiciona a camada do OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Adiciona um marcador na localização exata
+        L.marker([lat, lon]).addTo(map)
+            .bindPopup(`<b>Local do Serviço</b><br>${enderecoCompleto}`)
+            .openPopup();
+    } else {
+        // Se não houver coordenadas, exibe uma mensagem no lugar do mapa
+        mapContainer.innerHTML = `
+            <div class="alert alert-warning h-100 d-flex align-items-center justify-content-center">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Localização não disponível no mapa.
+            </div>`;
+        mapContainer.style.height = 'auto'; // Ajusta a altura do container
+    }
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>

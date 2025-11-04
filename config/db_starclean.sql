@@ -495,5 +495,6 @@ COMMIT;
 
 ALTER TABLE endereco
 ADD COLUMN latitude DECIMAL(10, 8) NULL AFTER complemento,
-ADD COLUMN longitude DECIMAL(11, 8) NULL AFTER latitude;
+ADD COLUMN longitude DECIMAL(11, 8) NULL;
+
 ALTER TABLE `avaliacao_prestador` ADD `oculto` TINYINT(1) NOT NULL DEFAULT 0;

@@ -1,4 +1,32 @@
 <?php
+/**
+ * Busca coordenadas (latitude e longitude) para um endereço usando a API Nominatim (OpenStreetMap).
+ *
+ * @param string $logradouro Rua, avenida, etc.
+ * @param string $numero Número do imóvel.
+ * @param string $cidade Nome da cidade.
+ * @param string $estado Sigla do estado (UF).
+ * @return array|null Retorna um array com ['latitude', 'longitude'] ou null se não encontrar.
+ */
+function obterCoordenadasComNominatim(string $logradouro, string $numero, string $cidade, string $estado): ?array
+{
+    $endereco_completo = urlencode("$logradouro, $numero, $cidade, $estado, Brasil");
+    $url_api = "https://nominatim.openstreetmap.org/search?q={$endereco_completo}&format=json&limit=1";
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url_api);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'StarCleanApp/1.0 (starclean.prest.servicos@gmail.com)');
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    $resposta_json = curl_exec($ch);
+    curl_close($ch);
+
+    if ($resposta_json && ($dados = json_decode($resposta_json, true)) && !empty($dados)) {
+        return ['latitude' => $dados[0]['lat'], 'longitude' => $dados[0]['lon']];
+    }
+    return null;
+}
+
 session_start();
 require_once '../config/db.php';
 
@@ -65,12 +93,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Se não houver erros, prossiga com a inserção no banco
         try {
+            // --- INTEGRAÇÃO DA API AQUI ---
+            // Busca as coordenadas antes de salvar
+            $coordenadas = obterCoordenadasComNominatim($logradouro, $numero, $cidade, $uf);
+            $latitude = $coordenadas['latitude'] ?? null;
+            $longitude = $coordenadas['longitude'] ?? null;
+
             $pdo = obterConexaoPDO();
             $stmt = $pdo->prepare(
-                "INSERT INTO Endereco (Cliente_id, cep, logradouro, numero, complemento, bairro, cidade, uf)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                "INSERT INTO Endereco (Cliente_id, cep, logradouro, numero, complemento, bairro, cidade, uf, latitude, longitude)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            $stmt->execute([$id_cliente, $cep, $logradouro, $numero, $complemento, $bairro, $cidade, $uf]);
+            // Adiciona latitude e longitude ao execute
+            $stmt->execute([$id_cliente, $cep, $logradouro, $numero, $complemento, $bairro, $cidade, $uf, $latitude, $longitude]);
 
             $_SESSION['mensagem_sucesso'] = "Endereço adicionado com sucesso!";
             header("Location: gerir_enderecos.php");
@@ -211,7 +246,7 @@ include '../includes/navbar_logged_in.php';
             document.getElementById('numero').value = '';
             document.getElementById('complemento').value = '';
         }
-    });
+    });    
 </script>
 
 <?php include '../includes/footer.php'; ?>
