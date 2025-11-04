@@ -101,7 +101,7 @@ include '../includes/navbar_logged_in.php';
         <!-- Formulário de Filtro -->
         <div class="card shadow-sm mb-4 no-print">
             <div class="card-body">
-                <form method="GET" action="meu_financeiro.php" class="row g-3">
+                <form method="GET" action="meu_financeiro.php" class="row-03 g-2">
                     <div class="col-md-6">
                         <label for="data_inicio" class="form-label">Data Início</label>
                         <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="<?= htmlspecialchars($data_inicio) ?>">

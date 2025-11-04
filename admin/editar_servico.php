@@ -123,7 +123,6 @@ include '../includes/navbar_logged_in.php';
             <div class="card border-0 shadow-sm" style="max-width: 600px;">
                 <div class="card-body">
                     <form action="editar_servico.php?id=<?= htmlspecialchars($id_servico) ?>" method="post">
-                        
                         <div class="mb-3">
                             <label for="prestador_id" class="form-label">Prestador de Serviço</label>
                             <select class="form-select" id="prestador_id" name="prestador_id" required>

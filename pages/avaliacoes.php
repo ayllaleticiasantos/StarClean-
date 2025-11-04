@@ -10,7 +10,7 @@ try {
 
     // Consulta SQL para buscar as avaliações mais recentes e o nome do cliente
     $stmt = $pdo->prepare(
-        "SELECT ap.comentario, ap.nota, c.nome AS nome_cliente 
+        "SELECT ap.comentario, ap.nota, ap.oculto, c.nome AS nome_cliente 
          FROM avaliacao_prestador ap
          JOIN cliente c ON ap.Cliente_id = c.id
          WHERE ap.comentario IS NOT NULL AND ap.nota IS NOT NULL
@@ -66,7 +66,7 @@ include '../includes/navbar.php';
                                 <p class="card-text flex-grow-1">"<?= nl2br(htmlspecialchars($avaliacao['comentario'])) ?>"</p>
                                 
                                 <h5 class="card-title mt-3 mb-0 text-primary">
-                                    <?= htmlspecialchars($avaliacao['nome_cliente']) ?>
+                                    <?= $avaliacao['oculto'] ? 'Cliente Anônimo' : htmlspecialchars($avaliacao['nome_cliente']) ?>
                                 </h5>
 
                             </div>

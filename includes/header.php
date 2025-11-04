@@ -23,68 +23,90 @@ if (!defined('BASE_URL')) {
 
     <link rel="stylesheet" href="<?= BASE_URL ?>/includes/star_clean.css">
 
-    <script src="https://code.jquery.com/jquery-3.7.1.slim.js" integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.js"
+        integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css" />
 
+    <!-- CSS do Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- JS do Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Pega o caminho completo da URL atual (ex: /star_clean/pages/sobre.php)
-        const path = window.location.pathname;
 
-        // Mapeamento simples de caminhos para IDs de LI
-        // NOTE: Use a parte final do caminho ou o nome do arquivo para o mapeamento
-        let activeId;
-        
-        if (path.endsWith('/index.php') || path.endsWith('/star_clean/')) {
-            activeId = 'nav-home';
-        } else if (path.includes('/pages/sobre.php')) {
-            activeId = 'nav-sobre';
-        } else if (path.includes('/pages/avaliacoes.php')) {
-            activeId = 'nav-avaliacoes';
-        } else if (path.includes('/pages/servicos.php')) {
-            activeId = 'nav-servicos';
-        }
+    <!-- Biblioteca de Gráficos (Chart.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Pega o caminho completo da URL atual (ex: /star_clean/pages/sobre.php)
+            const path = window.location.pathname;
 
-        // Adiciona a classe 'active' ao item de navegação correto
-        if (activeId) {
-            const activeElement = document.getElementById(activeId);
-            if (activeElement) {
-                // Remove a classe 'active' de todos os links para evitar duplicidade
-                document.querySelectorAll('.navbar-nav .nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                
-                // Adiciona a classe 'active' ao item da página atual
-                activeElement.classList.add('active');
+            // Mapeamento simples de caminhos para IDs de LI
+            // NOTE: Use a parte final do caminho ou o nome do arquivo para o mapeamento
+            let activeId;
+
+            if (path.endsWith('/index.php') || path.endsWith('/star_clean/')) {
+                activeId = 'nav-home';
+            } else if (path.includes('/pages/sobre.php')) {
+                activeId = 'nav-sobre';
+            } else if (path.includes('/pages/avaliacoes.php')) {
+                activeId = 'nav-avaliacoes';
+            } else if (path.includes('/pages/servicos.php')) {
+                activeId = 'nav-servicos';
+            }
+
+            // Adiciona a classe 'active' ao item de navegação correto
+            if (activeId) {
+                const activeElement = document.getElementById(activeId);
+                if (activeElement) {
+                    // Remove a classe 'active' de todos os links para evitar duplicidade
+                    document.querySelectorAll('.navbar-nav .nav-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+
+                    // Adiciona a classe 'active' ao item da página atual
+                    activeElement.classList.add('active');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        /* Estilos para a impressão */
+        @media print {
+
+            /* Oculta tudo que não deve aparecer na impressão */
+            body {
+                background-color: #fff !important;
+                /* Fundo branco para economizar tinta */
+            }
+
+            .navbar,
+            #sidebar,
+            .offcanvas,
+            .btn,
+            footer,
+            #btn-print,
+            form,
+            .no-print {
+                display: none !important;
+            }
+
+            /* Garante que o conteúdo principal ocupe toda a página */
+            main,
+            .container-fluid {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
             }
         }
-    });
-</script>
-
-<style>
-    /* Estilos para a impressão */
-    @media print {
-        /* Oculta tudo que não deve aparecer na impressão */
-        body {
-            background-color: #fff !important; /* Fundo branco para economizar tinta */
-        }
-        .navbar, #sidebar, .offcanvas, .btn, footer, #btn-print, form, .no-print {
-            display: none !important;
-        }
-        /* Garante que o conteúdo principal ocupe toda a página */
-        main, .container-fluid {
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        .card {
-            box-shadow: none !important;
-            border: 1px solid #ccc !important;
-        }
-    }
-</style>
+    </style>
 
 
 </head>

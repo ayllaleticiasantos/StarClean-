@@ -25,7 +25,8 @@ SET time_zone = "+00:00";
 
 --
 -- Estrutura para tabela `administrador`
---
+--ALTER TABLE `avaliacao_prestador` ADD `oculto` TINYINT(1) NOT NULL DEFAULT 0;
+
 
 CREATE TABLE `administrador` (
   `id` int(11) NOT NULL,
@@ -495,3 +496,4 @@ COMMIT;
 ALTER TABLE endereco
 ADD COLUMN latitude DECIMAL(10, 8) NULL AFTER complemento,
 ADD COLUMN longitude DECIMAL(11, 8) NULL AFTER latitude;
+ALTER TABLE `avaliacao_prestador` ADD `oculto` TINYINT(1) NOT NULL DEFAULT 0;

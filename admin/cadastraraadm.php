@@ -57,18 +57,19 @@ include '../includes/navbar_logged_in.php';
 
 
     <div class="container-fluid p-4">
-        <h1 class="text-center mb-4">Cadastrar Administrador</h1>
+       <div>
+        <h1 class="text-dark mb-4"> Cadastrar Administrador</h1>
+        <a href="gerenciar_adm.php" class="btn btn-secondary mb-4 align-bottom-end">Gerenciar Administradores</a>
+       </div>
 
         <?php if ($mensagem): ?>
             <div class="alert alert-info">
                 <?= htmlspecialchars($mensagem) ?>
             </div>
-        <?php endif; ?>
+        <?php endif; ?> 
             
-            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#ajudaModal">Precisa de ajuda?</button>
-            <a href="gerenciar_adm.php" class="btn btn-secondary">Gerenciar Administradores</a>
 
-        <div class="card p-4 shadow-sm" style="width: 100%; max-width: 600px; margin: auto;">
+        <div class="card p-4 shadow-sm" style="width: 100%; max-width: 600px;">
             <form action="cadastraraadm.php" method="post">
                 <div class="mb-3">
                     <label for="nome_admin" class="form-label" placeholder="Digite seu nome:">Nome:</label>

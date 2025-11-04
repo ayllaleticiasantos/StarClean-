@@ -28,9 +28,8 @@ try {
     $pdo = obterConexaoPDO();
     // SQL CORRIGIDO: Usando as tabelas e colunas corretas (Cliente, data, hora) e buscando as coordenadas.
     $stmt = $pdo->prepare(
-        "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, s.descricao as descricao_servico, 
-                a.data, a.hora, a.status, e.logradouro, e.numero, e.bairro, e.cidade, e.uf, e.cep, 
-                e.latitude, e.longitude
+        "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, s.descricao as descricao_servico,
+                a.data, a.hora, a.status, e.logradouro, e.numero, e.bairro
          FROM Agendamento a
          JOIN Cliente c ON a.Cliente_id = c.id
          JOIN Servico s ON a.Servico_id = s.id
@@ -43,7 +42,8 @@ try {
 } catch (PDOException $e) {
     error_log("Erro ao buscar os agendamentos: " . $e->getMessage());
     $mensagem_erro = '<div class="alert alert-danger">Erro ao carregar agendamentos. Tente novamente.</div>';
-}
+}// Adicione esta linha para depuração:
+// var_dump($_SESSION);
 
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
@@ -97,22 +97,6 @@ include '../includes/navbar_logged_in.php';
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($agendamentos as $agendamento):
-                                    // ... dentro do loop foreach ...
-                            
-                                    $latitude = htmlspecialchars($agendamento['latitude'] ?? '');
-                                    $longitude = htmlspecialchars($agendamento['longitude'] ?? '');
-                                    $map_url = '';
-
-                                    if (!empty($latitude) && !empty($longitude)) {
-                                        // Link direto para as coordenadas
-                                        $map_url = "https://www.google.com/maps/search/?api=1&query={$latitude},{$longitude}";
-                                    } else {
-                                        // Fallback: Pesquisa o endereço completo
-                                        $endereco_formatado = "{$agendamento['logradouro']}, {$agendamento['numero']} - {$agendamento['bairro']}, {$agendamento['cidade']} - {$agendamento['uf']}";
-                                        $endereco_uri = urlencode($endereco_formatado);
-                                        $map_url = "https://www.google.com/maps/search/?api=1&query={$endereco_uri}";
-                                    }
-
                                     $status = strtolower($agendamento['status']);
                                     ?>
                                     <tr>
@@ -146,11 +130,6 @@ include '../includes/navbar_logged_in.php';
                                                 class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>
                                         </td>
                                         <td>
-                                            <a href="<?= $map_url ?>" target="_blank" class="btn btn-sm btn-info me-2"
-                                                title="Abrir no Google Maps">
-                                                <i class="fas fa-map-marker-alt"></i> Localizar
-                                            </a>
-
                                             <?php if ($status === 'pendente'): ?>
                                                 <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito"
                                                     class="btn btn-sm btn-success">Aceitar</a>
@@ -160,6 +139,8 @@ include '../includes/navbar_logged_in.php';
                                                 <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado"
                                                     class="btn btn-sm btn-primary">Concluído</a>
                                             <?php endif; ?>
+                                            <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>"
+                                                class="btn btn-sm btn-info">Visualizar</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

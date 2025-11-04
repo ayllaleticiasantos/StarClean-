@@ -53,7 +53,7 @@ try {
     // Nota: O cliente avalia o prestador, não o agendamento em si, para fins de consistência.
     $stmt_check = $pdo->prepare(
         // Verifica se já existe uma avaliação do cliente para este prestador
-        "SELECT nota, comentario FROM avaliacao_prestador 
+        "SELECT nota, comentario, oculto FROM avaliacao_prestador 
          WHERE Cliente_id = ? AND Prestador_id = ? LIMIT 1"
     );
     $stmt_check->execute([$id_cliente, $agendamento['Prestador_id']]);
@@ -72,6 +72,7 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento) {
     $nota = $_POST['nota'] ?? null;
     $comentario = trim($_POST['comentario'] ?? '');
+    $oculto = isset($_POST['oculto']) ? 1 : 0; // Captura o valor da checkbox
     
     if (empty($nota) || $nota < 1 || $nota > 5) {
         $mensagem = '<div class="alert alert-danger">Por favor, selecione uma nota de 1 a 5.</div>';
@@ -83,18 +84,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento) {
             if ($avaliacao_existente) {
                  // Atualiza a avaliação existente
                  $stmt = $pdo->prepare(
-                    "UPDATE avaliacao_prestador SET nota = ?, comentario = ? 
+                    "UPDATE avaliacao_prestador SET nota = ?, comentario = ?, oculto = ? 
                      WHERE Cliente_id = ? AND Prestador_id = ?"
                  );
-                 $stmt->execute([$nota, $comentario, $id_cliente, $prestador_id]);
+                 $stmt->execute([$nota, $comentario, $oculto, $id_cliente, $prestador_id]);
                  $_SESSION['mensagem_sucesso'] = "Sua avaliação foi atualizada com sucesso!";
             } else {
                 // Insere nova avaliação
                 $stmt = $pdo->prepare(
-                    "INSERT INTO avaliacao_prestador (Cliente_id, Prestador_id, nota, comentario) 
-                     VALUES (?, ?, ?, ?)"
+                    "INSERT INTO avaliacao_prestador (Cliente_id, Prestador_id, nota, comentario, oculto) 
+                     VALUES (?, ?, ?, ?, ?)"
                 );
-                $stmt->execute([$id_cliente, $prestador_id, $nota, $comentario]);
+                $stmt->execute([$id_cliente, $prestador_id, $nota, $comentario, $oculto]);
                 $_SESSION['mensagem_sucesso'] = "Sua avaliação foi enviada com sucesso!";
             }
             
@@ -160,6 +161,13 @@ include '../includes/navbar_logged_in.php';
                             <textarea class="form-control" id="comentario" name="comentario" rows="3" placeholder="Compartilhe sua experiência..." maxlength="300"><?= htmlspecialchars($avaliacao_existente['comentario'] ?? '') ?></textarea>
                         </div>
                         
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="oculto" id="ocultoCheck" value="1" <?= !empty($avaliacao_existente['oculto']) ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="ocultoCheck">
+                                Deixar minha avaliação como anônima (seu nome não será exibido).
+                            </label>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
                         <a href="meus_agendamentos.php" class="btn btn-secondary">Voltar</a>
                     </form>
