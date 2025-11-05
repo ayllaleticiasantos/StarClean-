@@ -1,47 +1,59 @@
 <?php
 /**
- * Busca coordenadas (latitude e longitude) para um CEP usando a API Nominatim.
+ * Busca coordenadas (latitude e longitude) para um ENDEREÇO COMPLETO.
+ * É muito mais preciso do que buscar apenas pelo CEP.
  *
- * @param string $cep O CEP a ser buscado.
+ * @param string $enderecoCompleto Ex: "Quadra QNQ 5, 17, Ceilândia, DF"
  * @return array|null Retorna um array com ['latitude', 'longitude'] ou null se não encontrar.
  */
-function obterCoordenadasPorCEP(string $cep): ?array
-
+function obterCoordenadasPorEndereco(string $enderecoCompleto): ?array
 {
-    // Limpa o CEP para enviar apenas números e adiciona ", Brasil" para precisão
-    $cep_limpo = preg_replace('/[^0-9]/', '', $cep);
-    $endereco_completo = urlencode($cep_limpo . ", Brasil");
-    $url_api = "https://nominatim.openstreetmap.org/search?q={$endereco_completo}&format=json&limit=1";
+    // 1. Insira sua chave de API gratuita da OpenCage aqui
+    // IMPORTANTE: Esta chave 'c245...' é do seu exemplo. Se ela for sua,
+    // considere criar uma nova e guardá-la em segurança.
+    $apiKey = 'c245633945894b24a123507f84263f38';
 
+    // 2. Prepara a consulta para a API
+    $query = urlencode($enderecoCompleto);
+    // Adicionamos 'countrycode=br' para limitar a busca ao Brasil
+    $url_api = "https://api.opencagedata.com/geocode/v1/json?q={$query}&key={$apiKey}&countrycode=br&limit=1";
+
+    // 3. Faz a requisição cURL
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url_api);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    // User-Agent com e-mail válido (IMPORTANTE)
-    curl_setopt($ch, CURLOPT_USERAGENT, 'StarCleanApp/1.0 (starclean.prest.servicos@gmail.com)');
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Timeout de 5 segundos
     $resposta_json = curl_exec($ch);
 
     // Trata erros de cURL
-
     if (curl_errno($ch)) {
-        error_log("Erro cURL: " . curl_error($ch));
+        error_log("Erro cURL na OpenCage API: " . curl_error($ch));
         return null;
     }
-
     curl_close($ch);
 
-
-    if ($resposta_json && ($dados = json_decode($resposta_json, true)) && !empty($dados)) {
-        return ['latitude' => $dados[0]['lat'], 'longitude' => $dados[0]['lon']];
+    // 4. Decodifica a resposta e extrai as coordenadas
+    if ($resposta_json && ($dados = json_decode($resposta_json, true)) && !empty($dados['results'])) {
+        $geometria = $dados['results'][0]['geometry'];
+        
+        // Verifica se a API encontrou com uma confiança razoável (ex: > 7)
+        // Isso evita salvar coordenadas genéricas (do centro da cidade ou do CEP)
+        if ($dados['results'][0]['confidence'] > 7) {
+            return ['latitude' => $geometria['lat'], 'longitude' => $geometria['lng']];
+        }
+        
+        error_log("OpenCage API: Baixa confiança para o endereço: " . $enderecoCompleto);
+        return null;
     }
     
+    error_log("OpenCage API: Endereço não encontrado: " . $enderecoCompleto);
     return null;
 }
 
 session_start();
-require_once '../config/db.php';
+require_once '../config/db.php'; // Garanta que este caminho está correto
 
-// Segurança: Apenas clientes podem acessar esta página
+// Segurança: Apenas clientes podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
     header("Location: ../pages/login.php");
     exit();
@@ -60,7 +72,7 @@ $cidade = $_POST['cidade'] ?? '';
 $uf = $_POST['uf'] ?? '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Pega os valores do POST e remove espaços extras e previne XSS
+    // Pega os valores do POST e limpa
     $cep = trim($_POST['cep']);
     $logradouro = trim($_POST['logradouro']);
     $numero = trim($_POST['numero']);
@@ -69,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $cidade = trim($_POST['cidade']);
     $uf = trim($_POST['uf']);
 
-    // --- MELHORIA 1: VALIDAÇÃO NO LADO DO SERVIDOR ---
+    // --- VALIDAÇÃO NO LADO DO SERVIDOR ---
     $erros = [];
     if (empty($cep)) { $erros[] = "O campo CEP é obrigatório."; }
     if (empty($logradouro)) { $erros[] = "O campo Logradouro é obrigatório."; }
@@ -78,45 +90,62 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($cidade)) { $erros[] = "O campo Cidade é obrigatório."; }
     if (empty($uf)) { $erros[] = "O campo UF é obrigatório."; }
 
-    // Se houver erros, monta a mensagem para exibir
+    // *** CORREÇÃO DE SINTAXE (CHAVE FALTANDO) APLICADA AQUI ***
     if (!empty($erros)) {
         $mensagem = '<div class="alert alert-danger"><strong>Por favor, corrija os seguintes erros:</strong><ul>';
         foreach ($erros as $erro) {
             $mensagem .= "<li>" . htmlspecialchars($erro) . "</li>";
-
+        } // <-- Esta chave estava faltando
         $mensagem .= '</ul></div>';
     } else {
         // Se não houver erros, prossiga com a inserção no banco
         try {
-            // --- MODIFICAÇÃO APLICADA AQUI ---
-            // Busca as coordenadas usando APENAS o CEP
+            
+            // ==================================================================
+            // !! ATUALIZAÇÃO APLICADA AQUI !! (Linha 118)
+            // ==================================================================
+            // Monta o endereço para busca precisa (Logradouro, Número, Cidade, UF)
+            // Removemos bairro e cep para uma busca mais limpa e precisa.
+            $endereco_para_api = "{$logradouro}, {$numero}, {$cidade}, {$uf}";
+            // ==================================================================
 
-            $coordenadas = obterCoordenadasPorCEP($cep);
+            $coordenadas = obterCoordenadasPorEndereco($endereco_para_api);
             
             $latitude = $coordenadas['latitude'] ?? null;
             $longitude = $coordenadas['longitude'] ?? null;
 
+            // --- CORREÇÃO LÓGICA (AVISO) APLICADA ---
+            // Se não achou coordenadas, avisa o usuário
             if (!$latitude || !$longitude) {
-                $mensagem = '<div class="alert alert-warning">Não foi possível encontrar a localização para este CEP. Verifique se o CEP está correto.</div>';
+                $mensagem = '<div class="alert alert-warning"><strong>Aviso:</strong> O endereço foi salvo, mas não foi possível encontrar a localização exata no mapa (latitude/longitude). Verifique se o número e o logradouro estão corretos.</div>';
+                // Mesmo sem coordenadas, continuamos para salvar o endereço
             }
 
             $pdo = obterConexaoPDO();
             $stmt = $pdo->prepare(
                 "INSERT INTO Endereco (Cliente_id, cep, logradouro, numero, complemento, bairro, cidade, uf, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            // Adiciona latitude e longitude ao execute
+            
             $stmt->execute([$id_cliente, $cep, $logradouro, $numero, $complemento, $bairro, $cidade, $uf, $latitude, $longitude]);
 
-            $_SESSION['mensagem_sucesso'] = "Endereço adicionado com sucesso!";
-            header("Location: gerir_enderecos.php");
-            exit();
+            // Se definimos uma mensagem de aviso, não redirecionamos
+            if (empty($mensagem)) {
+                $_SESSION['mensagem_sucesso'] = "Endereço adicionado com sucesso!";
+                header("Location: gerir_enderecos.php");
+                exit();
+            } else {
+                // Se houve aviso, adicionamos uma mensagem de sucesso parcial
+                $mensagem = '<div class="alert alert-success">Endereço adicionado com sucesso!</div>' . $mensagem;
+            }
+
         } catch (PDOException $e) {
             $mensagem = '<div class="alert alert-danger">Erro ao adicionar o endereço. Tente novamente. Se o erro persistir, contacte o suporte.</div>';
-            error_log($e->getMessage());
+            error_log("Erro PDO em adicionar_endereco.php: " . $e->getMessage());
         }
     }
 }
 
+// Inclui o cabeçalho HTML
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 
@@ -135,6 +164,7 @@ include '../includes/navbar_logged_in.php';
         <?php include '../includes/menu.php'; ?>
     </div>
 </div>
+
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
@@ -204,6 +234,7 @@ include '../includes/navbar_logged_in.php';
         }
         cepInput.addEventListener('keyup', mascaraCEP);
 
+        // --- FUNÇÃO DE BUSCA VIASEP ---
         cepInput.addEventListener('blur', function() {
             let cep = cepInput.value.replace(/\D/g, ''); // Remove caracteres não-numéricos
 
@@ -259,7 +290,7 @@ include '../includes/navbar_logged_in.php';
             document.getElementById('numero').value = '';
             document.getElementById('complemento').value = '';
         }
-    });    
+    });
 </script>
 
 <?php include '../includes/footer.php'; ?>
