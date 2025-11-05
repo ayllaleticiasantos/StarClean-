@@ -10,20 +10,33 @@ if (isset($_SESSION['usuario_id'])) {
     $pdo = obterConexaoPDO();
     $notifications = [];
     
-    $link_destino = BASE_URL . '/prestador/gerir_agendamentos.php';
+    $link_destino = '#'; // Link padrão
     
     try {
         if ($tipo_usuario === 'prestador') {
-            // CORREÇÃO FINAL: Usando nomes de coluna simples (data)
-            $stmt = $pdo->prepare("SELECT a.data as data, c.nome AS nome_cliente FROM Agendamento a JOIN Cliente c ON a.Cliente_id = c.id WHERE a.Prestador_id = ? AND a.status = 'pendente' ORDER BY a.data DESC LIMIT 5");
+            $link_destino = BASE_URL . '/prestador/gerir_agendamentos.php';
+            // --- MODIFICADO: Busca apenas notificações não lidas ---
+            $stmt = $pdo->prepare("SELECT a.data as data, c.nome AS nome_cliente FROM Agendamento a JOIN Cliente c ON a.Cliente_id = c.id WHERE a.Prestador_id = ? AND a.status = 'pendente' AND a.notificacao_prestador_lida = FALSE ORDER BY a.data DESC LIMIT 5");
             $stmt->execute([$id_usuario]);
             $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($tipo_usuario === 'cliente') {
-            // CORREÇÃO FINAL: Usando nomes de coluna simples (data)
-            $stmt = $pdo->prepare("SELECT a.data as data, p.nome AS nome_prestador, s.titulo AS titulo_servico FROM Agendamento a JOIN Prestador p ON a.Prestador_id = p.id JOIN Servico s ON a.Servico_id = s.id WHERE a.Cliente_id = ? AND a.status = 'aceito' ORDER BY a.data DESC LIMIT 5");
+            $link_destino = BASE_URL . '/cliente/meus_agendamentos.php';
+            // --- MODIFICADO: Busca apenas notificações não lidas ---
+            $stmt = $pdo->prepare("SELECT a.data as data, p.nome AS nome_prestador, s.titulo AS titulo_servico FROM Agendamento a JOIN Prestador p ON a.Prestador_id = p.id JOIN Servico s ON a.Servico_id = s.id WHERE a.Cliente_id = ? AND a.status = 'aceito' AND a.notificacao_cliente_lida = FALSE ORDER BY a.data DESC LIMIT 5");
             $stmt->execute([$id_usuario]);
             $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $link_destino = BASE_URL . '/cliente/meus_agendamentos.php';
+        } elseif ($tipo_usuario === 'admin') {
+            $link_destino = BASE_URL . '/admin/gerir_agendamentos.php';
+            // --- MODIFICADO: Busca apenas notificações não lidas ---
+            $stmt = $pdo->prepare(
+                "SELECT a.data, s.titulo, s.preco, p.nome AS nome_prestador
+                 FROM Agendamento a
+                 JOIN Servico s ON a.Servico_id = s.id
+                 JOIN Prestador p ON a.Prestador_id = p.id
+                 WHERE a.status = 'realizado' AND a.notificacao_admin_lida = FALSE ORDER BY a.data DESC LIMIT 5"
+            );
+            $stmt->execute();
+            $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     } catch (PDOException $e) {
         error_log("Erro ao buscar notificações: " . $e->getMessage());
@@ -67,15 +80,24 @@ if (isset($_SESSION['usuario_id'])) {
                                     <?php elseif ($tipo_usuario === 'cliente'): ?>
                                         <b>Agendamento Aceito!</b><br>
                                         Seu serviço com <?= htmlspecialchars($notification['nome_prestador']) ?> foi aceito.
+                                    <?php elseif ($tipo_usuario === 'admin'): ?>
+                                        <b>Serviço Concluído!</b><br>
+                                        "<?= htmlspecialchars($notification['titulo']) ?>" por <?= htmlspecialchars($notification['nome_prestador']) ?>.
+                                        <br>
+                                        <span class="text-success fw-bold">Valor: R$ <?= number_format($notification['preco'], 2, ',', '.') ?></span>
                                     <?php endif; ?>
                                 </small>
                                 <br>
                                 <small class="text-muted"><?= date('d/m/Y', strtotime($notification['data'])) ?></small>
                             </a></li>
                         <?php endforeach; ?>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Botão para marcar como lidas -->
+                        <li><a class="dropdown-item text-center text-primary" href="<?= BASE_URL ?>/includes/marcar_notificacoes_lidas.php">
+                            <i class="fas fa-check-double me-1"></i>Marcar todas como lidas
+                        </a></li>
                     <?php endif; ?>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-center" href="<?= $link_destino ?>">Ver todas as notificações</a></li>
+                    
                 </ul>
             </div>
 

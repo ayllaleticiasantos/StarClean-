@@ -27,7 +27,9 @@ try {
     $stmt = $pdo->prepare("
         SELECT a.id, s.titulo AS titulo_servico, s.descricao AS descricao_servico,
                a.data, a.hora, a.status, a.observacoes,
-               c.nome AS nome_cliente, c.telefone AS telefone_cliente, e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep,
+               a.tem_pets, a.tem_crianca, a.possui_aspirador,
+               c.nome AS nome_cliente, c.telefone AS telefone_cliente, 
+               e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep,
                e.latitude, e.longitude
         FROM Agendamento a
         JOIN Servico s ON a.Servico_id = s.id
@@ -111,6 +113,20 @@ include '../includes/navbar_logged_in.php';
                     <span class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento_detalhes['status'])) ?></span>
                 </p>
                 <p><strong>Observações do Cliente:</strong> <?= nl2br(htmlspecialchars($agendamento_detalhes['observacoes'] ?: 'Nenhuma observação fornecida.')) ?></p>
+                
+                <!-- ================================================== -->
+                <!-- !! NOVOS DETALHES EXIBIDOS PARA O PRESTADOR !! -->
+                <!-- ================================================== -->
+                <hr>
+                <h6 class="mt-3">Detalhes Adicionais do Local:</h6>
+                <ul>
+                    <li><strong>Possui pets?</strong> 
+                        <?= $agendamento_detalhes['tem_pets'] ? '<span class="text-success fw-bold">Sim</span>' : 'Não' ?></li>
+                    <li><strong>Há crianças?</strong> 
+                        <?= $agendamento_detalhes['tem_crianca'] ? '<span class="text-success fw-bold">Sim</span>' : 'Não' ?></li>
+                    <li><strong>Disponibiliza aspirador?</strong> 
+                        <?= $agendamento_detalhes['possui_aspirador'] ? '<span class="text-success fw-bold">Sim</span>' : 'Não' ?></li>
+                </ul>
             </div>
         </div>
 
@@ -128,6 +144,29 @@ include '../includes/navbar_logged_in.php';
                 <?php endif; ?>
                 
                 <div id="map" style="height: 300px; width: 100%; border-radius: 8px;"></div>
+
+                <!-- ================================================== -->
+                <!-- !! BOTÃO DE ROTA ADICIONADO AQUI !! -->
+                <!-- ================================================== -->
+                <?php
+                $google_maps_url = '';
+                // Prioriza o uso de coordenadas para maior precisão
+                if (!empty($agendamento_detalhes['latitude']) && !empty($agendamento_detalhes['longitude'])) {
+                    $google_maps_url = "https://www.google.com/maps/dir/?api=1&destination=" . $agendamento_detalhes['latitude'] . "," . $agendamento_detalhes['longitude'];
+                } else {
+                    // Se não houver coordenadas, usa o endereço completo como fallback
+                    $endereco_completo_url = urlencode(
+                        $agendamento_detalhes['logradouro'] . ', ' . $agendamento_detalhes['numero'] . ', ' . $agendamento_detalhes['bairro'] . ', ' . $agendamento_detalhes['cidade'] . '-' . $agendamento_detalhes['uf']
+                    );
+                    $google_maps_url = "https://www.google.com/maps/dir/?api=1&destination=" . $endereco_completo_url;
+                }
+                ?>
+                <div class="mt-3 text-center">
+                    <a href="<?= $google_maps_url ?>" class="btn btn-lg btn-success" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-route me-2"></i> Ver Rota no Google Maps
+                    </a>
+                </div>
+
             </div>
         </div>
     </div>

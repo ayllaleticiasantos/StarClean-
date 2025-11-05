@@ -498,3 +498,63 @@ ADD COLUMN latitude DECIMAL(10, 8) NULL AFTER complemento,
 ADD COLUMN longitude DECIMAL(11, 8) NULL;
 
 ALTER TABLE `avaliacao_prestador` ADD `oculto` TINYINT(1) NOT NULL DEFAULT 0;
+
+ALTER TABLE `Agendamento`
+ADD COLUMN `tem_pets` BOOLEAN NOT NULL DEFAULT FALSE,
+ADD COLUMN `tem_crianca` BOOLEAN NOT NULL DEFAULT FALSE,
+ADD COLUMN `possui_aspirador` BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE `Agendamento`
+ADD COLUMN `notificacao_prestador_lida` BOOLEAN NOT NULL DEFAULT FALSE,
+ADD COLUMN `notificacao_cliente_lida` BOOLEAN NOT NULL DEFAULT FALSE,
+ADD COLUMN `notificacao_admin_lida` BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE TABLE `conteudo_pagina_inicial` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tipo_conteudo` enum('carousel','card') NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `texto` text DEFAULT NULL,
+  `imagem_url` varchar(255) DEFAULT NULL,
+  `link_url` varchar(255) DEFAULT NULL,
+  `texto_botao` varchar(100) DEFAULT NULL,
+  `ordem` int(11) NOT NULL DEFAULT 0,
+  `ativo` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Agora, vamos inserir os dados que já existem na sua página inicial para não começar do zero.
+INSERT INTO `conteudo_pagina_inicial` (`tipo_conteudo`, `titulo`, `texto`, `imagem_url`, `link_url`, `texto_botao`, `ordem`, `ativo`) VALUES
+('carousel', 'Bem-vindos à StarClean', 'A sua plataforma para agendar serviços de limpeza com qualidade e confiança.', 'img/sliderbar_1.png', NULL, NULL, 1, 1),
+('carousel', 'Seja um dos nossos Clientes', 'Encontre os melhores prestadores de serviços de limpeza.', 'img/sliderbar_1.png', 'pages/cadastro.php', 'Cadastre-se', 2, 1),
+('carousel', 'Seja um Prestador de Serviços', 'Junte-se a nós e ofereça seus serviços de limpeza.', 'img/sliderbar_1.png', 'pages/cadastro.php', 'Cadastre-se', 3, 1),
+('card', 'Higienização do Escritório', 'Este é um serviço de limpeza especializado para escritórios, garantindo um ambiente de trabalho limpo e saudável.', 'img/escritorio2.png', NULL, NULL, 1, 1),
+('card', 'Limpeza completa da sua casa.', 'Este é um serviço de limpeza especializado para residencias, garantindo que a sua casa permaneça limpa e bem cuidada.', 'img/cozinha.png', NULL, NULL, 2, 1),
+('card', 'Higienização da Biblioteca', 'Este é um serviço de limpeza especializado para bibliotecas, garantindo um ambiente de leitura limpo e organizado para sua familia.', 'img/biblioteca.png', NULL, NULL, 3, 1),
+('card', 'Higienização da Sala', 'Este é um serviço de limpeza especializado para salas de estar, garantindo um ambiente aconchegante limpo e bem cuidado.', 'img/sala.png', NULL, NULL, 4, 1),
+('card', 'Higienização do Quarto', 'Este é um serviço de limpeza especializado para casas no geral você pode contratar na diária, mensalmente e por pacotes.', 'img/quarto.png', NULL, NULL, 5, 1),
+('card', 'Outros Serviços', 'Na Star Clean, oferecemos uma variedade de serviços adicionais para atender às suas necessidades específicas.', 'img/limpando.jpg', 'pages/servicos.php', 'Ver mais', 6, 1);
+
+-- 1. Cria a tabela central de logs de atividades
+CREATE TABLE `log_atividades` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `admin_id` INT(11) NOT NULL,
+  `acao` VARCHAR(255) NOT NULL,
+  `detalhes` TEXT DEFAULT NULL,
+  `data_ocorrencia` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_log_atividades_admin_idx` (`admin_id`),
+  CONSTRAINT `fk_log_atividades_admin` FOREIGN KEY (`admin_id`) REFERENCES `administrador` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. Adiciona colunas de auditoria na tabela de conteúdo da página inicial
+ALTER TABLE `conteudo_pagina_inicial`
+ADD COLUMN `criado_por_admin_id` INT(11) NULL AFTER `ativo`,
+ADD COLUMN `editado_por_admin_id` INT(11) NULL AFTER `criado_por_admin_id`,
+ADD COLUMN `data_criacao` TIMESTAMP NOT NULL DEFAULT current_timestamp() AFTER `editado_por_admin_id`,
+ADD COLUMN `data_edicao` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() AFTER `data_criacao`;
+
+-- 3. Adiciona as chaves estrangeiras para manter a integridade dos dados
+ALTER TABLE `conteudo_pagina_inicial`
+ADD CONSTRAINT `fk_conteudo_criado_por` FOREIGN KEY (`criado_por_admin_id`) REFERENCES `administrador`(`id`) ON DELETE SET NULL,
+ADD CONSTRAINT `fk_conteudo_editado_por` FOREIGN KEY (`editado_por_admin_id`) REFERENCES `administrador`(`id`) ON DELETE SET NULL;
+

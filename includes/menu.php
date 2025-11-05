@@ -27,6 +27,12 @@ $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
         <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerenciar_adm.php"><i class="fas fa-user-shield fa-fw me-2"></i>Gerir Administradores</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_pagina_inicial.php"><i class="fas fa-home fa-fw me-2"></i>Gerir Página Inicial</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/visualizar_logs.php"><i class="fas fa-history fa-fw me-2"></i>Logs de Atividades</a>
+        </li>
 
     <?php // Menu para Prestador ?>
     <?php elseif ($tipo_usuario === 'prestador'): ?>

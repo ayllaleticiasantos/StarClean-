@@ -60,6 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
     $data = $_POST['data']; 
     $hora = $_POST['hora']; 
     $observacoes = $_POST['observacoes'];
+    // --- NOVOS CAMPOS CAPTURADOS DO POST ---
+    // O valor será '1' para Sim e '0' para Não
+    $tem_pets = $_POST['tem_pets'] ?? '0';
+    $tem_crianca = $_POST['tem_crianca'] ?? '0';
+    $possui_aspirador = $_POST['possui_aspirador'] ?? '0';
     $status = 'pendente';
     
     if (empty($endereco_id)) {
@@ -87,10 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
                     $pdo = obterConexaoPDO();
                     
                     $stmt = $pdo->prepare(
-                        "INSERT INTO Agendamento (cliente_id, prestador_id, servico_id, endereco_id, data, hora, status, observacoes)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO Agendamento (cliente_id, prestador_id, servico_id, endereco_id, data, hora, status, observacoes, tem_pets, tem_crianca, possui_aspirador)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                     );
-                    $stmt->execute([$id_cliente, $prestador_id, $servico['id'], $endereco_id, $data, $hora, $status, $observacoes]);
+                    $stmt->execute([$id_cliente, $prestador_id, $servico['id'], $endereco_id, $data, $hora, $status, $observacoes, $tem_pets, $tem_crianca, $possui_aspirador]);
 
                     $_SESSION['mensagem_sucesso'] = "Agendamento solicitado com sucesso! Aguarde a confirmação do prestador.";
                     header("Location: meus_agendamentos.php");
@@ -167,6 +172,45 @@ include '../includes/navbar_logged_in.php';
                             </select>
                         </div>
                         
+                        <!-- ================================================== -->
+                        <!-- !! NOVOS CAMPOS ADICIONADOS AO FORMULÁRIO !! -->
+                        <!-- ================================================== -->
+                        <div class="mb-3">
+                            <label class="form-label">Possui animais de estimação (pets)?</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tem_pets" id="pets_sim" value="1" required>
+                                    <label class="form-check-label" for="pets_sim">Sim</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tem_pets" id="pets_nao" value="0" checked>
+                                    <label class="form-check-label" for="pets_nao">Não</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Há crianças em casa?</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tem_crianca" id="crianca_sim" value="1" required>
+                                    <label class="form-check-label" for="crianca_sim">Sim</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tem_crianca" id="crianca_nao" value="0" checked>
+                                    <label class="form-check-label" for="crianca_nao">Não</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="possui_aspirador" class="form-label">Disponibiliza aspirador de pó?</label>
+                            <select class="form-select" id="possui_aspirador" name="possui_aspirador" required>
+                                <option value="0" selected>Não</option>
+                                <option value="1">Sim</option>
+                            </select>
+                        </div>
+
                         <div class="mb-3">
                             <label for="data" class="form-label">Data do Serviço:</label>
                             <input type="date" class="form-control" id="data" name="data" required min="<?= $min_date ?>">

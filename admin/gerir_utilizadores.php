@@ -188,3 +188,4 @@ include '../includes/navbar_logged_in.php';
 // 3. INCLUSÃO DO RODAPÉ
 include '../includes/footer.php'; 
 ?>
+ 
