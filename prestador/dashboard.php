@@ -69,12 +69,12 @@ include '../includes/navbar_logged_in.php';
             </div>
 
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-success">
+                <div class="card h-100 shadow-sm border-danger">
                     <div class="card-body text-center">
-                        <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                        <i class="fas fa-calendar-alt fa-3x text-danger mb-3"></i>
                         <h5 class="card-title">Gerir Agendamentos</h5>
                         <p class="card-text">Veja seus agendamentos pendentes e aceitos.</p>
-                        <a href="gerir_agendamentos.php" class="btn btn-success">Ver Agendamentos</a>
+                        <a href="gerir_agendamentos.php" class="btn btn-danger">Ver Agendamentos</a>
                     </div>
                 </div>
             </div>
@@ -90,12 +90,12 @@ include '../includes/navbar_logged_in.php';
                 </div>
             </div>
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-warning">
+                <div class="card h-100 shadow-sm border-success">
                     <div class="card-body text-center">
-                        <i class="bi bi-currency-dollar fa-3x text-warning mb-3"></i>
+                        <i class="bi bi-currency-dollar fa-3x text-success mb-3"></i>
                         <h5 class="card-title">Meu Financeiro</h5>
                         <p class="card-text">Veja os serviços concluídos, e prestes a concluir </p>
-                        <a href="meu_financeiro.php" class="btn btn-warning">Ver Dados</a>
+                        <a href="meu_financeiro.php" class="btn btn-success">Ver Dados</a>
                     </div>
                 </div>
             </div>

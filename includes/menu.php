@@ -45,6 +45,9 @@ $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
         <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/prestador/gerir_agendamentos.php"><i class="fas fa-calendar-alt fa-fw me-2"></i>Agendamentos</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/prestador/gerir_disponibilidade.php"><i class="fas fa-calendar-times fa-fw me-2"></i>Minha Disponibilidade</a>
+        </li>
 
     <?php // Menu para Cliente ?>
     <?php elseif ($tipo_usuario === 'cliente'): ?>

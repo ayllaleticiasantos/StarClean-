@@ -55,3 +55,15 @@
     color: white !important;
     font-weight: 600; /* Deixa o texto mais bold */
 }
+
+/* ================================================== */
+/* EFEITO DE HOVER PARA CARDS DE SERVIÇO              */
+/* ================================================== */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px); /* Move o card 8 pixels para cima */
+    box-shadow: 0 8px 20px rgb(4, 54, 255); /* Adiciona uma sombra mais pronunciada */
+}

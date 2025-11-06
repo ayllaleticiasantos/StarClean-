@@ -112,7 +112,7 @@ include '../includes/navbar_logged_in.php';
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="container-fluid p-4">
-        <h1 class="mb-4">Editar Serviço #<?= htmlspecialchars($id_servico) ?></h1>
+        <h1 class="mb-4">Editar Serviço</h1>
         <p class="lead text-muted">Preencha o formulário para atualizar os detalhes do serviço.</p>
         <hr>
         

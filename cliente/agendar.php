@@ -158,7 +158,7 @@ include '../includes/navbar_logged_in.php';
                     <h5>Detalhes do Agendamento</h5>
                 </div>
                 <div class="card-body">
-                    <form action="agendar.php?servico_id=<?= htmlspecialchars($servico['id']) ?>" method="post">
+                    <form action="agendar.php?servico_id=<?= htmlspecialchars($servico['id']) ?>" method="post" onsubmit="return validarDisponibilidade(event)">
                         
                         <div class="mb-3">
                             <label for="endereco_id" class="form-label">Selecione o Endereço:</label>
@@ -233,5 +233,39 @@ include '../includes/navbar_logged_in.php';
         <?php endif; ?>
     </div>
 </main>
+
+<script>
+// Função para verificar a disponibilidade ANTES de enviar o formulário
+async function validarDisponibilidade(event) {
+    event.preventDefault(); // Impede o envio imediato do formulário
+    const form = event.target;
+    const dataSelecionada = document.getElementById('data').value;
+    const prestadorId = <?= $servico['prestador_id'] ?? 'null' ?>;
+
+    if (!dataSelecionada || !prestadorId) {
+        alert('Por favor, selecione uma data válida.');
+        return false;
+    }
+
+    try {
+        // Faz uma requisição para um novo script PHP que apenas verifica a data
+        const response = await fetch(`../includes/verificar_disponibilidade_api.php?prestador_id=${prestadorId}&data=${dataSelecionada}`);
+        const resultado = await response.json();
+
+        if (resultado.disponivel) {
+            // Se estiver disponível, envia o formulário
+            form.submit();
+        } else {
+            // Se não, exibe um alerta
+            alert('O prestador não está disponível na data selecionada. Por favor, escolha outra data.');
+            return false;
+        }
+    } catch (error) {
+        console.error('Erro ao verificar disponibilidade:', error);
+        alert('Ocorreu um erro ao verificar a disponibilidade. Tente novamente.');
+        return false;
+    }
+}
+</script>
 
 <?php include '../includes/footer.php'; ?>
