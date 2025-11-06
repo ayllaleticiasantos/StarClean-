@@ -59,7 +59,7 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
         <h1>Painel de Controle</h1>
         <hr>
         <h3>Bem-vindo(a), <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!</h3>
@@ -68,7 +68,8 @@ include '../includes/navbar_logged_in.php';
         <p>O seu tipo de utilizador é: <strong><?= htmlspecialchars($_SESSION['usuario_tipo']) ?></strong>.</p>
 
         <div class="row mt-4">
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+            <!-- Cards de Ação -->
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
                 <div class="card h-100 shadow-sm border-primary">
                     <div class="card-body text-center"><i class="fas fa-users fa-3x text-primary mb-3"></i>
                         <h5 class="card-title">Gerir Utilizadores</h5>
@@ -77,7 +78,7 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
                 <div class="card h-100 shadow-sm border-success">
                     <div class="card-body text-center"><i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
                         <h5 class="card-title">Gerir Agendamentos</h5>
@@ -86,78 +87,47 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-info">
-                    <div class="card-body text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor"
-                            class="bi bi-person-fill-add text-info" viewBox="0 0 16 16">
-                            <path
-                                d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-                            <path
-                                d="M2 13c0 1 1 1 1 1h5.256A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4" />
-                        </svg>
-                        <h5 class="card-title">Cadastrar Administrador</h5>
-                        <p class="card-text">Adicione um novo administrador.</p>
-                        <a href="cadastraraadm.php" class="btn btn-info">Cadastrar Agora</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+             <div class="col-12 col-sm-6 col-lg-3 mb-4">
                 <div class="card h-100 shadow-sm border-warning">
-                    <div class="card-body text-center"><i
-                            class="fa-3x bi bi-plus-square-fill text-warning mb-3"></i>
-                        <h5 class="card-title">Adicionar Serviços</h5>
-                        <p class="card-text">Adicione um novo serviço.</p><a href="adicionar_servico.php"
-                            class="btn btn-warning">Cadastrar Agora</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-danger">
-                    <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-danger"></i>
-                        <h5 class="card-title">Relatórios</h5>
-                        <p class="card-text">Visualize relatórios.</p><a href="relatorios.php"
-                            class="btn btn-danger">Acessar</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-primary">
-                    <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-primary"></i>
-                        <h5 class="card-title">Gerenciar Site</h5>
-                        <p class="card-text">Visualize e gerencie o conteúdo do site.</p><a href="gerir_pagina_inicial.php"
-                            class="btn btn-primary">Acessar</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-success">
-                    <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-success"></i>
-                        <h5 class="card-title">Gerenciar Serviços</h5>
-                        <p class="card-text">Visualize e gerencie os serviços cadastrados.</p><a href="gerir_servicos.php"
-                            class="btn btn-success">Acessar</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-info">
-                    <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-info"></i>
-                        <h5 class="card-title">Gerenciar Serviços</h5>
-                        <p class="card-text">Visualize e gerencie os serviços cadastrados.</p><a href="gerir_servicos.php"
-                            class="btn btn-info">Acessar</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-warning">
-                    <div class="card-body text-center"><i class="fa-3x bi bi-file-earmark-bar-graph-fill text-warning"></i>
-                        <h5 class="card-title">Gerenciar Serviços</h5>
-                        <p class="card-text">Visualize e gerencie os serviços cadastrados.</p><a href="gerir_servicos.php"
+                    <div class="card-body text-center"><i class="fas fa-briefcase fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Gerir Serviços</h5>
+                        <p class="card-text">Adicionar, editar e remover serviços.</p><a href="gerir_servicos.php"
                             class="btn btn-warning">Acessar</a>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm border-danger">
+                    <div class="card-body text-center"><i class="fas fa-chart-pie fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Relatórios</h5>
+                        <p class="card-text">Visualize relatórios financeiros e de serviços.</p><a href="relatorios.php"
+                            class="btn btn-danger">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm border-info">
+                    <div class="card-body text-center"><i class="fas fa-user-shield fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Gerir Administradores</h5>
+                        <p class="card-text">Adicionar e gerir contas de admin.</p><a href="gerenciar_adm.php"
+                            class="btn btn-info">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm border-secondary">
+                    <div class="card-body text-center"><i class="fas fa-desktop fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">Gerenciar Site</h5>
+                        <p class="card-text">Visualize e gerencie o conteúdo do site.</p><a href="gerir_pagina_inicial.php"
+                            class="btn btn-secondary">Acessar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <!-- Cards de Informação -->
+            <div class="col-12 col-sm-6 col-lg-3 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-primary text-center">
                     <div class="card-body">
                         <h2 class="card-title text-primary">Total de Clientes</h2>
@@ -168,7 +138,7 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-success text-center">
                     <div class="card-body">
                         <h2 class="card-title text-success">Total de Prestadores</h2>
@@ -179,7 +149,7 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-info text-center">
                     <div class="card-body">
                         <h2 class="card-title text-info">Total de Agendamentos</h2>
@@ -190,7 +160,7 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4 align-self-stretch">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-warning text-center">
                     <div class="card-body">
                         <h2 class="card-title text-warning">Total de serviços cadastrados</h2>

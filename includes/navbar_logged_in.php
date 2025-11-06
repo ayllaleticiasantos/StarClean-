@@ -44,17 +44,17 @@ if (isset($_SESSION['usuario_id'])) {
 }
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-primary shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid">
-        <a class="navbar-brand" href="<?= BASE_URL ?>/index.php">
-            <img src="<?= BASE_URL ?>/img/logoPrimary.png" alt="StarClean" height="50" class="d-inline-block align-text-top my-1">
+        
+        <a href="<?= BASE_URL ?>/index.php">
+            <img src="<?= BASE_URL ?>/img/LogoBranca.png" alt="StarClean" height="60" class="d-inline-block align-text-top">
         </a>
-
         <div class="d-flex align-items-center">
 
             <div class="dropdown me-3">
                 <a href="#" class="nav-link" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-bell fs-5 text-white me-2"></i>
+                    <i class="fas fa-bell fs-5"></i>
                     <?php if (!empty($notifications)): ?>
                         <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
                             <?= count($notifications) ?>
@@ -100,7 +100,7 @@ if (isset($_SESSION['usuario_id'])) {
 
             <div class="dropdown">
                 <a href="#" class="nav-link" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user-circle fs-3 text-white me-2"></i>
+                    <i class="fas fa-user-circle fs-3"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                     <li><h6 class="dropdown-header">Olá, <?= htmlspecialchars($_SESSION['usuario_nome'] ?? 'Convidado') ?>!</h6></li>

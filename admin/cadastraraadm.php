@@ -56,7 +56,7 @@ include '../includes/navbar_logged_in.php';
 
 
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
        <div>
         <h1 class="text-dark mb-4"> Cadastrar Administrador</h1>
         <a href="gerenciar_adm.php" class="btn btn-secondary mb-4 align-bottom-end">Gerenciar Administradores</a>

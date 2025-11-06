@@ -51,7 +51,7 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4"> <h1 class="mb-4">Painel do Cliente</h1>
+    <div class="container-fluid p-4 flex-grow-1"> <h1 class="mb-4">Painel do Cliente</h1>
         <h3>Bem-vindo(a), <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!</h3>
         <hr>
 

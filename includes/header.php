@@ -107,8 +107,6 @@ if (!defined('BASE_URL')) {
             }
         }
     </style>
-
-
 </head>
 
 <body class="d-flex flex-column min-vh-100" style="background-color: #acd0f5ff;">

@@ -75,7 +75,7 @@ include '../includes/navbar_logged_in.php';
     <?php include '../includes/sidebar.php'; ?>
     
     <!-- CORREÇÃO: Abrindo a div de conteúdo aqui, que é fechada implicitamente no footer -->
-    <div class="container-fluid p-4"> 
+    <div class="container-fluid p-4 flex-grow-1"> 
         <h1>Configurações</h1>
         <hr>
 

@@ -79,7 +79,7 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Gestão de Utilizadores</h1>

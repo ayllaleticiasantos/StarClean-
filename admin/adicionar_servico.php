@@ -94,7 +94,7 @@ include '../includes/sidebar.php';
     include '../includes/sidebar.php'; 
     ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
         <h1 class="mb-4">Cadastrar Novo Serviço</h1>
         <?= $mensagem_sucesso ?>
         <?= $mensagem_erro ?>

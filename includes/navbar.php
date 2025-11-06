@@ -1,9 +1,8 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container m-fluid">
-        <a class="navbar-brand" href="<?= BASE_URL ?>/index.php">
-            <img src="<?= BASE_URL ?>/img/logoPrimary.png" alt="StarClean" height="50" class="d-inline-block align-text-top my-1">
+        <a href="<?= BASE_URL ?>/index.php">
+            <img src="<?= BASE_URL ?>/img/logoPrimary.png" alt="StarClean" height="60" class="d-inline-block align-text-top">
         </a>
-        <!-- <i class="bi bi-star fs-3 me-2 bg-circle p-2 text-white">StarClean</i></a> -->
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
