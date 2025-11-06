@@ -88,6 +88,11 @@ body {
         z-index: 1020; /* Garante que a sidebar fique acima do conteúdo, mas abaixo da navbar */
     }
 
+    /* Adiciona uma margem à esquerda no conteúdo principal para compensar a sidebar fixa */
+    main.d-flex > .flex-grow-1 {
+        margin-left: 280px; /* Deve ser igual à largura da #sidebar */
+    }
+
 }
 
 /* Garante que o conteúdo principal ocupe o espaço vertical disponível */

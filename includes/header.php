@@ -73,6 +73,18 @@ if (!defined('BASE_URL')) {
     </script>
 
     <style>
+    #sidebar {
+        width: 280px;     /* Largura fixa para o menu */
+        flex-shrink: 0;   /* Impede que o menu seja "esmagado" */
+    }
+
+    /* Em telas pequenas, a sidebar está no offcanvas, então removemos a largura */
+    @media (max-width: 767.98px) {
+        #sidebar {
+            width: auto;
+        }
+    }
+  
         /* Estilos para a impressão */
         @media print {
 

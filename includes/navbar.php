@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
     <div class="container m-fluid">
         <a href="<?= BASE_URL ?>/index.php">
             <img src="<?= BASE_URL ?>/img/logoPrimary.png" alt="StarClean" height="60" class="d-inline-block align-text-top">

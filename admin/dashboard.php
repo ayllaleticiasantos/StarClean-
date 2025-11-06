@@ -130,7 +130,7 @@ include '../includes/navbar_logged_in.php';
             <div class="col-12 col-sm-6 col-lg-3 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-primary text-center">
                     <div class="card-body">
-                        <h2 class="card-title text-primary">Total de Clientes</h2>
+                        <h2 class="card-title text-primary">Total de Clientes cadastrados</h2>
                         <h2 class="card-text display-4"><?= $counts['clientes'] ?></h2>
                         <p>
                         <h4>Clientes registados no sistema.</h4>
