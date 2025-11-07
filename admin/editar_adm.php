@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../includes/validation_helper.php'; // Inclui o nosso helper
 require_once '../config/db.php';
 
 // Segurança: Apenas administradores podem acessar
@@ -23,9 +24,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id && !empty($nome) && !empty($email) && !empty($tipo)) {
         try {
-            // Se uma nova senha foi fornecida, crie o hash.
-            // Se não, o campo da senha não será atualizado.
             if (!empty($senha)) {
+                // Valida a nova senha
+                $erros_senha = validarSenhaForte($senha);
+                if (!empty($erros_senha)) {
+                    $_SESSION['mensagem_erro'] = "A nova senha não é forte o suficiente: <ul><li>" . implode("</li><li>", $erros_senha) . "</li></ul>";
+                    header("Location: editar_adm.php?id=" . $id);
+                    exit();
+                }
+
+                // Se a senha for forte, atualiza
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare(
                     "UPDATE Administrador SET nome = ?, sobrenome = ?, email = ?, tipo = ?, password = ? WHERE id = ?"
@@ -133,8 +141,20 @@ include '../includes/navbar_logged_in.php';
                 </div>
                 <div class="mb-3">
                     <label for="senha" class="form-label">Nova Senha:</label>
-                    <input type="password" class="form-control" name="senha" id="senha" placeholder="Deixe em branco para não alterar">
-                    <small class="form-text text-muted">Preencha apenas se desejar alterar a senha atual.</small>
+                    <div class="input-group">
+                        <input type="password" class="form-control" name="senha" id="senha" placeholder="Deixe em branco para não alterar" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}|" title="A senha deve conter no mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e um caractere especial, ou ser deixada em branco.">
+                        <button class="btn btn-outline-secondary" type="button" id="toggleSenha"><i class="fas fa-eye" id="iconSenha"></i></button>
+                    </div>
+                    <small class="form-text text-muted">Preencha apenas se desejar alterar a senha atual. Se preenchido, deve ser uma senha forte.</small>
+                    
+                    <!-- Requisitos da Senha (Feedback Visual) -->
+                    <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
+                        <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
+                        <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
+                        <li id="uppercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra maiúscula</li>
+                        <li id="number" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um número</li>
+                        <li id="special" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um caractere especial (!@#$%)</li>
+                    </ul>
                 </div>
                 <div class="mb-3">
                     <label for="tipo" class="form-label">Tipo:</label>
@@ -152,3 +172,57 @@ include '../includes/navbar_logged_in.php';
 </main>
 
 <?php include '../includes/footer.php'; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const senhaInput = document.getElementById('senha');
+    const requirementsList = document.getElementById('password-requirements');
+    const requirements = {
+        length: document.getElementById('length'),
+        lowercase: document.getElementById('lowercase'),
+        uppercase: document.getElementById('uppercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special')
+    };
+
+    function validatePassword() {
+        const value = senhaInput.value;
+
+        // Se o campo estiver vazio, esconde a lista e não valida
+        if (value.length === 0) {
+            requirementsList.style.display = 'none';
+            return;
+        }
+        requirementsList.style.display = 'block';
+
+        const updateRequirement = (req, isValid) => {
+            req.className = isValid ? 'text-success' : 'text-danger';
+            req.querySelector('i').className = isValid ? 'fas fa-check-circle me-1' : 'fas fa-times-circle me-1';
+        };
+
+        updateRequirement(requirements.length, value.length >= 8);
+        updateRequirement(requirements.lowercase, /[a-z]/.test(value));
+        updateRequirement(requirements.uppercase, /[A-Z]/.test(value));
+        updateRequirement(requirements.number, /\d/.test(value));
+        updateRequirement(requirements.special, /[\W_]/.test(value));
+    }
+
+    senhaInput.addEventListener('input', validatePassword);
+    validatePassword(); // Executa uma vez ao carregar para esconder a lista se o campo estiver vazio
+
+    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
+    const toggleButton = document.getElementById('toggleSenha');
+    const icon = document.getElementById('iconSenha');
+
+    if (toggleButton && senhaInput && icon) {
+        toggleButton.addEventListener('click', function() {
+            // Alterna o tipo do input
+            const type = senhaInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            senhaInput.setAttribute('type', type);
+            
+            // Alterna o ícone
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+    }
+});
+</script>

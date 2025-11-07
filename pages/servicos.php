@@ -1,8 +1,44 @@
 <?php
-
 include '../config/config.php';
+require_once '../config/db.php'; // Adicionado para conexão com o banco
 include '../includes/header.php';
 include '../includes/navbar.php';
+
+// --- LÓGICA PARA BUSCAR SERVIÇOS DO BANCO DE DADOS ---
+$servicos = [];
+$termo_busca = $_GET['q'] ?? ''; // Pega o termo de busca da URL
+$mensagem_erro = '';
+
+try {
+    $pdo = obterConexaoPDO();
+    
+    $sql = "SELECT s.titulo, s.descricao, s.preco FROM Servico s";
+    $params = [];
+
+    // Se houver um termo de busca, adiciona o filtro
+    if (!empty($termo_busca)) {
+        $sql .= " WHERE s.titulo LIKE ? OR s.descricao LIKE ?";
+        $like_term = "%" . $termo_busca . "%";
+        $params = [$like_term, $like_term];
+    }
+
+    // Ordenação customizada: primeiro por nível (básico, intermediário, brilhante) e depois por preço
+    $sql .= " ORDER BY 
+                CASE 
+                    WHEN s.titulo LIKE '%básico%' OR s.descricao LIKE '%básico%' THEN 1
+                    WHEN s.titulo LIKE '%intermediário%' OR s.descricao LIKE '%intermediário%' THEN 2
+                    WHEN s.titulo LIKE '%brilhante%' OR s.descricao LIKE '%brilhante%' THEN 3
+                    ELSE 4 
+                END, s.preco ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    $mensagem_erro = "Erro ao carregar os serviços. Tente novamente mais tarde.";
+    error_log("Erro na página de serviços: " . $e->getMessage());
+}
 
 ?>
 
@@ -15,268 +51,53 @@ include '../includes/navbar.php';
 </header>
 <main>
     <div class="container mt-5">
-        <h1 class="mb-4 text-center">Tabela de Preços de Serviços StarClean</h1>
+        <h1 class="mb-4 text-center">Nossos Serviços Disponíveis</h1> 
+
+        <?php if (!empty($mensagem_erro)): ?>
+            <div class="alert alert-danger"><?= $mensagem_erro ?></div>
+        <?php endif; ?>
+
+        <!-- Formulário de Filtro -->
+        <div class="mb-4">
+            <form action="servicos.php" method="GET" class="d-flex">
+                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por serviço..." value="<?= htmlspecialchars($termo_busca) ?>">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                <?php if (!empty($termo_busca)): ?>
+                    <a href="servicos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
+                <?php endif; ?>
+            </form>
+        </div>
+
+        <?php if (!empty($termo_busca) && empty($servicos)): ?>
+            <div class="alert alert-info text-center" role="alert">Nenhum serviço encontrado para "<?= htmlspecialchars($termo_busca) ?>". Tente uma busca diferente ou limpe o filtro.</div>
+        <?php endif; ?>
+
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
                 <thead class="table-primary">
                     <tr>
-                        <th scope="col" style="width: 70%;">Serviço Detalhado</th>
-                        <th scope="col" style="width: 30%;" class="text-end">Preço</th>
+                        <th scope="col" style="width: 80%;">Serviço</th>
+                        <th scope="col" style="width: 20%;" class="text-end">Preço a partir de</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="2" class="table-group-divider text-primary">Combo 1 Nível Básico</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de 1 quarto diária</td>
-                        <td class="text-end text-primary fw-bold">R$180,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de 1 quarto mensal</td>
-                        <td class="text-end text-primary fw-bold">R$720,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de 3 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$270,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de 3 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.080,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de 4 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$ 320,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de 4 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.280,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de +4 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$ 450,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para casa de +4 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.800,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de 1 sala diária</td>
-                        <td class="text-end text-primary fw-bold">R$190,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de 1 sala mensal</td>
-                        <td class="text-end text-primary fw-bold">R$760,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de 3 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$260,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de 3 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.040,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de 4 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$300,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de 4 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.200,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de +4 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$400,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 1 nível básico: para escritório de +4 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.600,00</td>
-                    </tr>
-
-                    <tr>
-                        <td colspan="2" class="table-group-divider text-primary">Combo 2 Nível Intermediário</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de 2 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$270,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de 2 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.000,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de 3 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$300,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de 3 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.200,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de 4 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$350,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de 4 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.400,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de +4 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$500,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para casa de +4 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$2.000,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de 2 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$260,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de 2 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.040,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de 3 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$320,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de 3 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.280,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de 4 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$380,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de 4 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.520,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de +4 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$480,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 2 nível intermediário: para escritório de +4 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.920,00</td>
-                    </tr>
-
-                    <tr>
-                        <td colspan="2" class="table-group-divider text-primary">Combo 3 Nível Brilhante</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de 1 quarto diária</td>
-                        <td class="text-end text-primary fw-bold">R$360,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de 1 quarto mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.440,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de 2 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$430,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de 2 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.720,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de 3 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$520,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de 3 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$2.080,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de +4 quartos diária</td>
-                        <td class="text-end text-primary fw-bold">R$620,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para casa de +4 quartos mensal</td>
-                        <td class="text-end text-primary fw-bold">R$2.480,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de 1 sala diária</td>
-                        <td class="text-end text-primary fw-bold">R$440,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de 1 sala mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.760,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de 2 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$490,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de 2 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$1.960,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de 3 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$580,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de 3 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$2.320,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de +4 salas diária</td>
-                        <td class="text-end text-primary fw-bold">R$680,00</td>
-                    </tr>
-
-                    <tr>
-                        <td>Combo 3 nível brilhante: para escritório de +4 salas mensal</td>
-                        <td class="text-end text-primary fw-bold">R$2.720,00</td>
-                    </tr>
-
+                    <?php if (empty($servicos)): ?>
+                        <tr>
+                            <td colspan="2" class="text-center">Nenhum serviço disponível no momento.</td> 
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($servicos as $servico): ?>
+                            <tr>
+                                <td>
+                                    <h6 class="mb-1"><?= htmlspecialchars($servico['titulo']) ?></h6>
+                                    <small class="text-muted"><?= htmlspecialchars($servico['descricao']) ?></small>
+                                </td>
+                                <td class="text-end text-primary fw-bold">
+                                    R$ <?= number_format($servico['preco'], 2, ',', '.') ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

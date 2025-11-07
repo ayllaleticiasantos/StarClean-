@@ -2,18 +2,26 @@
 session_start();
 require_once '../config/db.php';
 
+// Inclui o helper de validação de senha
+require_once '../includes/validation_helper.php';
+
 $mensagem = '';
 
 // Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Campos comuns que sempre virão do formulário
-    $tipo = $_POST['tipo'] ?? '';
+    $tipo_usuario = $_POST['tipo'] ?? '';
     $email = trim($_POST['email']);
     $senha = $_POST['senha'];
+    $confirmar_senha = $_POST['confirmar_senha'];
 
-    // Validação básica para campos comuns
-    if (empty($tipo) || empty($email) || empty($senha)) {
-        $mensagem = '<div class="alert alert-danger">Tipo, E-mail e Senha são obrigatórios!</div>';
+    // 1. Valida a força da senha
+    $erros_senha = validarSenhaForte($senha);
+
+    if (!empty($erros_senha)) {
+        $mensagem = '<div class="alert alert-danger">A senha não é forte o suficiente: <ul><li>' . implode("</li><li>", $erros_senha) . "</li></ul></div>";
+    } elseif ($senha !== $confirmar_senha) {
+        $mensagem = '<div class="alert alert-danger">As senhas não correspondem.</div>';
     } else {
         $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
@@ -21,46 +29,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Assume-se que obterConexaoPDO() retorna um objeto PDO configurado
             $pdo = obterConexaoPDO(); 
 
-            switch ($tipo) {
+            switch ($tipo_usuario) {
                 // --- CASO CLIENTE ---
                 case 'cliente':
-                    $nome = trim($_POST['cliente_nome']);
-                    $sobrenome = trim($_POST['cliente_sobrenome']);
+                    $nome = trim($_POST['nome']);
+                    $sobrenome = trim($_POST['sobrenome']);
                     $data_nascimento = $_POST['data_nascimento'];
-                    $telefone = trim($_POST['cliente_telefone']);
-                    // Corrigido para o novo nome do campo do Cliente no POST
-                    $cpf = trim($_POST['cpf_cliente']); 
+                    $telefone = trim($_POST['telefone']);
+                    $cpf = trim($_POST['cpf']); 
 
                     if (empty($nome) || empty($sobrenome) || empty($data_nascimento) || empty($cpf)) {
                         $mensagem = '<div class="alert alert-danger">Todos os campos do cliente são obrigatórios!</div>';
                         break;
                     }
 
-                    // Verifica duplicidade de email ou cpf
-                    $stmt = $pdo->prepare("SELECT id FROM cliente WHERE email = ? OR cpf = ?");
-                    $stmt->execute([$email, $cpf]);
-
-                    if ($stmt->fetch()) {
-                        $mensagem = '<div class="alert alert-danger">E-mail ou CPF já cadastrados!</div>';
-                    } else {
-                        $stmt = $pdo->prepare(
-                            "INSERT INTO cliente (nome, sobrenome, email, data_nascimento, telefone, cpf, password) 
-                             VALUES (?, ?, ?, ?, ?, ?, ?)"
-                        );
-                        $stmt->execute([$nome, $sobrenome, $email, $data_nascimento, $telefone, $cpf, $senhaHash]);
-                        $_SESSION['mensagem_sucesso'] = "Cliente cadastrado com sucesso! Faça o login.";
-                        header("Location: login.php");
-                        exit();
-                    }
+                    $stmt = $pdo->prepare(
+                        "INSERT INTO cliente (nome, sobrenome, email, data_nascimento, telefone, cpf, password) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?)"
+                    );
+                    $stmt->execute([$nome, $sobrenome, $email, $data_nascimento, $telefone, $cpf, $senhaHash]);
+                    $_SESSION['mensagem_sucesso'] = "Cliente cadastrado com sucesso! Faça o login.";
+                    header("Location: login.php");
+                    exit();
                     break;
 
                 // --- CASO PRESTADOR ---
                 case 'prestador':
-                    $nomeRazao = trim($_POST['nome']);
-                    $sobrenomeFantasia = trim($_POST['sobrenome']);
-                    // Corrigido para o novo nome do campo do Prestador no POST
-                    $cpfCnpj = trim($_POST['doc_prestador']); 
-                    $telefone = trim($_POST['prestador_telefone']);
+                    $nomeRazao = trim($_POST['nome_prestador']);
+                    $sobrenomeFantasia = trim($_POST['sobrenome_prestador']);
+                    $cpfCnpj = trim($_POST['cpf_prestador']); 
+                    $telefone = trim($_POST['telefone_prestador']);
                     $especialidade = trim($_POST['especialidade']);
                     $descricao = trim($_POST['descricao']);
 
@@ -69,25 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         break;
                     }
 
-                    // Verifica duplicidade de email ou cpf/cnpj
-                    $stmt = $pdo->prepare("SELECT id FROM prestador WHERE email = ? OR cpf = ?");
-                    $stmt->execute([$email, $cpfCnpj]);
+                    $admin_id_responsavel = 1; // ID do admin padrão (deve existir na tabela administrador)
 
-                    if ($stmt->fetch()) {
-                        $mensagem = '<div class="alert alert-danger">E-mail ou CPF/CNPJ já cadastrados!</div>';
-                    } else {
-                        $admin_id_responsavel = 1; // ID do admin padrão (deve existir na tabela administrador)
-
-                        $stmt = $pdo->prepare(
-                            "INSERT INTO prestador (nome, sobrenome, cpf, email, telefone, especialidade, descricao, password, Administrador_id) 
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                        );
-                        // Observação: a coluna 'descricao' não é NOT NULL no seu PHP, mas é NOT NULL no seu SQL, o que pode causar erro se estiver vazia. O PHP original já a trata.
-                        $stmt->execute([$nomeRazao, $sobrenomeFantasia, $cpfCnpj, $email, $telefone, $especialidade, $descricao, $senhaHash, $admin_id_responsavel]);
-                        $_SESSION['mensagem_sucesso'] = "Prestador cadastrado com sucesso! Faça o login.";
-                        header("Location: login.php");
-                        exit();
-                    }
+                    $stmt = $pdo->prepare(
+                        "INSERT INTO prestador (nome, sobrenome, cpf, email, telefone, especialidade, descricao, password, Administrador_id) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    );
+                    $stmt->execute([$nomeRazao, $sobrenomeFantasia, $cpfCnpj, $email, $telefone, $especialidade, $descricao, $senhaHash, $admin_id_responsavel]);
+                    $_SESSION['mensagem_sucesso'] = "Prestador cadastrado com sucesso! Faça o login.";
+                    header("Location: login.php");
+                    exit();
                     break;
 
                 default:
@@ -95,7 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
             }
         } catch (PDOException $e) {
-            $mensagem = '<div class="alert alert-danger">Ocorreu um erro no sistema. Tente novamente.</div>';
+            if ($e->getCode() == 23000) {
+                $mensagem = '<div class="alert alert-danger">E-mail ou CPF/CNPJ já cadastrado!</div>';
+            } else {
+                $mensagem = '<div class="alert alert-danger">Ocorreu um erro no sistema. Tente novamente.</div>';
+            }
             // É crucial registrar o erro para debug!
             error_log('Erro no cadastro: ' . $e->getMessage()); 
         }
@@ -122,9 +115,33 @@ include '../includes/navbar.php';
             </div>
             <div class="mb-3">
                 <label for="senha" class="form-label">Senha:</label>
-                <input type="password" class="form-control" name="senha" id="senha" placeholder="Crie uma senha forte"
-                    required>
+                <div class="input-group">
+                    <input type="password" class="form-control" name="senha" id="senha" placeholder="Crie uma senha forte" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="A senha deve conter no mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e um caractere especial.">
+                    <button class="btn btn-outline-secondary" type="button" id="toggleSenha">
+                        <i class="fas fa-eye" id="iconSenha"></i>
+                    </button>
+                </div>
             </div>
+            <div class="mb-3">
+                <label for="confirmar_senha" class="form-label">Confirmar Senha:</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" name="confirmar_senha" id="confirmar_senha" placeholder="Confirme sua senha" required>
+                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmarSenha">
+                        <i class="fas fa-eye" id="iconConfirmarSenha"></i>
+                    </button>
+                    <div class="invalid-feedback">As senhas não correspondem.</div>
+                </div>
+            </div>
+
+            <!-- Requisitos da Senha (Feedback Visual) -->
+            <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
+                <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
+                <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
+                <li id="uppercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra maiúscula</li>
+                <li id="number" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um número</li>
+                <li id="special" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um caractere especial (!@#$%)</li>
+            </ul>
+
             <div class="mb-3">
                 <label class="form-label">Tipo de conta:</label>
                 <div class="form-check"><input class="form-check-input" type="radio" name="tipo" id="tipoCliente"
@@ -136,34 +153,34 @@ include '../includes/navbar.php';
             </div>
 
             <div id="camposCliente">
-                <div class="mb-3"><label for="cliente_nome" class="form-label">Nome:</label><input type="text"
-                        class="form-control" name="cliente_nome" id="cliente_nome"
+                <div class="mb-3"><label for="nome" class="form-label">Nome:</label><input type="text"
+                        class="form-control" name="nome" id="nome"
                         placeholder="Digite seu nome completo"></div>
-                <div class="mb-3"><label for="cliente_sobrenome" class="form-label">Sobrenome:</label><input type="text"
-                        class="form-control" name="cliente_sobrenome" id="cliente_sobrenome"
+                <div class="mb-3"><label for="sobrenome" class="form-label">Sobrenome:</label><input type="text"
+                        class="form-control" name="sobrenome" id="sobrenome"
                         placeholder="Digite seu sobrenome"></div>
                 <div class="mb-3">
-                    <label for="cpf_cliente" class="form-label">CPF:</label>
-                    <input type="text" class="form-control" name="cpf_cliente" id="cpf_cliente" placeholder="000.000.000-00"
+                    <label for="cpf" class="form-label">CPF:</label>
+                    <input type="text" class="form-control" name="cpf" id="cpf" placeholder="000.000.000-00"
                         maxlength="14">
                     <div id="cpfError" class="text-danger mt-1" style="display: none; font-size: 0.9em;">CPF inválido.
                     </div>
                 </div>
-                <div class="mb-3"><label for="cliente_telefone" class="form-label">Telefone:</label><input type="tel"
-                        class="form-control" name="cliente_telefone" id="cliente_telefone" placeholder="(XX) XXXXX-XXXX"
+                <div class="mb-3"><label for="telefone" class="form-label">Telefone:</label><input type="tel"
+                        class="form-control" name="telefone" id="telefone" placeholder="(XX) XXXXX-XXXX"
                         maxlength="15"></div>
                 <div class="mb-3"><label for="data_nascimento" class="form-label">Data de Nascimento:</label><input
                         type="date" class="form-control" name="data_nascimento" id="data_nascimento"></div>
             </div>
 
             <div id="camposPrestador" style="display: none;">
-                <div class="mb-3"><label for="nome" class="form-label"
-                        placeholder="Dígite Seu Nome:">Nome:</label><input
-                        type="text" class="form-control" name="nome" id="nome" placeholder="Dígite Seu Nome:"></div>
-                <div class="mb-3"><label for="sobrenome" class="form-label"
-                        placeholder="Digite Seu Sobrenome">Sobrenome:</label><input
-                        type="text" class="form-control" name="sobrenome"
-                        id="sobrenome" placeholder="Digite Seu Sobrenome"></div>
+                <div class="mb-3"><label for="nome_prestador" class="form-label"
+                        placeholder="Dígite Seu Nome:">Nome/Razão Social:</label><input
+                        type="text" class="form-control" name="nome_prestador" id="nome_prestador" placeholder="Seu nome ou da empresa"></div>
+                <div class="mb-3"><label for="sobrenome_prestador" class="form-label"
+                        placeholder="Digite Seu Sobrenome">Sobrenome/Nome Fantasia:</label><input
+                        type="text" class="form-control" name="sobrenome_prestador"
+                        id="sobrenome_prestador" placeholder="Seu sobrenome ou nome fantasia"></div>
 
                 <div class="mb-3">
                     <label class="form-label">Tipo de Documento:</label>
@@ -180,15 +197,15 @@ include '../includes/navbar.php';
                 </div>
 
                 <div class="mb-3">
-                    <label for="doc_prestador" class="form-label" id="label_doc_prestador">CPF:</label>
-                    <input type="text" class="form-control" name="doc_prestador" id="doc_prestador" placeholder="000.000.000-00"
+                    <label for="cpf_prestador" class="form-label" id="label_doc_prestador">CPF:</label>
+                    <input type="text" class="form-control" name="cpf_prestador" id="cpf_prestador" placeholder="000.000.000-00"
                         maxlength="14">
                     <div id="docError" class="text-danger mt-1" style="display: none; font-size: 0.9em;">Documento inválido.
                     </div>
                 </div>
 
-                <div class="mb-3"><label for="prestador_telefone" class="form-label">Telefone:</label><input type="tel"
-                        class="form-control" name="prestador_telefone" id="prestador_telefone" placeholder="(XX) XXXXX-XXXX"
+                <div class="mb-3"><label for="telefone_prestador" class="form-label">Telefone:</label><input type="tel"
+                        class="form-control" name="telefone_prestador" id="telefone_prestador" placeholder="(XX) XXXXX-XXXX"
                         maxlength="15"></div>
                 <div class="mb-3"><label for="especialidade" class="form-label"
                         placeholder="Digite Sua Especialidade">Especialidade:</label><input type="text" class="form-control"
@@ -221,11 +238,11 @@ include '../includes/navbar.php';
         const camposCliente = document.getElementById('camposCliente');
         const camposPrestador = document.getElementById('camposPrestador');
 
-        function toggleCampos() {
+        function toggleCampos() { 
             const tipoSelecionado = document.querySelector('input[name="tipo"]:checked').value;
             camposCliente.style.display = tipoSelecionado === 'cliente' ? 'block' : 'none';
             camposPrestador.style.display = tipoSelecionado === 'prestador' ? 'block' : 'none';
-            // Garante que o campo de documento do Prestador seja configurado ao mudar
+            
             if (tipoSelecionado === 'prestador') {
                 configurarCampoDocumento();
             }
@@ -242,8 +259,8 @@ include '../includes/navbar.php';
         valor = valor.replace(/(\d)(\d{4})$/, '$1-$2');
         evento.target.value = valor;
     }
-    const inputTelefoneCliente = document.getElementById('cliente_telefone');
-    const inputTelefonePrestador = document.getElementById('prestador_telefone');
+    const inputTelefoneCliente = document.getElementById('telefone');
+    const inputTelefonePrestador = document.getElementById('telefone_prestador');
     if (inputTelefoneCliente) inputTelefoneCliente.addEventListener('keyup', mascaraTelefone);
     if (inputTelefonePrestador) inputTelefonePrestador.addEventListener('keyup', mascaraTelefone);
 
@@ -307,7 +324,7 @@ include '../includes/navbar.php';
     }
 
     // --- LÓGICA DO CAMPO DE CPF (CLIENTE) ---
-    const inputCpfCliente = document.getElementById('cpf_cliente');
+    const inputCpfCliente = document.getElementById('cpf');
     const cpfError = document.getElementById('cpfError');
     if (inputCpfCliente) {
         inputCpfCliente.addEventListener('keyup', mascaraCPF);
@@ -324,8 +341,7 @@ include '../includes/navbar.php';
 
     // --- LÓGICA DINÂMICA PARA O CAMPO CPF/CNPJ (PRESTADOR) ---
     const tipoDocRadios = document.querySelectorAll('input[name="tipo_documento_prestador"]');
-    // IDs CORRIGIDOS PARA PRESTADOR
-    const inputCpfCnpjPrestador = document.getElementById('doc_prestador');
+    const inputCpfCnpjPrestador = document.getElementById('cpf_prestador');
     const labelCpfCnpj = document.getElementById('label_doc_prestador');
     const docError = document.getElementById('docError');
 
@@ -405,6 +421,74 @@ include '../includes/navbar.php';
             }
         });
     }
+
+    // --- LÓGICA DE VALIDAÇÃO DE SENHA (FRONTEND) ---
+    const senhaInput = document.getElementById('senha');
+    const requirements = {
+        length: document.getElementById('length'),
+        lowercase: document.getElementById('lowercase'),
+        uppercase: document.getElementById('uppercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special')
+    };
+
+    function validatePassword() {
+        const value = senhaInput.value;
+
+        const updateRequirement = (req, isValid) => {
+            if (isValid) {
+                req.classList.remove('text-danger');
+                req.classList.add('text-success');
+                req.querySelector('i').className = 'fas fa-check-circle me-1';
+            } else {
+                req.classList.remove('text-success');
+                req.classList.add('text-danger');
+                req.querySelector('i').className = 'fas fa-times-circle me-1';
+            }
+        };
+
+        updateRequirement(requirements.length, value.length >= 8);
+        updateRequirement(requirements.lowercase, /[a-z]/.test(value));
+        updateRequirement(requirements.uppercase, /[A-Z]/.test(value));
+        updateRequirement(requirements.number, /\d/.test(value));
+        updateRequirement(requirements.special, /[\W_]/.test(value));
+    }
+
+    if(senhaInput) {
+        senhaInput.addEventListener('input', validatePassword);
+    }
+
+    // --- LÓGICA DE COMPARAÇÃO DE SENHAS (FRONTEND) ---
+    const confirmarSenhaInput = document.getElementById('confirmar_senha');
+
+    function checkPasswordMatch() {
+        if (senhaInput.value !== confirmarSenhaInput.value && confirmarSenhaInput.value.length > 0) {
+            confirmarSenhaInput.classList.add('is-invalid');
+        } else {
+            confirmarSenhaInput.classList.remove('is-invalid');
+        }
+    }
+
+    senhaInput.addEventListener('input', checkPasswordMatch);
+    confirmarSenhaInput.addEventListener('input', checkPasswordMatch);
+
+    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
+    function setupTogglePassword(inputId, buttonId, iconId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        const icon = document.getElementById(iconId);
+
+        if (input && button && icon) {
+            button.addEventListener('click', function() {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
+        }
+    }
+
+    setupTogglePassword('senha', 'toggleSenha', 'iconSenha');
+    setupTogglePassword('confirmar_senha', 'toggleConfirmarSenha', 'iconConfirmarSenha');
 </script>
 
 <?php

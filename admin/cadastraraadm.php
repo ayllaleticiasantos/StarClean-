@@ -4,6 +4,7 @@
 // Database connection (adjust credentials as needed)
 include('../config/config.php');
 include('../config/db.php');
+include('../includes/validation_helper.php'); // Inclui o nosso helper
 
 session_start();
 require_once '../config/db.php';
@@ -15,19 +16,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sobrenome = trim($_POST['sobrenome']);
     $email = trim($_POST['email']);
     $senha = $_POST['senha'];
-    $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
     $tipo = $_POST['tipo'];
 
-    try {
-        $pdo = obterConexaoPDO();
-        $stmt = $pdo->prepare('INSERT INTO Administrador (nome, sobrenome, email, password, tipo) VALUES (:nome, :sobrenome, :email, :password, :tipo)');
-        $stmt->execute(['nome' => $nome, 'sobrenome' => $sobrenome, 'email' => $email, 'password' => $senhaHash, 'tipo' => $tipo]);
-        $mensagem = 'Administrador cadastrado com sucesso!';
-    } catch (PDOException $e) {
-        if ($e->getCode() == 23000) { // Código de erro para violação de chave única
-            $mensagem = 'Erro: Email já cadastrado.';
-        } else {
-            $mensagem = 'Erro ao cadastrar administrador: ' . $e->getMessage();
+    // Validação da senha
+    $erros_senha = validarSenhaForte($senha); 
+
+    if (!empty($erros_senha)) {
+        $mensagem = "A senha não é forte o suficiente: <ul><li>" . implode("</li><li>", $erros_senha) . "</li></ul>";
+    } else {
+        $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+
+        try {
+            $pdo = obterConexaoPDO();
+            $stmt = $pdo->prepare('INSERT INTO Administrador (nome, sobrenome, email, password, tipo) VALUES (:nome, :sobrenome, :email, :password, :tipo)');
+            $stmt->execute(['nome' => $nome, 'sobrenome' => $sobrenome, 'email' => $email, 'password' => $senhaHash, 'tipo' => $tipo]);
+            $mensagem = 'Administrador cadastrado com sucesso!';
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) { // Código de erro para violação de chave única
+                $mensagem = 'Erro: Email já cadastrado.';
+            } else {
+                $mensagem = 'Erro ao cadastrar administrador: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -63,7 +72,7 @@ include '../includes/navbar_logged_in.php';
        </div>
 
         <?php if ($mensagem): ?>
-            <div class="alert alert-info">
+            <div class="alert <?= strpos($mensagem, 'sucesso') !== false ? 'alert-success' : 'alert-danger' ?>">
                 <?= htmlspecialchars($mensagem) ?>
             </div>
         <?php endif; ?> 
@@ -87,7 +96,20 @@ include '../includes/navbar_logged_in.php';
 
                 <div class="mb-3"> 
                     <label for="senha" class="form-label" placeholder="Digite sua senha:">Senha:</label>
-                    <input type="password" class="form-control" placeholder="Digite sua senha" name="senha" id="senha" required>
+                    <div class="input-group">
+                        <input type="password" class="form-control" placeholder="Digite sua senha" name="senha" id="senha" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="A senha deve conter no mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e um caractere especial.">
+                        <button class="btn btn-outline-secondary" type="button" id="toggleSenha"><i class="fas fa-eye" id="iconSenha"></i></button>
+                        <div id="password-feedback" class="invalid-feedback">
+                            A senha deve atender aos requisitos.
+                        </div>
+                    </div>
+                    <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
+                        <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
+                        <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
+                        <li id="uppercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra maiúscula</li>
+                        <li id="number" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um número</li>
+                        <li id="special" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um caractere especial (!@#$%)</li>
+                    </ul>
                 </div>
                 <div class="mb-3">
                     <label for="tipo" class="form-label">Tipo:</label>
@@ -105,3 +127,58 @@ include '../includes/navbar_logged_in.php';
     </div>
 </main>
 <?php include '../includes/footer.php'; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const senhaInput = document.getElementById('senha');
+    const requirements = {
+        length: document.getElementById('length'),
+        lowercase: document.getElementById('lowercase'),
+        uppercase: document.getElementById('uppercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special')
+    };
+
+    function validatePassword() {
+        const value = senhaInput.value;
+        let allValid = true;
+
+        // Função para atualizar o requisito na UI
+        const updateRequirement = (req, isValid) => {
+            if (isValid) {
+                req.classList.remove('text-danger');
+                req.classList.add('text-success');
+                req.querySelector('i').className = 'fas fa-check-circle me-1';
+            } else {
+                req.classList.remove('text-success');
+                req.classList.add('text-danger');
+                req.querySelector('i').className = 'fas fa-times-circle me-1';
+                allValid = false;
+            }
+        };
+
+        updateRequirement(requirements.length, value.length >= 8);
+        updateRequirement(requirements.lowercase, /[a-z]/.test(value));
+        updateRequirement(requirements.uppercase, /[A-Z]/.test(value));
+        updateRequirement(requirements.number, /\d/.test(value));
+        updateRequirement(requirements.special, /[\W_]/.test(value));
+    }
+
+    senhaInput.addEventListener('input', validatePassword);
+
+    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
+    const toggleButton = document.getElementById('toggleSenha');
+    const icon = document.getElementById('iconSenha');
+
+    if (toggleButton && senhaInput && icon) {
+        toggleButton.addEventListener('click', function() {
+            // Alterna o tipo do input
+            const type = senhaInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            senhaInput.setAttribute('type', type);
+            
+            // Alterna o ícone
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+    }
+});
+</script>

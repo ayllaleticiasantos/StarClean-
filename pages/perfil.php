@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../includes/validation_helper.php'; // Inclui o nosso helper
 require_once '../config/db.php';
 
 // Segurança: Se não estiver logado, redireciona para o login
@@ -53,7 +54,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nova_senha = $_POST['nova_senha'];
         $confirmar_nova_senha = $_POST['confirmar_nova_senha'];
 
-        if ($nova_senha !== $confirmar_nova_senha) {
+        $erros_senha = validarSenhaForte($nova_senha);
+
+        if (!empty($erros_senha)) {
+            $_SESSION['mensagem_erro'] = "A nova senha não é forte o suficiente: <ul><li>" . implode("</li><li>", $erros_senha) . "</li></ul>";
+        } elseif ($nova_senha !== $confirmar_nova_senha) {
             $_SESSION['mensagem_erro'] = "As novas senhas não correspondem.";
         } else {
             // Busca a senha atual no banco de dados para verificação
@@ -61,16 +66,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$id_usuario]);
             $usuario = $stmt->fetch();
 
-            if ($usuario && password_verify($senha_atual, $usuario['password'])) {
+            if (!$usuario || !password_verify($senha_atual, $usuario['password'])) {
+                $_SESSION['mensagem_erro'] = "A senha atual está incorreta.";
+            } else {
+                // Se tudo estiver correto, atualiza a senha
                 $nova_senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("UPDATE `$tabela` SET password = ? WHERE id = ?");
-                if ($stmt->execute([$nova_senha_hash, $id_usuario])) {
+                $stmt_update = $pdo->prepare("UPDATE `$tabela` SET password = ? WHERE id = ?");
+                if ($stmt_update->execute([$nova_senha_hash, $id_usuario])) {
                     $_SESSION['mensagem_sucesso'] = "Senha alterada com sucesso!";
                 } else {
-                    $_SESSION['mensagem_erro'] = "Erro ao alterar a senha.";
+                    $_SESSION['mensagem_erro'] = "Ocorreu um erro ao alterar a senha.";
                 }
-            } else {
-                $_SESSION['mensagem_erro'] = "A senha atual está incorreta.";
             }
         }
     }
@@ -150,16 +156,34 @@ include '../includes/navbar_logged_in.php';
             <form action="perfil.php" method="POST">
                 <div class="mb-3">
                     <label for="senha_atual" class="form-label">Senha Atual</label>
-                    <input type="password" class="form-control" id="senha_atual" placeholder="Digite sua senha atual" name="senha_atual" required>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="senha_atual" placeholder="Digite sua senha atual" name="senha_atual" required>
+                        <button class="btn btn-outline-secondary" type="button" id="toggleSenhaAtual"><i class="fas fa-eye" id="iconSenhaAtual"></i></button>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="nova_senha" class="form-label">Nova Senha</label>
-                    <input type="password" class="form-control" id="nova_senha" placeholder="Digite sua nova senha" name="nova_senha" required>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="nova_senha" placeholder="Digite sua nova senha" name="nova_senha" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="A senha deve conter no mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e um caractere especial.">
+                        <button class="btn btn-outline-secondary" type="button" id="toggleNovaSenha"><i class="fas fa-eye" id="iconNovaSenha"></i></button>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="confirmar_nova_senha" class="form-label">Confirmar Nova Senha</label>
-                    <input type="password" class="form-control" id="confirmar_nova_senha" placeholder="Confirme sua nova senha" name="confirmar_nova_senha" required>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="confirmar_nova_senha" placeholder="Confirme sua nova senha" name="confirmar_nova_senha" required>
+                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmarNovaSenha"><i class="fas fa-eye" id="iconConfirmarNovaSenha"></i></button>
+                    </div>
                 </div>
+
+                <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
+                    <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
+                    <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
+                    <li id="uppercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra maiúscula</li>
+                    <li id="number" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um número</li>
+                    <li id="special" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um caractere especial (!@#$%)</li>
+                </ul>
+
                 <button type="submit" name="alterar_senha" class="btn btn-primary">Alterar Senha</button>
             </form>
         </div>
@@ -168,3 +192,59 @@ include '../includes/navbar_logged_in.php';
 </main>
 
 <?php include '../includes/footer.php'; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- LÓGICA DE VALIDAÇÃO DE SENHA (FRONTEND) ---
+    const senhaInput = document.getElementById('nova_senha');
+    const requirements = {
+        length: document.getElementById('length'),
+        lowercase: document.getElementById('lowercase'),
+        uppercase: document.getElementById('uppercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special')
+    };
+
+    function validatePassword() {
+        const value = senhaInput.value;
+
+        const updateRequirement = (req, isValid) => {
+            if (isValid) {
+                req.classList.remove('text-danger');
+                req.classList.add('text-success');
+                req.querySelector('i').className = 'fas fa-check-circle me-1';
+            } else {
+                req.classList.remove('text-success');
+                req.classList.add('text-danger');
+                req.querySelector('i').className = 'fas fa-times-circle me-1';
+            }
+        };
+
+        updateRequirement(requirements.length, value.length >= 8);
+        updateRequirement(requirements.lowercase, /[a-z]/.test(value));
+        updateRequirement(requirements.uppercase, /[A-Z]/.test(value));
+        updateRequirement(requirements.number, /\d/.test(value));
+        updateRequirement(requirements.special, /[\W_]/.test(value));
+    }
+
+    senhaInput.addEventListener('input', validatePassword);
+
+    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
+    function setupTogglePassword(inputId, buttonId, iconId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        const icon = document.getElementById(iconId);
+
+        if (input && button && icon) {
+            button.addEventListener('click', function() {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
+        }
+    }
+    setupTogglePassword('senha_atual', 'toggleSenhaAtual', 'iconSenhaAtual');
+    setupTogglePassword('nova_senha', 'toggleNovaSenha', 'iconNovaSenha');
+    setupTogglePassword('confirmar_nova_senha', 'toggleConfirmarNovaSenha', 'iconConfirmarNovaSenha');
+});
+</script>
