@@ -1,4 +1,4 @@
-<footer class="text-center bg-primary text-white py-3 mt-auto bottom">
+<footer class="text-center bg-white text-dark py-3 mt-auto bottom">
     <p class="mb-0">&copy; <?= date('Y') ?> StarClean. Todos os direitos reservados.</p>
 </footer>
 

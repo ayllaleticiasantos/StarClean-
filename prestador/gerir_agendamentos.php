@@ -24,20 +24,33 @@ if (isset($_SESSION['mensagem_erro'])) {
 // Buscar apenas os agendamentos do prestador que está logado
 $id_prestador_logado = $_SESSION['usuario_id'];
 $agendamentos = [];
+$termo_busca = $_GET['q'] ?? ''; // Pega o termo de busca da URL
+
 try {
     $pdo = obterConexaoPDO();
-    // SQL CORRIGIDO: Usando as tabelas e colunas corretas (Cliente, data, hora) e buscando as coordenadas.
-    $stmt = $pdo->prepare(
-        "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, s.descricao as descricao_servico,
-                a.data, a.hora, a.status, e.logradouro, e.numero, e.bairro
-         FROM Agendamento a
-         JOIN Cliente c ON a.Cliente_id = c.id
-         JOIN Servico s ON a.Servico_id = s.id
-         JOIN Endereco e ON a.Endereco_id = e.id
-         WHERE a.Prestador_id = ?
-         ORDER BY a.data, a.hora"
-    );
-    $stmt->execute([$id_prestador_logado]);
+    $params = [$id_prestador_logado];
+
+    $sql = "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, s.descricao as descricao_servico,
+                   a.data, a.hora, a.status, e.logradouro, e.numero, e.bairro
+            FROM Agendamento a
+            JOIN Cliente c ON a.Cliente_id = c.id
+            JOIN Servico s ON a.Servico_id = s.id
+            JOIN Endereco e ON a.Endereco_id = e.id
+            WHERE a.Prestador_id = ?";
+
+    // Adiciona o filtro se um termo de busca for fornecido
+    if (!empty($termo_busca)) {
+        $sql .= " AND (c.nome LIKE ? OR s.titulo LIKE ? OR a.status LIKE ?)";
+        $like_term = "%" . $termo_busca . "%";
+        $params[] = $like_term;
+        $params[] = $like_term;
+        $params[] = $like_term;
+    }
+
+    $sql .= " ORDER BY a.data, a.hora";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Erro ao buscar os agendamentos: " . $e->getMessage());
@@ -66,9 +79,16 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Meus Agendamentos</h1>
+            <form method="GET" action="gerir_agendamentos.php" class="d-flex">
+                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por cliente, serviço, status..." value="<?= htmlspecialchars($termo_busca) ?>">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                <?php if (!empty($termo_busca)): ?>
+                    <a href="gerir_agendamentos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
+                <?php endif; ?>
+            </form>
         </div>
 
         <?= $mensagem_sucesso ?>
@@ -93,7 +113,11 @@ include '../includes/navbar_logged_in.php';
                         <tbody>
                             <?php if (empty($agendamentos)): ?>
                                 <tr>
-                                    <td colspan="8" class="text-center">Nenhum agendamento encontrado.</td>
+                                    <?php if (!empty($termo_busca)): ?>
+                                        <td colspan="8" class="text-center">Nenhum agendamento encontrado para "<?= htmlspecialchars($termo_busca) ?>".</td>
+                                    <?php else: ?>
+                                        <td colspan="8" class="text-center">Nenhum agendamento encontrado.</td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($agendamentos as $agendamento):
@@ -130,17 +154,21 @@ include '../includes/navbar_logged_in.php';
                                                 class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>
                                         </td>
                                         <td>
-                                            <?php if ($status === 'pendente'): ?>
-                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito"
-                                                    class="btn btn-sm btn-success">Aceitar</a>
-                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado"
-                                                    class="btn btn-sm btn-danger">Recusar</a>
-                                            <?php elseif ($status === 'aceito'): ?>
-                                                <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado"
-                                                    class="btn btn-sm btn-primary">Concluído</a>
-                                            <?php endif; ?>
-                                            <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>"
-                                                class="btn btn-sm btn-info">Visualizar</a>
+                                            <div class="d-flex gap-1" role="group" aria-label="Ações do Agendamento">
+                                                <?php if ($status === 'pendente'): ?>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito"
+                                                        class="btn btn-sm btn-success">Aceitar</a>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado"
+                                                        class="btn btn-sm btn-danger">Recusar</a>
+                                                <?php elseif ($status === 'aceito'): ?>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado"
+                                                        class="btn btn-sm btn-primary">Marcar como Concluído</a>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado"
+                                                        class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem certeza que deseja cancelar este agendamento? O cliente será notificado.');">Cancelar</a>
+                                                <?php endif; ?>
+                                                <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>"
+                                                    class="btn btn-sm btn-info">Visualizar</a>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

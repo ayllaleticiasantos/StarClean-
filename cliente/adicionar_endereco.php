@@ -136,7 +136,7 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
         <h1 class="mb-4">Adicionar Endereço</h1>
         <hr>
 

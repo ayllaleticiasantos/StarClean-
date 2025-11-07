@@ -115,22 +115,22 @@ include '../includes/navbar_logged_in.php';
                     </div>
 
                     <div class="mb-3">
-                        <label for="titulo" class="form-label" placeholder="Titulo do Serviço">Título do Serviço</label>
-                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                        <label for="titulo" class="form-label">Título do Serviço</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required placeholder="Ex: Limpeza de que tipo...">
                     </div>
                     
                     <div class="mb-3">
-                        <label for="descricao" class="form-label" placeholder="Descrição do Serviço">Descrição</label>
-                        <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="descricao" name="descricao" rows="3" placeholder="Descreva os detalhes do serviço, o que está incluso, etc."></textarea>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="preco" class="form-label" placeholder="Digite o preço do Serviço">Preço (R$)</label>
-                        <input type="number" class="form-control" id="preco" name="preco" step="0.01" min="0" required placeholder="Ex: 50.00">
+                        <label for="preco" class="form-label">Preço (R$)</label>
+                        <input type="text" class="form-control" id="preco" name="preco" required placeholder="Ex: R$ 50,00">
                     </div>
 
                     <button type="submit" class="btn btn-primary">Salvar Serviço</button>
-                    <a href="gerir_servicos.php" class="btn btn-info">Ver Todos os Serviços</a>
+                    <a href="gerir_servicos.php" class="btn btn-info">Gerir Serviços</a>
 
                 </form>
             </div>
@@ -139,5 +139,26 @@ include '../includes/navbar_logged_in.php';
 </main>
 
 <?php 
-include '../includes/footer.php'; 
+include '../includes/footer.php';
 ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const precoInput = document.getElementById('preco');
+
+    // Função para formatar o valor como moeda brasileira
+    function formatarMoeda(e) {
+        // Remove todos os caracteres que não são dígitos
+        let valor = e.target.value.replace(/\D/g, '');
+
+        // Converte para número e divide por 100 para obter os centavos
+        valor = (parseFloat(valor) / 100).toFixed(2);
+
+        // Formata usando as regras do Brasil (R$, vírgula para centavos, ponto para milhares)
+        e.target.value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    }
+
+    // Adiciona o evento 'input' para formatar enquanto o usuário digita
+    precoInput.addEventListener('input', formatarMoeda);
+});
+</script>

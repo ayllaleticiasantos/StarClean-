@@ -31,6 +31,9 @@ $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_pagina_inicial.php"><i class="fas fa-home fa-fw me-2"></i>Gerir Página Inicial</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/relatorios.php"><i class="fas fa-chart-pie fa-fw me-2"></i>Relatórios</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/visualizar_logs.php"><i class="fas fa-history fa-fw me-2"></i>Logs de Atividades</a>
         </li>
 
@@ -47,6 +50,12 @@ $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
         </li>
         <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/prestador/gerir_disponibilidade.php"><i class="fas fa-calendar-times fa-fw me-2"></i>Minha Disponibilidade</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/prestador/meu_financeiro.php"><i class="fas fa-dollar-sign fa-fw me-2"></i>Meu Financeiro</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/pages/configuracoes.php"><i class="fas fa-cog fa-fw me-2"></i>Configurações</a>
         </li>
 
     <?php // Menu para Cliente ?>

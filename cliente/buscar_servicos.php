@@ -8,22 +8,34 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
     exit();
 }
 
-// Buscar todos os serviços ativos no banco de dados
+// --- LÓGICA DE BUSCA E FILTRO ---
 $servicos = [];
+$termo_busca = $_GET['q'] ?? ''; // Pega o termo da URL
+$mensagem_erro = '';
+
 try {
     $pdo = obterConexaoPDO();
-    // Consulta corrigida para buscar todos os serviços e os seus prestadores
-    $stmt = $pdo->prepare(
-        "SELECT s.id, s.titulo, s.descricao, s.preco, p.nome AS nome_prestador
-         FROM Servico s
-         JOIN Prestador p ON s.prestador_id = p.id
-         ORDER BY s.titulo"
-    );
-    $stmt->execute();
+    $params = [];
+
+    $sql = "SELECT s.id, s.titulo, s.descricao, s.preco, p.nome AS nome_prestador
+            FROM Servico s
+            JOIN Prestador p ON s.prestador_id = p.id";
+
+    // Se houver um termo de busca, adiciona o filtro
+    if (!empty($termo_busca)) {
+        $sql .= " WHERE s.titulo LIKE ? OR s.descricao LIKE ? OR p.nome LIKE ?";
+        $like_term = "%" . $termo_busca . "%";
+        $params = [$like_term, $like_term, $like_term];
+    }
+
+    $sql .= " ORDER BY s.titulo";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // Em caso de erro, termina a execução e exibe uma mensagem amigável
-    die("Erro ao buscar os serviços: " . $e->getMessage());
+    $mensagem_erro = "Erro ao buscar os serviços: " . $e->getMessage();
+    error_log($mensagem_erro);
 }
 
 include '../includes/header.php';
@@ -47,14 +59,25 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
         <h1 class="mb-4">Buscar Serviços</h1>
+
+        <!-- Formulário de Filtro -->
+        <div class="mb-4">
+            <form action="buscar_servicos.php" method="GET" class="d-flex">
+                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por serviço ou prestador..." value="<?= htmlspecialchars($termo_busca) ?>">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                <?php if (!empty($termo_busca)): ?>
+                    <a href="buscar_servicos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
+                <?php endif; ?>
+            </form>
+        </div>
         
         <div class="row">
             <?php if (empty($servicos)): ?>
                 <div class="col-12">
                     <div class="alert alert-info" role="alert">
-                        Nenhum serviço disponível no momento.
+                        Nenhum serviço encontrado para "<?= htmlspecialchars($termo_busca) ?>". Tente uma busca diferente ou limpe o filtro.
                     </div>
                 </div>
             <?php else: ?>

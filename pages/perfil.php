@@ -107,7 +107,7 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-<div class="container-fluid m-3">
+<div class="container-fluid p-4 flex-grow-1">
     
     <h1>Meu Perfil</h1>
     <hr>

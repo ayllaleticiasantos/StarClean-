@@ -69,57 +69,75 @@ include '../includes/navbar_logged_in.php';
 
         <div class="row mt-4">
             <!-- Cards de Ação -->
-            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-primary">
-                    <div class="card-body text-center"><i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-users fa-3x text-primary mb-3"></i>
                         <h5 class="card-title">Gerir Utilizadores</h5>
-                        <p class="card-text">Gerir clientes e prestadores de serviço.</p><a
-                            href="gerir_utilizadores.php" class="btn btn-primary">Acessar</a>
+                        <p class="card-text">Gerir clientes e prestadores de serviço.</p>
+                        <a href="gerir_utilizadores.php" class="btn btn-primary mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-success">
-                    <div class="card-body text-center"><i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
                         <h5 class="card-title">Gerir Agendamentos</h5>
-                        <p class="card-text">Ver e gerir todos os agendamentos.</p><a href="gerir_agendamentos.php"
-                            class="btn btn-success">Acessar</a>
+                        <p class="card-text">Ver e gerir todos os agendamentos.</p>
+                        <a href="gerir_agendamentos.php" class="btn btn-success mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>
-             <div class="col-12 col-sm-6 col-lg-3 mb-4">
+             <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-warning">
-                    <div class="card-body text-center"><i class="fas fa-briefcase fa-3x text-warning mb-3"></i>
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-briefcase fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">Gerir Serviços</h5>
-                        <p class="card-text">Adicionar, editar e remover serviços.</p><a href="gerir_servicos.php"
-                            class="btn btn-warning">Acessar</a>
+                        <p class="card-text">Editar, remover e visualizar todos os serviços.</p>
+                        <a href="gerir_servicos.php" class="btn btn-warning mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-3 mb-4">
-                <div class="card h-100 shadow-sm border-danger">
-                    <div class="card-body text-center"><i class="fas fa-chart-pie fa-3x text-danger mb-3"></i>
-                        <h5 class="card-title">Relatórios</h5>
-                        <p class="card-text">Visualize relatórios financeiros e de serviços.</p><a href="relatorios.php"
-                            class="btn btn-danger">Acessar</a>
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-dark">
+                    <div class="card-body text-center d-flex flex-column"><i class="fas bi bi-plus-square-fill fa-3x text-dark mb-3"></i>
+                        <h5 class="card-title">Cadastrar Serviço</h5>
+                        <p class="card-text">Adicionar um novo serviço e atribuir a um prestador.</p>
+                        <a href="adicionar_servico.php" class="btn btn-dark mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-info">
-                    <div class="card-body text-center"><i class="fas fa-user-shield fa-3x text-info mb-3"></i>
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-user-shield fa-3x text-info mb-3"></i>
                         <h5 class="card-title">Gerir Administradores</h5>
-                        <p class="card-text">Adicionar e gerir contas de admin.</p><a href="gerenciar_adm.php"
-                            class="btn btn-info">Acessar</a>
+                        <p class="card-text">Adicionar e gerir contas de admin.</p>
+                        <a href="gerenciar_adm.php" class="btn btn-info mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-secondary">
-                    <div class="card-body text-center"><i class="fas fa-desktop fa-3x text-secondary mb-3"></i>
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-desktop fa-3x text-secondary mb-3"></i>
                         <h5 class="card-title">Gerenciar Site</h5>
-                        <p class="card-text">Visualize e gerencie o conteúdo do site.</p><a href="gerir_pagina_inicial.php"
-                            class="btn btn-secondary">Acessar</a>
+                        <p class="card-text">Gerencie o conteúdo da página inicial.</p>
+                        <a href="gerir_pagina_inicial.php" class="btn btn-secondary mt-auto">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-danger">
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-chart-pie fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Relatórios</h5>
+                        <p class="card-text">Visualize relatórios financeiros e de serviços.</p>
+                        <a href="relatorios.php" class="btn btn-danger mt-auto">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-light">
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-history fa-3x text-dark mb-3"></i>
+                        <h5 class="card-title">Logs de Atividades</h5>
+                        <p class="card-text">Monitore as ações realizadas pelos administradores.</p>
+                        <a href="visualizar_logs.php" class="btn btn-light mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>

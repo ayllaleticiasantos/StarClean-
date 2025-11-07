@@ -32,7 +32,7 @@ $agendamentos = [];
 try {
     $pdo = obterConexaoPDO();
     $stmt = $pdo->prepare(
-        "SELECT a.id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome AS nome_prestador, s.descricao AS descricao_servico
+        "SELECT a.id, s.id AS servico_id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome AS nome_prestador, s.descricao AS descricao_servico
          FROM Agendamento a
          JOIN Servico s ON a.Servico_id = s.id
          JOIN Prestador p ON a.Prestador_id = p.id
@@ -68,7 +68,7 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
         <h1 class="mb-4">Meus Agendamentos</h1>
         
         <?= $mensagem_sucesso ?>
@@ -103,16 +103,28 @@ include '../includes/navbar_logged_in.php';
                                         <td><?= htmlspecialchars($agendamento['nome_prestador']) ?></td>
                                         <td><?= date('d/m/Y', strtotime($agendamento['data'])) ?></td>
                                         <td><?= htmlspecialchars($agendamento['hora']) ?></td>
-                                        <td><span class="badge bg-secondary"><?= htmlspecialchars($agendamento['status']) ?></span></td>
                                         <td>
-                                            <a href="cancelar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-danger">Cancelar</a>
-                                            <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-info">Visualizar</a>
-                                            <a href="editar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-warning">Editar</a>
-                                            
-                                            <?php 
-                                            // CORREÇÃO APLICADA AQUI: Botão de avaliação
-                                            if ($agendamento['status'] === 'realizado'): ?>
-                                                <a href="avaliar_servico.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-success mt-1">Avaliar</a>
+                                            <?php
+                                                $status = $agendamento['status'];
+                                                $badge_class = 'bg-secondary';
+                                                if ($status === 'pendente') $badge_class = 'bg-warning text-dark';
+                                                elseif ($status === 'aceito') $badge_class = 'bg-success';
+                                                elseif ($status === 'realizado') $badge_class = 'bg-primary';
+                                                elseif ($status === 'cancelado') $badge_class = 'bg-danger';
+                                            ?>
+                                            <span class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($status)) ?></span>
+                                        </td>
+                                        <td class="d-flex gap-1">
+                                            <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-info" title="Visualizar Detalhes"><i class="fas fa-eye"></i></a>
+                                            <?php if ($status === 'pendente' || $status === 'aceito'): ?>
+                                                <a href="editar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-warning" title="Editar Data/Hora"><i class="fas fa-edit"></i></a>
+                                                <a href="cancelar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-danger" title="Cancelar Agendamento" onclick="return confirm('Tem certeza que deseja cancelar este agendamento?');"><i class="fas fa-times"></i></a>
+                                            <?php elseif ($status === 'realizado'): ?>
+                                                <a href="avaliar_servico.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-success" title="Avaliar Serviço"><i class="fas fa-star"></i></a>
+                                            <?php elseif ($status === 'cancelado'): ?>
+                                                <a href="agendar.php?servico_id=<?= $agendamento['servico_id'] ?>" class="btn btn-sm btn-primary" title="Remarcar Serviço">
+                                                    <i class="fas fa-redo"></i> Remarcar
+                                                </a>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

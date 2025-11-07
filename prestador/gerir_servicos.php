@@ -24,13 +24,28 @@ if (isset($_SESSION['mensagem_erro'])) {
 // Buscar apenas os serviços do prestador que está logado
 $id_prestador_logado = $_SESSION['usuario_id'];
 $servicos = [];
+$termo_busca = $_GET['q'] ?? '';
+
 try {
     $pdo = obterConexaoPDO();
-    $stmt = $pdo->prepare("SELECT * FROM Servico WHERE prestador_id = ? ORDER BY id DESC");
-    $stmt->execute([$id_prestador_logado]);
+    $params = [$id_prestador_logado];
+
+    $sql = "SELECT * FROM Servico WHERE prestador_id = ?";
+
+    // Adiciona o filtro se um termo de busca for fornecido
+    if (!empty($termo_busca)) {
+        $sql .= " AND (titulo LIKE ? OR descricao LIKE ?)";
+        $like_term = "%" . $termo_busca . "%";
+        $params[] = $like_term;
+        $params[] = $like_term;
+    }
+
+    $sql .= " ORDER BY id DESC";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $servicos = $stmt->fetchAll();
 } catch (PDOException $e) {
-    die("Erro ao buscar os serviços: " . $e->getMessage());
+    $mensagem_erro = "Erro ao buscar os serviços: " . $e->getMessage();
 }
 
 include '../includes/header.php';
@@ -54,10 +69,17 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
+    <div class="container-fluid p-4 flex-grow-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Meus Serviços</h1>
-            </div>
+            <form method="GET" action="gerir_servicos.php" class="d-flex">
+                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por título ou descrição..." value="<?= htmlspecialchars($termo_busca) ?>">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                <?php if (!empty($termo_busca)): ?>
+                    <a href="gerir_servicos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
+                <?php endif; ?>
+            </form>
+        </div>
         
         <?= $mensagem_sucesso ?>
         <?= $mensagem_erro ?>
@@ -76,7 +98,11 @@ include '../includes/navbar_logged_in.php';
                         <tbody>
                             <?php if (empty($servicos)): ?>
                                 <tr>
-                                    <td colspan="3" class="text-center">Nenhum serviço cadastrado.</td>
+                                    <?php if (!empty($termo_busca)): ?>
+                                        <td colspan="3" class="text-center">Nenhum serviço encontrado para "<?= htmlspecialchars($termo_busca) ?>".</td>
+                                    <?php else: ?>
+                                        <td colspan="3" class="text-center">Nenhum serviço cadastrado.</td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($servicos as $servico): ?>

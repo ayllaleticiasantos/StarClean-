@@ -59,12 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico_atual) {
     // Coleta os dados do formulário
     $titulo = trim($_POST['titulo']);
     $descricao = trim($_POST['descricao']);
-    $preco = $_POST['preco'];
+    $preco_formatado = $_POST['preco'];
     $prestador_id_novo = $_POST['prestador_id'] ?? null; 
+
+    // --- LÓGICA PARA LIMPAR A MÁSCARA DE MOEDA ---
+    // Remove "R$", espaços em branco e o separador de milhar (.)
+    $preco_limpo = preg_replace('/[R$\s\.]/', '', $preco_formatado);
+    // Substitui a vírgula decimal por um ponto decimal
+    $preco = str_replace(',', '.', $preco_limpo);
 
     // Validação
     if (empty($titulo) || empty($preco) || empty($prestador_id_novo)) {
-        $_SESSION['mensagem_erro'] = "O título, o preço e o prestador são obrigatórios.";
+        $_SESSION['mensagem_erro'] = "O título, o preço e o prestador são obrigatórios. Certifique-se de que o preço é um valor válido.";
     } else {
         try {
             $pdo = obterConexaoPDO();
@@ -150,7 +156,7 @@ include '../includes/navbar_logged_in.php';
                         
                         <div class="mb-3">
                             <label for="preco" class="form-label">Preço (R$)</label>
-                            <input type="number" class="form-control" id="preco" name="preco" step="0.01" min="0" value="<?= htmlspecialchars($servico_atual['preco']) ?>" required>
+                            <input type="text" class="form-control" id="preco" name="preco" value="R$ <?= number_format($servico_atual['preco'], 2, ',', '.') ?>" required placeholder="Ex: R$ 50,00">
                         </div>
 
                         <button type="submit" class="btn btn-warning">Salvar Alterações</button>
@@ -167,3 +173,25 @@ include '../includes/navbar_logged_in.php';
 <?php 
 include '../includes/footer.php'; 
 ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const precoInput = document.getElementById('preco');
+
+    // Função para formatar o valor como moeda brasileira
+    function formatarMoeda(e) {
+        // Remove todos os caracteres que não são dígitos
+        let valor = e.target.value.replace(/\D/g, '');
+
+        // Converte para número e divide por 100 para obter os centavos
+        valor = (parseFloat(valor) / 100).toFixed(2);
+
+        // Formata usando as regras do Brasil (R$, vírgula para centavos, ponto para milhares)
+        // Se o valor for inválido (NaN), retorna uma string vazia
+        e.target.value = isNaN(valor) ? '' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    }
+
+    // Adiciona o evento 'input' para formatar enquanto o usuário digita
+    precoInput.addEventListener('input', formatarMoeda);
+});
+</script>

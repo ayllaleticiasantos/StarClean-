@@ -57,7 +57,7 @@ include '../includes/navbar_logged_in.php';
 
         <?php if (!empty($notificacoes)): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <h4 class="alert-heading">Novos Agendamentos Aceites!</h4>
+                <h4 class="alert-heading">Novos Agendamentos Aceitos!</h4>
                 <p>O prestador <strong><?= htmlspecialchars($notificacoes[0]['nome_prestador']) ?></strong> aceitou o seu agendamento para <strong><?= htmlspecialchars($notificacoes[0]['titulo_servico']) ?></strong> no dia <strong><?= date('d/m/Y', strtotime($notificacoes[0]['data'])) ?></strong> às <strong><?= htmlspecialchars(substr($notificacoes[0]['hora'], 0, 5)) ?></strong>.</p>
                 <hr>
                 <p class="mb-0">Pode ver todos os seus agendamentos na página "Meus Agendamentos".</p>
@@ -65,41 +65,51 @@ include '../includes/navbar_logged_in.php';
             </div>
         <?php endif; ?>
 
-        <div class="row">
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
+        <div class="row mt-4">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm border-primary">
                     <div class="card-body text-center d-flex flex-column">
                         <i class="fas fa-search fa-3x text-primary mb-3"></i>
                         <h5 class="card-title">Buscar Serviços</h5>
                         <p class="card-text">Encontre os melhores prestadores para o que você precisa.</p>
-                        <a href="buscar_servicos.php" class="btn btn-primary mt-auto">
-                            Buscar Agora
-                        </a>
+                        <a href="buscar_servicos.php" class="btn btn-primary mt-auto">Buscar Agora</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm border-success">
                     <div class="card-body text-center d-flex flex-column">
                         <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
                         <h5 class="card-title">Meus Agendamentos</h5>
                         <p class="card-text">Veja o histórico e os seus próximos serviços agendados.</p>
-                        <a href="meus_agendamentos.php" class="btn btn-success mt-auto">Ver Agendamentos</a>
+                        <a href="meus_agendamentos.php" class="btn btn-success mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm border-danger">
+                    <div class="card-body text-center d-flex flex-column">
+                        <i class="fas fa-map-marker-alt fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Gerir Endereços</h5>
+                        <p class="card-text">Adicione ou edite seus endereços para os serviços.</p>
+                        <a href="gerir_enderecos.php" class="btn btn-danger mt-auto">Acessar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm border-warning">
                     <div class="card-body text-center d-flex flex-column">
                         <i class="fas fa-user-edit fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">Meu Perfil</h5>
                         <p class="card-text">Mantenha seus dados de contato e de acesso atualizados.</p>
-                        <a href="../pages/perfil.php" class="btn btn-warning mt-auto">Editar Perfil</a>
+                        <a href="../pages/perfil.php" class="btn btn-warning mt-auto">Acessar</a>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </main>

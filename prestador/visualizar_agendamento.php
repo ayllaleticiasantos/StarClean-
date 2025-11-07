@@ -75,10 +75,7 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="container-fluid p-4">
-        <h1 class="mb-4">Detalhes do Agendamento</h1>
-        <hr>
-
+    <div class="container-fluid p-4 flex-grow-1">
         <a href="gerir_agendamentos.php" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Voltar para a Lista</a>
 
         <div class="card shadow-sm mb-4">
