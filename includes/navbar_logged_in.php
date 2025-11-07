@@ -22,7 +22,14 @@ if (isset($_SESSION['usuario_id'])) {
         } elseif ($tipo_usuario === 'cliente') {
             $link_destino = BASE_URL . '/cliente/meus_agendamentos.php';
             // --- MODIFICADO: Busca apenas notificações não lidas ---
-            $stmt = $pdo->prepare("SELECT a.data as data, p.nome AS nome_prestador, s.titulo AS titulo_servico FROM Agendamento a JOIN Prestador p ON a.Prestador_id = p.id JOIN Servico s ON a.Servico_id = s.id WHERE a.Cliente_id = ? AND a.status = 'aceito' AND a.notificacao_cliente_lida = FALSE ORDER BY a.data DESC LIMIT 5");
+            $stmt = $pdo->prepare(
+                "SELECT a.data, a.status, p.nome AS nome_prestador, s.titulo AS titulo_servico 
+                 FROM Agendamento a 
+                 JOIN Prestador p ON a.Prestador_id = p.id 
+                 JOIN Servico s ON a.Servico_id = s.id 
+                 WHERE a.Cliente_id = ? AND a.status IN ('aceito', 'cancelado') AND a.notificacao_cliente_lida = FALSE 
+                 ORDER BY a.data DESC LIMIT 5"
+            );
             $stmt->execute([$id_usuario]);
             $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($tipo_usuario === 'admin') {
@@ -74,9 +81,12 @@ if (isset($_SESSION['usuario_id'])) {
                                     <?php if ($tipo_usuario === 'prestador'): ?>
                                         <b>Novo agendamento!</b><br>
                                         <?= htmlspecialchars($notification['nome_cliente']) ?> agendou um serviço.
-                                    <?php elseif ($tipo_usuario === 'cliente'): ?>
+                                    <?php elseif ($tipo_usuario === 'cliente' && $notification['status'] === 'aceito'): ?>
                                         <b>Agendamento Aceito!</b><br>
                                         Seu serviço com <?= htmlspecialchars($notification['nome_prestador']) ?> foi aceito.
+                                    <?php elseif ($tipo_usuario === 'cliente' && $notification['status'] === 'cancelado'): ?>
+                                        <b class="text-danger">Agendamento Cancelado</b><br>
+                                        O serviço com <?= htmlspecialchars($notification['nome_prestador']) ?> foi cancelado. Clique para reagendar.
                                     <?php elseif ($tipo_usuario === 'admin'): ?>
                                         <b>Serviço Concluído!</b><br>
                                         "<?= htmlspecialchars($notification['titulo']) ?>" por <?= htmlspecialchars($notification['nome_prestador']) ?>.

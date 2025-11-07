@@ -154,6 +154,7 @@ include '../includes/navbar_logged_in.php';
                                                 class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>
                                         </td>
                                         <td>
+                                            <div class="btn-group" role="group" aria-label="Ações do Agendamento">
                                             <div class="d-flex gap-1" role="group" aria-label="Ações do Agendamento">
                                                 <?php if ($status === 'pendente'): ?>
                                                     <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito"
@@ -162,9 +163,9 @@ include '../includes/navbar_logged_in.php';
                                                         class="btn btn-sm btn-danger">Recusar</a>
                                                 <?php elseif ($status === 'aceito'): ?>
                                                     <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado"
-                                                        class="btn btn-sm btn-primary">Marcar como Concluído</a>
+                                                        class="btn btn-sm btn-primary">Concluído?</a>
                                                     <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado"
-                                                        class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem certeza que deseja cancelar este agendamento? O cliente será notificado.');">Cancelar</a>
+                                                        class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja cancelar este agendamento? O cliente será notificado.');">Cancelar</a>
                                                 <?php endif; ?>
                                                 <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>"
                                                     class="btn btn-sm btn-info">Visualizar</a>

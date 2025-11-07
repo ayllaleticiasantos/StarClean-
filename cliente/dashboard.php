@@ -9,22 +9,36 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
 }
 
 $id_cliente = $_SESSION['usuario_id'];
-$notificacoes = [];
+$notificacoes_aceitas = [];
+$notificacoes_canceladas = [];
 
 try {
     $pdo = obterConexaoPDO();
-    $stmt = $pdo->prepare(
-        // CORREÇÃO FINAL: Usando nomes de coluna simples (data e hora)
-        "SELECT a.id, p.nome AS nome_prestador, s.titulo AS titulo_servico, a.data, a.hora, a.status
+
+    // Busca agendamentos ACEITOS não lidos
+    $stmt_aceitos = $pdo->prepare(
+        "SELECT a.id, p.nome AS nome_prestador, s.titulo AS titulo_servico, a.data, a.hora
          FROM Agendamento a
          JOIN Prestador p ON a.Prestador_id = p.id
          JOIN Servico s ON a.Servico_id = s.id
-         WHERE a.Cliente_id = ? AND a.status = 'aceito'
-         ORDER BY a.data DESC, a.hora DESC
-         LIMIT 5"
+         WHERE a.Cliente_id = ? AND a.status = 'aceito' AND a.notificacao_cliente_lida = FALSE
+         ORDER BY a.data DESC, a.hora DESC LIMIT 5"
     );
-    $stmt->execute([$id_cliente]);
-    $notificacoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt_aceitos->execute([$id_cliente]);
+    $notificacoes_aceitas = $stmt_aceitos->fetchAll(PDO::FETCH_ASSOC);
+
+    // Busca agendamentos CANCELADOS não lidos
+    $stmt_cancelados = $pdo->prepare(
+        "SELECT a.id, p.nome AS nome_prestador, s.titulo AS titulo_servico, a.data, a.hora
+         FROM Agendamento a
+         JOIN Prestador p ON a.Prestador_id = p.id
+         JOIN Servico s ON a.Servico_id = s.id
+         WHERE a.Cliente_id = ? AND a.status = 'cancelado' AND a.notificacao_cliente_lida = FALSE
+         ORDER BY a.data DESC, a.hora DESC LIMIT 5"
+    );
+    $stmt_cancelados->execute([$id_cliente]);
+    $notificacoes_canceladas = $stmt_cancelados->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     error_log("Erro ao buscar notificações do cliente: " . $e->getMessage());
 }
@@ -55,15 +69,25 @@ include '../includes/navbar_logged_in.php';
         <h3>Bem-vindo(a), <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!</h3>
         <hr>
 
-        <?php if (!empty($notificacoes)): ?>
+        <?php foreach ($notificacoes_canceladas as $notificacao): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading">Agendamento Cancelado!</h4>
+                <p>O prestador <strong><?= htmlspecialchars($notificacao['nome_prestador']) ?></strong> cancelou o serviço "<strong><?= htmlspecialchars($notificacao['titulo_servico']) ?></strong>" que estava agendado para o dia <strong><?= date('d/m/Y', strtotime($notificacao['data'])) ?></strong>.</p>
+                <hr>
+                <p class="mb-0">Você pode ir para a página <a href="meus_agendamentos.php" class="alert-link">Meus Agendamentos</a> para remarcar o serviço.</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endforeach; ?>
+
+        <?php foreach ($notificacoes_aceitas as $notificacao): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <h4 class="alert-heading">Novos Agendamentos Aceitos!</h4>
-                <p>O prestador <strong><?= htmlspecialchars($notificacoes[0]['nome_prestador']) ?></strong> aceitou o seu agendamento para <strong><?= htmlspecialchars($notificacoes[0]['titulo_servico']) ?></strong> no dia <strong><?= date('d/m/Y', strtotime($notificacoes[0]['data'])) ?></strong> às <strong><?= htmlspecialchars(substr($notificacoes[0]['hora'], 0, 5)) ?></strong>.</p>
+                <p>O prestador <strong><?= htmlspecialchars($notificacao['nome_prestador']) ?></strong> aceitou o seu agendamento para <strong><?= htmlspecialchars($notificacao['titulo_servico']) ?></strong> no dia <strong><?= date('d/m/Y', strtotime($notificacao['data'])) ?></strong> às <strong><?= htmlspecialchars(substr($notificacao['hora'], 0, 5)) ?></strong>.</p>
                 <hr>
                 <p class="mb-0">Pode ver todos os seus agendamentos na página "Meus Agendamentos".</p>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        <?php endif; ?>
+        <?php endforeach; ?>
 
         <div class="row mt-4">
             <div class="col-12 col-sm-6 col-lg-3 mb-4">
