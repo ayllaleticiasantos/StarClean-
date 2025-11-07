@@ -58,6 +58,68 @@ try {
     </div>
 </div>
 
+<div class="container my-5">
+    <h2 class="text-center mb-4">Limpeza Completa e Personalizada</h2>
+    <p class="text-center lead mb-4">
+        Oferecemos serviços abrangentes de limpeza para empresas, condomínios e residências. 
+        Trabalhamos com combos ou planos personalizados para atender sua necessidade.
+    </p>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Nossos Serviços Incluem:</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Limpeza de chão e remoção de pó dos móveis </li>
+                    <li class="list-group-item">Aspiração de tapetes e sofás </li>
+                    <li class="list-group-item">Limpeza de banheiros </li>
+                    <li class="list-group-item">Lavagem de portas e janelas </li>
+                    <li class="list-group-item">Serviço de passadeira </li>
+                    <li class="list-group-item">Encerar chão </li>
+                    <li class="list-group-item">Lavar geladeira e micro-ondas </li>
+                    <li class="list-group-item">Limpar parede de gordura </li>
+                    <li class="list-group-item">Limpar lustres </li>
+                    <li class="list-group-item">Separar lixo de reciclagem </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid bg-light py-5" id="diferenciais">
+    <div class="container">
+        <h2 class="text-center mb-4">Por que escolher a Star Clean?</h2>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 text-center shadow-sm card2">
+                    <div class="card-body">
+                        <h5 class="card-title">Equipe Qualificada</h5>
+                        <p class="card-text">Nossos Prestadores de Serviços são capacitados e recebem cursos semestrais para garantir um serviço de excelência.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 text-center shadow-sm card2">
+                    <div class="card-body">
+                        <h5 class="card-title">Garantia de Qualidade</h5>
+                        <p class="card-text">Nosso diferencial! Após o serviço, <strong>é feita uma vistoria do trabalho prestado</strong> para garantir sua total satisfação.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 text-center shadow-sm card2">
+                    <div class="card-body">
+                        <h5 class="card-title">Preços e Mimos</h5>
+                        <p class="card-text">Oferecemos preços justos, <strong>5% de desconto na primeira compra</strong> e fragrâncias exclusivas para clientes fiéis.<br></p>
+                        <p class="card-text"><a href="login.php">Faça seu login!</a> <br><a href="cadastro.php">Ainda não tem conta? Cadastre-se.</a></p>
+                    </div>
+                </div>
+            </div>
+        </div><
+    </div>
+</div>
 
 <div class="container my-5">
     <div class="row">
@@ -83,5 +145,74 @@ try {
         <?php endif; ?>
     </div>
 </div>
+
+<div class="container my-5" id="processo">
+    <h2 class="text-center mb-4">Nosso Processo Simplificado</h2>
+    <div class="row">
+        <div class="col-m-3 text-center m-3 bg-dark text-white">
+            <div class="p-3 border rounded shadow-sm">
+                <strong>1. Contato</strong>
+                <p class="small mb-0">Via site da StarClean</p>
+            </div>
+        </div>
+        <div class="col-m-3 text-center m-3 bg-dark text-white">
+            <div class="p-3 border rounded shadow-sm">
+                <strong>2. Se cadastre</strong>
+                <p class="small mb-0">Crie uma conta para acessar nossos serviços.</p>
+            </div>
+        </div>
+        <div class="col-m-3 text-center m-3 bg-dark text-white">
+            <div class="p-3 border rounded shadow-sm">
+                <strong>3. Agendamento</strong>
+                <p class="small mb-0">Você escolhe o dia, o serviço e o horário.</p>
+            </div>
+        </div>
+        <div class="col-m-3 text-center m-3 bg-dark text-white">
+            <div class="p-3 border rounded shadow-sm">
+                <strong>4. Execução e Feedback</strong>
+                <p class="small mb-0">Realizamos o serviço e após você realiza a avaliação no sistema com feedback.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5" id="planos">
+    <h2 class="text-center mb-4">Planos que se adaptam à sua rotina</h2>
+    <p class="text-center lead mb-4">Trabalhamos com combos diários, mensais e personalizados. Veja alguns dos nossos níveis de serviço:</p>
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Combo Básico</h5>
+                    <p class="card-text small">Inclui: Limpar/lavar o chão, lavar banheiro, lavar louça/pia, limpar móveis, limpar espelhos, arrumar cama, limpar fogão, separar o lixo e organizar itens.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Combo Intermediário</h5>
+                    <p class="card-text small">Tudo do Básico e mais: encerar piso, tirar teia dos móveis/teto, limpar micro-ondas, entre outros.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Combo Brilhante</h5>
+                    <p class="card-text small">Tudo do Intermediário e mais: Lavar portas/janelas, limpar geladeira, limpar parede de gordura, limpar lustres e aspirar tapetes e sofás.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Combo Passadeira</h5>
+                    <p class="card-text small">Serviço avulso ou combinado, focado em passar suas roupas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
 
 <?php include 'includes/footer.php'; ?>

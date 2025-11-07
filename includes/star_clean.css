@@ -22,7 +22,19 @@ body {
     min-height: 220px;
 
 }
-
+.card-body.card2
+{
+    transition: background-color 0.3s ease;
+    border-radius: 5px; 
+    box-shadow: 0 4px 8px paleturquoise;
+}
+.card-body.card2:hover
+{
+    background-color: rgba(133, 214, 244, 0.981);
+    transition: background-color 0.3s ease;
+    border-radius: 5px; 
+    box-shadow: 0 4px 8px paleturquoise;
+}
 /* Media query para telas menores que 768px (tablets e celulares) */
 @media (max-width: 767.98px) {
     .display-4-mobile-friendly {
