@@ -1,153 +1,79 @@
 <?php
+require_once '../config/config.php';
+require_once '../config/db.php';
 
-include '../config/config.php';
+// Busca os textos da página 'sobre' do banco de dados
+$conteudo_pagina = [];
+try {
+    $pdo = obterConexaoPDO();
+    $stmt_geral = $pdo->query("SELECT chave, conteudo FROM conteudo_geral WHERE pagina = 'sobre'");
+    foreach ($stmt_geral->fetchAll(PDO::FETCH_ASSOC) as $item) {
+        $conteudo_pagina[$item['chave']] = $item['conteudo'];
+    }
+} catch (PDOException $e) {
+    error_log("Erro ao buscar conteúdo da página Sobre: " . $e->getMessage());
+    // Define valores padrão em caso de erro para a página não quebrar
+    $conteudo_pagina = [
+        'sobre_hero_titulo' => 'Sobre a StarClean',
+        'sobre_hero_subtitulo' => 'Conheça nossa jornada e nossos valores.',
+        'sobre_historia_titulo' => 'Nossa História',
+        'sobre_historia_texto' => 'Texto sobre a história da empresa.',
+        'sobre_missao_titulo' => 'Nossa Missão',
+        'sobre_missao_texto' => 'Texto sobre a missão da empresa.',
+        'sobre_visao_titulo' => 'Nossa Visão',
+        'sobre_visao_texto' => 'Texto sobre a visão da empresa.'
+    ];
+}
+
 include '../includes/header.php';
-include '../includes/navbar.php';
 
+include '../includes/navbar.php'; // Sempre exibe a navbar pública
 ?>
 
-<header class="hero-section" style="background: url(../img/cleaning.jpeg) center/cover no-repeat; height: 400px; display: flex; align-items: start; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
+<header class="hero-section" style="background: url('<?= BASE_URL ?>/img/cleaning.jpeg') center/cover no-repeat; height: 400px; display: flex; align-items: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
     <div class="container">
-        <h1 class="display-4 fw-bold text-center color-white">Conheça a StarClean</h1>
-        <p><h4 class="text-center color-white">Eficiência na prestação de serviços de limpeza para empresas, escritórios e residências.</h4></p>
+        <h1 class="display-3 fw-bold text-center"><?= htmlspecialchars($conteudo_pagina['sobre_hero_titulo'] ?? '') ?></h1>
+        <p class="lead col-lg-8 mx-auto text-center"><?= htmlspecialchars($conteudo_pagina['sobre_hero_subtitulo'] ?? '') ?></p>
     </div>
 </header>
 
 <main class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="mb-5">
+                <h2 class="mb-3"><?= htmlspecialchars($conteudo_pagina['sobre_historia_titulo'] ?? '') ?></h2>
+                <hr class="my-3">
+                <p class="text-muted"><?= nl2br(htmlspecialchars($conteudo_pagina['sobre_historia_texto'] ?? '')) ?></p>
+            </div>
 
-    <section class="mb-5">
-        <div class="row text-center">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-bullseye fs-1 text-primary"></i>
-                        <h3 class="card-title mt-3">Missão</h3>
-                        <p class="card-text">Prestar serviços de qualidade aos clientes, com excelência, rapidez,
-                            segurança, ética e eficiência, utilizando produtos de alto padrão e profissionais
-                            capacitados.</p>
-                    </div>
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <h3 class="mb-3"><?= htmlspecialchars($conteudo_pagina['sobre_missao_titulo'] ?? '') ?></h3>
+                    <hr class="my-3">
+                    <p class="text-muted"><?= nl2br(htmlspecialchars($conteudo_pagina['sobre_missao_texto'] ?? '')) ?></p>
                 </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-binoculars-fill fs-1 text-primary"></i>
-                        <h3 class="card-title mt-3">Visão</h3>
-                        <p class="card-text">Ser referência no Distrito Federal e região, expandindo nossos serviços
-                            para atender tanto órgãos públicos, quanto privados e cultivar uma base de clientes
-                            fidelizada.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-gem fs-1 text-primary"></i>
-                        <h3 class="card-title mt-3">Valores</h3>
-                        <ul class="list-unstyled align-center">
-                            <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Ética</li>
-                            <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Integridade</li>
-                            <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Profissionalismo</li>
-                            <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Transparência</li>
-                            <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Pontualidade</li>
-                            <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Eficiência</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-5 bg-light rounded">
-        <div class="container">
-            <div class="row text-center mb-5">
-                <div class="col-lg-8 mx-auto">
-                    <h2 class="display-6">Nossa Liderança</h2>
-                    <p class="lead">Conheça as profissionais que guiam a StarClean ao sucesso.</p>
+                <div class="col-md-6">
+                    <h3 class="mb-3"><?= htmlspecialchars($conteudo_pagina['sobre_visao_titulo'] ?? '') ?></h3>
+                    <hr class="my-3">
+                    <p class="text-muted"><?= nl2br(htmlspecialchars($conteudo_pagina['sobre_visao_texto'] ?? '')) ?></p>
                 </div>
             </div>
 
-            <div class="row justify-content-center">
-                <div class="col-lg-5 col-md-6 mb-4">
-                    <div class="card h-100 text-center border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <!-- <img src="https://via.placeholder.com/150" alt="Foto de Gislene Aparecida"
-                                class="rounded-circle team-member mb-3"> -->
-                            <h4 class="mb-1">Gislene Aparecida Oliveira da Silva</h4>
-                            <h6 class="text-primary mb-3">Diretora e Advogada</h6>
-                            <p class="text-muted">Graduada em Direito, Técnica em Logística e Técnica em Administração e cursando Técnico em
-                                Informática. Responsável pela direção da empresa, visão estratégica, relacionamento
-                                com clientes e fornecedores, além da área jurídica.</p>
-                        </div>
-                    </div>
-                </div>
+            <hr class="my-5">
 
-                <div class="col-lg-5 col-md-6 mb-4">
-                    <div class="card h-100 text-center border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <!-- <img src="https://via.placeholder.com/150" alt="Foto de Ana Júlia Brito"
-                                class="rounded-circle team-member mb-3"> -->
-                            <h4 class="mb-1">Ana Júlia Brito de Souza</h4>
-                            <h6 class="text-primary mb-3">Gerente</h6>
-                            <p class="text-muted">Técnico em Administração. Atua na gerência da empresa, contribuindo
-                                com a visão estratégica, orientação de equipes e relacionamento com clientes e
-                                fornecedores.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="mt-5">
-        <div class="row">
-            <div class="col-lg-6 mb-4">
-                <h2 class="mb-3">Dados do Empreendimento</h2>
-                <div class="card">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>Nome da Empresa:</strong> Star Clean</li>
-                        <li class="list-group-item"><strong>Razão Social:</strong> Star Clean Serviços de Limpeza</li>
-                        <li class="list-group-item"><strong>CNPJ:</strong> 01.123.567/0001-00</li>
-                        <li class="list-group-item"><strong>Endereço:</strong> Taguatinga Centro - Quadra C 11, loja 2
-                        </li>
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4"><?= htmlspecialchars($conteudo_pagina['sobre_dados_titulo'] ?? '') ?></h2>
+                    <ul class="list-unstyled text-center text-muted">
+                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i><strong>Endereço:</strong> <?= htmlspecialchars($conteudo_pagina['sobre_dados_endereco'] ?? '') ?></li>
+                        <li class="mb-2"><i class="fas fa-phone me-2 text-primary"></i><strong>Telefones:</strong> <?= htmlspecialchars($conteudo_pagina['sobre_dados_telefones'] ?? '') ?></li>
+                        <li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i><strong>Email:</strong> <?= htmlspecialchars($conteudo_pagina['sobre_dados_email'] ?? '') ?></li>
+                        <li class="mb-2"><i class="fas fa-clock me-2 text-primary"></i><strong>Horário:</strong> <?= htmlspecialchars($conteudo_pagina['sobre_dados_horario'] ?? '') ?></li>
                     </ul>
                 </div>
             </div>
-            <div class="col-lg-6 mb-4">
-                <h2 class="mb-3">Indicadores de Viabilidade</h2>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Indicador</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Lucratividade</td>
-                                <td>13,15% ao ano</td>
-                            </tr>
-                            <tr>
-                                <td>Rentabilidade</td>
-                                <td>81,70% ao ano</td>
-                            </tr>
-                            <tr>
-                                <td>Prazo de Retorno do Investimento</td>
-                                <td>1 ano, 2 meses e 19 dias</td>
-                            </tr>
-                            <tr>
-                                <td>Ponto de Equilíbrio (PE)</td>
-                                <td>R$ 1.275.222,52 ao ano</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <small class="text-muted">Capital inicial investido: R$ 340.800,00 | Faturamento mensal projetado:
-                        R$ 176.120,00</small>
-                </div>
-            </div>
         </div>
-    </section>
+    </div>
 </main>
 
 <?php include '../includes/footer.php'; ?>

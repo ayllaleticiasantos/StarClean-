@@ -1,23 +1,30 @@
 <?php
 include 'includes/header.php';
 include 'includes/navbar.php';
+require_once 'config/config.php';
 require_once 'config/db.php';
 
 // Buscar conteúdo dinâmico do banco de dados
 $carousel_slides = [];
 $cards_destaque = [];
+$conteudo_pagina = [];
+
 try {
     $pdo = obterConexaoPDO();
     
     // Busca slides do carrossel ativos
-    $stmt_carousel = $pdo->prepare("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'carousel' AND ativo = 1 ORDER BY ordem ASC");
-    $stmt_carousel->execute();
+    $stmt_carousel = $pdo->query("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'carousel' AND ativo = 1 ORDER BY ordem ASC");
     $carousel_slides = $stmt_carousel->fetchAll(PDO::FETCH_ASSOC);
 
     // Busca cards de destaque ativos
-    $stmt_cards = $pdo->prepare("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'card' AND ativo = 1 ORDER BY ordem ASC");
-    $stmt_cards->execute();
+    $stmt_cards = $pdo->query("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'card' AND ativo = 1 ORDER BY ordem ASC");
     $cards_destaque = $stmt_cards->fetchAll(PDO::FETCH_ASSOC);
+
+    // Busca os textos da página inicial da nova tabela
+    $stmt_geral = $pdo->query("SELECT chave, conteudo FROM conteudo_geral WHERE pagina = 'index'");
+    foreach ($stmt_geral->fetchAll(PDO::FETCH_ASSOC) as $item) {
+        $conteudo_pagina[$item['chave']] = $item['conteudo'];
+    }
 
 } catch (PDOException $e) {
     // Em caso de erro, a página pode ficar em branco, mas não quebrará. O erro será logado.
@@ -59,69 +66,49 @@ try {
 </div>
 
 <div class="container my-5">
-    <h2 class="text-center mb-4">Limpeza Completa e Personalizada</h2>
-    <p class="text-center lead mb-4">
-        Oferecemos serviços abrangentes de limpeza para empresas, condomínios e residências. 
-        Trabalhamos com combos ou planos personalizados para atender sua necessidade.
-    </p>
-    
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Nossos Serviços Incluem:</h5>
+    <h1 class="text-center mb-4"><?= htmlspecialchars($conteudo_pagina['index_hero_titulo'] ?? 'Limpeza Completa e Personalizada') ?></h1>
+    <hr class="my-3">
+    <h4 class="text-center mb-4">
+        <?= nl2br(htmlspecialchars($conteudo_pagina['index_hero_subtitulo'] ?? 'Oferecemos serviços abrangentes...')) ?>
+    </h4>
+</div>
+
+<div class="container-fluid bg-light py-5" id="diferenciais">
+    <div class="container">
+        <h2 class="text-center mb-4"><?= htmlspecialchars($conteudo_pagina['index_diferenciais_titulo'] ?? 'Por que escolher a Star Clean?') ?></h2>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 text-center shadow-sm card2"> 
+                    <div class="card-body">
+                        <h5 class="card-title"><?= htmlspecialchars($conteudo_pagina['index_diferenciais_card1_titulo'] ?? 'Equipe Qualificada') ?></h5>
+                        <p class="card-text"><?= $conteudo_pagina['index_diferenciais_card1_texto'] ?? 'Texto do diferencial 1.' ?></p>
+                    </div>
                 </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Limpeza de chão e remoção de pó dos móveis </li>
-                    <li class="list-group-item">Aspiração de tapetes e sofás </li>
-                    <li class="list-group-item">Limpeza de banheiros </li>
-                    <li class="list-group-item">Lavagem de portas e janelas </li>
-                    <li class="list-group-item">Serviço de passadeira </li>
-                    <li class="list-group-item">Encerar chão </li>
-                    <li class="list-group-item">Lavar geladeira e micro-ondas </li>
-                    <li class="list-group-item">Limpar parede de gordura </li>
-                    <li class="list-group-item">Limpar lustres </li>
-                    <li class="list-group-item">Separar lixo de reciclagem </li>
-                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 text-center shadow-sm card2"> 
+                    <div class="card-body">
+                        <h5 class="card-title"><?= htmlspecialchars($conteudo_pagina['index_diferenciais_card2_titulo'] ?? 'Garantia de Qualidade') ?></h5>
+                        <p class="card-text"><?= $conteudo_pagina['index_diferenciais_card2_texto'] ?? 'Texto do diferencial 2.' ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4"> 
+                <div class="card h-100 text-center shadow-sm card2"> 
+                    <div class="card-body">
+                        <h5 class="card-title"><?= htmlspecialchars($conteudo_pagina['index_diferenciais_card3_titulo'] ?? 'Preços e Mimos') ?></h5>
+                        <p class="card-text"><?= $conteudo_pagina['index_diferenciais_card3_texto'] ?? 'Texto do diferencial 3.' ?></p>
+                        <p class="card-text"><a href="<?= BASE_URL ?>/pages/login.php">Faça seu login!</a> <br><a href="<?= BASE_URL ?>/pages/cadastro.php">Ainda não tem conta? Cadastre-se.</a></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container-fluid bg-light py-5" id="diferenciais">
-    <div class="container">
-        <h2 class="text-center mb-4">Por que escolher a Star Clean?</h2>
-        <div class="row">
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 text-center shadow-sm card2">
-                    <div class="card-body">
-                        <h5 class="card-title">Equipe Qualificada</h5>
-                        <p class="card-text">Nossos Prestadores de Serviços são capacitados e recebem cursos semestrais para garantir um serviço de excelência.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 text-center shadow-sm card2">
-                    <div class="card-body">
-                        <h5 class="card-title">Garantia de Qualidade</h5>
-                        <p class="card-text">Nosso diferencial! Após o serviço, <strong>é feita uma vistoria do trabalho prestado</strong> para garantir sua total satisfação.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 text-center shadow-sm card2">
-                    <div class="card-body">
-                        <h5 class="card-title">Preços e Mimos</h5>
-                        <p class="card-text">Oferecemos preços justos, <strong>5% de desconto na primeira compra</strong> e fragrâncias exclusivas para clientes fiéis.<br></p>
-                        <p class="card-text"><a href="login.php">Faça seu login!</a> <br><a href="cadastro.php">Ainda não tem conta? Cadastre-se.</a></p>
-                    </div>
-                </div>
-            </div>
-        </div><
-    </div>
-</div>
-
 <div class="container my-5">
+    <h3 class="text-center ">Como cuidamos dos seus ambientes!</h3>
+    <hr class="my-3">
     <div class="row">
         <?php if (empty($cards_destaque)): ?>
             <div class="col-12">
@@ -146,8 +133,10 @@ try {
     </div>
 </div>
 
+<!-- Seção Processo -->
 <div class="container my-5" id="processo">
     <h2 class="text-center mb-4">Nosso Processo Simplificado</h2>
+    <hr class="my-3">
     <div class="row">
         <div class="col-m-3 text-center m-3 bg-dark text-white">
             <div class="p-3 border rounded shadow-sm">
@@ -176,8 +165,10 @@ try {
     </div>
 </div>
 
+<!-- Seção Planos -->
 <div class="container my-5" id="planos">
     <h2 class="text-center mb-4">Planos que se adaptam à sua rotina</h2>
+    <hr class="my-2">
     <p class="text-center lead mb-4">Trabalhamos com combos diários, mensais e personalizados. Veja alguns dos nossos níveis de serviço:</p>
     <div class="row">
         <div class="col-lg-3 col-md-6 mb-4">

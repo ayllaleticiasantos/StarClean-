@@ -51,7 +51,9 @@ try {
 </header>
 <main>
     <div class="container mt-5">
-        <h1 class="mb-4 text-center">Nossos Serviços Disponíveis</h1> 
+        <h1 class="mb-4 text-center">Serviços Disponíveis</h1> 
+        <hr class="my-4">
+
 
         <?php if (!empty($mensagem_erro)): ?>
             <div class="alert alert-danger"><?= $mensagem_erro ?></div>

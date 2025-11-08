@@ -99,7 +99,7 @@ include '../includes/navbar.php';
 ?>
 
 <div class="container d-flex justify-content-center align-items-center"
-    style="min-height: 80vh; margin-top: 20px; margin-bottom: 20px;">
+    style="min-height: 80vh; margin-top: 30px; margin-bottom: 20px;">
     <div class="card p-4 shadow-sm" style="width: 100%; max-width: 600px;">
         <h3 class="text-center mb-4">Cadastro de Novo Usuário</h3>
 
@@ -107,7 +107,7 @@ include '../includes/navbar.php';
             echo $mensagem;
         } ?>
 
-        <form action="cadastro.php" method="post" id="formCadastro">
+        <form action="cadastro.php" method="post" id="formCadastro" >
             <div class="mb-3">
                 <label for="email" class="form-label">E-mail:</label>
                 <input type="email" class="form-control" name="email" id="email" placeholder="email@exemplo.com"
@@ -169,8 +169,11 @@ include '../includes/navbar.php';
                 <div class="mb-3"><label for="telefone" class="form-label">Telefone:</label><input type="tel"
                         class="form-control" name="telefone" id="telefone" placeholder="(XX) XXXXX-XXXX"
                         maxlength="15"></div>
-                <div class="mb-3"><label for="data_nascimento" class="form-label">Data de Nascimento:</label><input
-                        type="date" class="form-control" name="data_nascimento" id="data_nascimento"></div>
+                <div class="mb-3">
+                    <label for="data_nascimento" class="form-label">Data de Nascimento:</label>
+                    <input type="date" class="form-control" name="data_nascimento" id="data_nascimento">
+                    <div id="ageError" class="text-danger mt-1" style="display: none; font-size: 0.9em;">Apenas maiores de 18 anos podem se cadastrar.</div>
+                </div>
             </div>
 
             <div id="camposPrestador" style="display: none;">
@@ -226,7 +229,7 @@ include '../includes/navbar.php';
         Você deve aceitar os termos para continuar.
     </div>
 </div>
-            <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+            <button type="submit" id="btnCadastrar" class="btn btn-primary w-100">Cadastrar</button>
         </form>
     </div>
 </div>
@@ -245,6 +248,10 @@ include '../includes/navbar.php';
             
             if (tipoSelecionado === 'prestador') {
                 configurarCampoDocumento();
+            } else if (tipoSelecionado === 'cliente') {
+                // Garante que a validação de idade seja executada ao voltar para a aba de cliente
+                // e que o botão de cadastro seja reavaliado.
+                validarIdade();
             }
         }
         radios.forEach(radio => radio.addEventListener('change', toggleCampos));
@@ -471,6 +478,39 @@ include '../includes/navbar.php';
 
     senhaInput.addEventListener('input', checkPasswordMatch);
     confirmarSenhaInput.addEventListener('input', checkPasswordMatch);
+
+    // --- LÓGICA DE VALIDAÇÃO DE IDADE (CLIENTE) ---
+    const dataNascimentoInput = document.getElementById('data_nascimento');
+    const ageError = document.getElementById('ageError');
+    const btnCadastrar = document.getElementById('btnCadastrar');
+
+    function validarIdade() {
+        const dataNascimento = new Date(dataNascimentoInput.value);
+        if (!dataNascimentoInput.value) {
+            ageError.style.display = 'none';
+            btnCadastrar.disabled = false;
+            return;
+        }
+
+        const hoje = new Date();
+        let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+        const m = hoje.getMonth() - dataNascimento.getMonth();
+        if (m < 0 || (m === 0 && hoje.getDate() < dataNascimento.getDate())) {
+            idade--;
+        }
+
+        if (idade < 18) {
+            ageError.style.display = 'block';
+            btnCadastrar.disabled = true;
+        } else {
+            ageError.style.display = 'none';
+            btnCadastrar.disabled = false;
+        }
+    }
+
+    if (dataNascimentoInput) {
+        dataNascimentoInput.addEventListener('change', validarIdade);
+    }
 
     // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
     function setupTogglePassword(inputId, buttonId, iconId) {
