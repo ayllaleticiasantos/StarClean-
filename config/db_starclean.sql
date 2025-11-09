@@ -168,7 +168,11 @@ CREATE TABLE `conteudo_geral` (
   `titulo` varchar(255) NOT NULL COMMENT 'Descrição amigável para o admin (ex: Título Principal da Home)',
   `conteudo` text DEFAULT NULL COMMENT 'O texto ou URL da imagem',
   `tipo` enum('texto_simples','textarea','imagem') NOT NULL DEFAULT 'texto_simples' COMMENT 'Define o tipo de campo no formulário',
-  `pagina` varchar(50) NOT NULL COMMENT 'Página a que o conteúdo pertence (ex: index, sobre)'
+  `pagina` varchar(50) NOT NULL COMMENT 'Página a que o conteúdo pertence (ex: index, sobre)',
+  `criado_por_admin_id` int(11) DEFAULT NULL,
+  `editado_por_admin_id` int(11) DEFAULT NULL,
+  `data_criacao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `data_edicao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -538,7 +542,9 @@ ALTER TABLE `cliente`
 --
 ALTER TABLE `conteudo_geral`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `chave` (`chave`);
+  ADD UNIQUE KEY `chave` (`chave`),
+  ADD KEY `fk_conteudo_geral_criado_idx` (`criado_por_admin_id`),
+  ADD KEY `fk_conteudo_geral_editado_idx` (`editado_por_admin_id`);
 
 --
 -- Índices de tabela `conteudo_pagina_inicial`
@@ -714,6 +720,13 @@ ALTER TABLE `agendamento`
 ALTER TABLE `avaliacao_prestador`
   ADD CONSTRAINT `fk_Avaliacao_prestador_Cliente1` FOREIGN KEY (`Cliente_id`) REFERENCES `cliente` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_Avaliacao_prestador_Prestador1` FOREIGN KEY (`Prestador_id`) REFERENCES `prestador` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Restrições para tabelas `conteudo_geral`
+--
+ALTER TABLE `conteudo_geral`
+  ADD CONSTRAINT `fk_conteudo_geral_criado` FOREIGN KEY (`criado_por_admin_id`) REFERENCES `administrador` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_conteudo_geral_editado` FOREIGN KEY (`editado_por_admin_id`) REFERENCES `administrador` (`id`) ON DELETE SET NULL;
 
 --
 -- Restrições para tabelas `conteudo_pagina_inicial`

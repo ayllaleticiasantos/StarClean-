@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- LÓGICA PARA ATUALIZAR CONTEÚDO GERAL (TEXTOS) ---
     if (isset($_POST['conteudo_geral'])) {
         foreach ($_POST['conteudo_geral'] as $chave => $valor) {
-            $stmt = obterConexaoPDO()->prepare("UPDATE conteudo_geral SET conteudo = ? WHERE chave = ?");
-            $stmt->execute([trim($valor), $chave]);
+            $stmt = obterConexaoPDO()->prepare("UPDATE conteudo_geral SET conteudo = ?, editado_por_admin_id = ? WHERE chave = ?");
+            $stmt->execute([trim($valor), $id_admin_logado, $chave]);
         }
         $mensagem_sucesso = "Conteúdo de texto atualizado com sucesso!"; // Mensagem provisória
     }
