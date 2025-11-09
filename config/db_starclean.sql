@@ -345,6 +345,33 @@ INSERT INTO `log_atividades` (`id`, `admin_id`, `acao`, `detalhes`, `data_ocorre
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `log_cliente_atividades`
+--
+
+CREATE TABLE `log_cliente_atividades` (
+  `id` int(11) NOT NULL,
+  `cliente_id` int(11) NOT NULL,
+  `acao` varchar(255) NOT NULL,
+  `detalhes` text DEFAULT NULL,
+  `data_ocorrencia` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `log_prestador_atividades`
+--
+
+CREATE TABLE `log_prestador_atividades` (
+  `id` int(11) NOT NULL,
+  `prestador_id` int(11) NOT NULL,
+  `acao` varchar(255) NOT NULL,
+  `detalhes` text DEFAULT NULL,
+  `data_ocorrencia` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+--
 -- Estrutura para tabela `prestador`
 --
 
@@ -544,6 +571,20 @@ ALTER TABLE `log_atividades`
   ADD KEY `fk_log_atividades_admin_idx` (`admin_id`);
 
 --
+-- Índices de tabela `log_cliente_atividades`
+--
+ALTER TABLE `log_cliente_atividades`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_log_cliente_idx` (`cliente_id`);
+
+--
+-- Índices de tabela `log_prestador_atividades`
+--
+ALTER TABLE `log_prestador_atividades`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_log_prestador_idx` (`prestador_id`);
+
+--
 -- Índices de tabela `prestador`
 --
 ALTER TABLE `prestador`
@@ -625,6 +666,18 @@ ALTER TABLE `log_atividades`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
+-- AUTO_INCREMENT de tabela `log_cliente_atividades`
+--
+ALTER TABLE `log_cliente_atividades`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `log_prestador_atividades`
+--
+ALTER TABLE `log_prestador_atividades`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de tabela `prestador`
 --
 ALTER TABLE `prestador`
@@ -687,6 +740,18 @@ ALTER TABLE `indisponibilidade_prestador`
 --
 ALTER TABLE `log_atividades`
   ADD CONSTRAINT `fk_log_atividades_admin` FOREIGN KEY (`admin_id`) REFERENCES `administrador` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Restrições para tabelas `log_cliente_atividades`
+--
+ALTER TABLE `log_cliente_atividades`
+  ADD CONSTRAINT `fk_log_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `cliente` (`id`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `log_prestador_atividades`
+--
+ALTER TABLE `log_prestador_atividades`
+  ADD CONSTRAINT `fk_log_prestador` FOREIGN KEY (`prestador_id`) REFERENCES `prestador` (`id`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `prestador`

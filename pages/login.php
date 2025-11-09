@@ -44,10 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $destino = $dados['destino'];
 
                 // Ajusta a coluna do nome para a tabela Prestador
-                $coluna_nome_db = ($tipo === 'prestador') ? 'nome' : 'nome';
+                $coluna_nome_db = 'nome'; // A coluna 'nome' é padrão
                 
+                // --- NOVO: Adiciona a coluna 'tipo' se a tabela for Administrador ---
+                $colunas_extras = ($tabela === 'Administrador') ? ', tipo' : '';
+
                 // Busca o usuário pelo e-mail
-                $stmt = $pdo->prepare("SELECT id, $coluna_nome_db AS nome, email, password FROM `$tabela` WHERE email = ?");
+                $stmt = $pdo->prepare("SELECT id, $coluna_nome_db AS nome, email, password $colunas_extras FROM `$tabela` WHERE email = ?");
                 $stmt->execute([$email]);
                 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -59,6 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['usuario_nome']   = $usuario['nome'];
                         $_SESSION['usuario_tipo']   = $tipo; // Armazena o tipo encontrado ('admin', 'prestador', ou 'cliente')
                         
+                        // --- NOVO: Salva o tipo específico do admin na sessão ---
+                        if ($tipo === 'admin') {
+                            $_SESSION['admin_tipo'] = $usuario['tipo'];
+                        }
+
                         $usuario_encontrado = true;
                         header("Location: " . $destino);
                         exit; // Termina o script e redireciona
@@ -87,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Layout e HTML
 include '../includes/header.php';
-include '../includes/navbar.php';
+include '../includes/navbar_logged_in.php';
 ?>
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
@@ -105,7 +113,12 @@ include '../includes/navbar.php';
 
             <div class="mb-3">
                 <label for="senha" class="form-label">Senha:</label>
-                <input type="password" class="form-control" name="senha" id="senha" placeholder="Digite sua senha" required>
+                <div class="input-group">
+                    <input type="password" class="form-control" name="senha" id="senha" placeholder="Digite sua senha" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="fas fa-eye" id="iconPassword"></i>
+                    </button>
+                </div>
             </div>
             
             <button type="submit" class="btn btn-primary w-100">Entrar</button>
@@ -118,5 +131,25 @@ include '../includes/navbar.php';
         </div>
     </div>
 </div>
+
+<!-- Script para a funcionalidade do olho -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButton = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('senha');
+    const icon = document.getElementById('iconPassword');
+
+    if (toggleButton && passwordInput && icon) {
+        toggleButton.addEventListener('click', function() {
+            // Alterna o tipo do input entre 'password' e 'text'
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Alterna o ícone do olho
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+    }
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>

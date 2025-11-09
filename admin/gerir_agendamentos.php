@@ -11,6 +11,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
 
 $agendamentos = [];
 $termo_busca = $_GET['q'] ?? '';
+$status_filtro = $_GET['status'] ?? ''; // NOVO: Captura o status do filtro
 $mensagem_erro = '';
 
 try {
@@ -24,10 +25,22 @@ try {
          JOIN Prestador p ON a.Prestador_id = p.id
          JOIN Servico s ON a.Servico_id = s.id";
 
+    // --- LÓGICA DE FILTRO DINÂMICO ---
+    $where_clauses = [];
+
     if (!empty($termo_busca)) {
-        $sql .= " WHERE c.nome LIKE ? OR p.nome LIKE ? OR s.titulo LIKE ? OR a.status LIKE ?";
+        $where_clauses[] = "(c.nome LIKE ? OR p.nome LIKE ? OR s.titulo LIKE ?)";
         $like_term = "%" . $termo_busca . "%";
-        $params = [$like_term, $like_term, $like_term, $like_term];
+        array_push($params, $like_term, $like_term, $like_term);
+    }
+
+    if (!empty($status_filtro)) {
+        $where_clauses[] = "a.status = ?";
+        $params[] = $status_filtro;
+    }
+
+    if (!empty($where_clauses)) {
+        $sql .= " WHERE " . implode(" AND ", $where_clauses); // A lógica aqui já está correta, mas vamos garantir a limpeza do botão.
     }
 
     $sql .= " ORDER BY a.data DESC, a.hora DESC";
@@ -70,10 +83,22 @@ include '../includes/navbar_logged_in.php';
                 <h1>Gestão de Agendamentos</h1>
                 <p class="lead">Visualize e filtre todos os agendamentos do sistema.</p>
             </div>
-            <form method="GET" action="gerir_agendamentos.php" class="d-flex align-items-center">
-                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por cliente, prestador, serviço..." value="<?= htmlspecialchars($termo_busca) ?>" style="width: 300px;">
+            <form method="GET" action="gerir_agendamentos.php" class="d-flex align-items-center gap-2">
+                <!-- NOVO: Filtro de Status -->
+                <div class="flex-shrink-0">
+                    <select name="status" class="form-select" style="width: auto;">
+                        <option value="">Todos os Status</option>
+                        <option value="pendente" <?= ($status_filtro === 'pendente') ? 'selected' : '' ?>>Pendente</option>
+                        <option value="aceito" <?= ($status_filtro === 'aceito') ? 'selected' : '' ?>>Aceito</option>
+                        <option value="realizado" <?= ($status_filtro === 'realizado') ? 'selected' : '' ?>>Realizado</option>
+                        <option value="cancelado" <?= ($status_filtro === 'cancelado') ? 'selected' : '' ?>>Cancelado</option>
+                        <option value="remarcado" <?= ($status_filtro === 'remarcado') ? 'selected' : '' ?>>Remarcado</option>
+                    </select>
+                </div>
+                <input class="form-control" type="search" name="q" placeholder="Buscar por cliente, prestador..." value="<?= htmlspecialchars($termo_busca) ?>" style="width: 250px;">
                 <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                <?php if (!empty($termo_busca)): ?>
+                <!-- CORREÇÃO: O botão de limpar deve aparecer se QUALQUER filtro estiver ativo -->
+                <?php if (!empty($termo_busca) || !empty($status_filtro)): ?>
                     <a href="gerir_agendamentos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
                 <?php endif; ?>
             </form>
@@ -120,6 +145,7 @@ include '../includes/navbar_logged_in.php';
                                             case 'aceito':    $badge_class = 'bg-success'; break;
                                             case 'realizado': $badge_class = 'bg-primary'; break;
                                             case 'cancelado': $badge_class = 'bg-danger'; break;
+                                            case 'remarcado': $badge_class = 'bg-light text-dark border'; break;
                                         }
                                     ?>
                                     <span class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>

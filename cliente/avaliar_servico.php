@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/log_helper.php'; // Inclui o helper de log
 
 // Segurança: Apenas clientes podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
@@ -88,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento) {
                      WHERE Cliente_id = ? AND Prestador_id = ?"
                  );
                  $stmt->execute([$nota, $comentario, $oculto, $id_cliente, $prestador_id]);
+                 // Registra a ação no log
+                 registrar_log_usuario('cliente', $id_cliente, 'Atualizou a avaliação do prestador', ['prestador_id' => $prestador_id, 'nota' => $nota]);
                  $_SESSION['mensagem_sucesso'] = "Sua avaliação foi atualizada com sucesso!";
             } else {
                 // Insere nova avaliação
@@ -96,6 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento) {
                      VALUES (?, ?, ?, ?, ?)"
                 );
                 $stmt->execute([$id_cliente, $prestador_id, $nota, $comentario, $oculto]);
+                // Registra a ação no log
+                registrar_log_usuario('cliente', $id_cliente, 'Enviou uma nova avaliação para o prestador', ['prestador_id' => $prestador_id, 'nota' => $nota]);
                 $_SESSION['mensagem_sucesso'] = "Sua avaliação foi enviada com sucesso!";
             }
             

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/log_helper.php'; // Inclui o helper de log
 // Removido o include de agendar.php pois as funções necessárias estão aqui
 
 // Segurança: Apenas clientes logados podem acessar
@@ -106,6 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento_detalhes) {
                 $agendamento_id, 
                 $id_cliente_logado
             ]);
+
+            // Registra a ação no log
+            registrar_log_usuario('cliente', $id_cliente_logado, 'Editou o agendamento', ['agendamento_id' => $agendamento_id, 'nova_data' => $data_nova, 'nova_hora' => $hora_nova]);
 
             $_SESSION['mensagem_sucesso'] = "Agendamento #{$agendamento_id} atualizado com sucesso.";
             header("Location: meus_agendamentos.php");

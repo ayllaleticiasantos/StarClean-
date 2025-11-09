@@ -1,7 +1,8 @@
 <?php
 session_start();
 require_once '../config/db.php';
-require_once '../config/enviar_email.php'; // 1. Incluir o arquivo de e-mail
+require_once '../includes/log_helper.php'; // Passo 2: Inclui o helper
+require_once '../config/config.php';
 
 // 1. Segurança: Apenas clientes logados podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
@@ -56,30 +57,12 @@ try {
                 "UPDATE Agendamento SET status = 'cancelado' WHERE id = ? AND Cliente_id = ?"
             );
             $stmt_update->execute([$agendamento_id, $cliente_id]);
-
-            // 2. Buscar dados e enviar e-mail de notificação para o prestador
-            $sql_dados_email = "
-                SELECT 
-                    a.data, a.hora,
-                    c.nome AS nome_cliente,
-                    p.nome AS nome_prestador, p.email AS email_prestador, p.receber_notificacoes_email AS notificacao_prestador,
-                    s.titulo AS titulo_servico,
-                    e.logradouro, e.numero, e.bairro, e.cidade, e.uf
-                FROM agendamento a
-                JOIN cliente c ON a.Cliente_id = c.id
-                JOIN prestador p ON a.Prestador_id = p.id
-                JOIN servico s ON a.Servico_id = s.id
-                JOIN endereco e ON a.Endereco_id = e.id
-                WHERE a.id = ?
-            ";
-            $stmt_email = $pdo->prepare($sql_dados_email);
-            $stmt_email->execute([$agendamento_id]);
-            $dadosAgendamento = $stmt_email->fetch(PDO::FETCH_ASSOC);
-
-            if ($dadosAgendamento && $dadosAgendamento['notificacao_prestador'] == 1) {
-                enviarEmailAgendamento('agendamento_cancelado_prestador', $dadosAgendamento);
-            }
             
+            // Passo 3: Registra a ação no log
+            registrar_log_usuario('cliente', $cliente_id, 'Cancelou o agendamento', ['agendamento_id' => $agendamento_id]);
+
+            // O código de envio de e-mail foi removido daqui.
+
             $_SESSION['mensagem_sucesso'] = "Agendamento cancelado com sucesso.";
         }
     }

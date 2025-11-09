@@ -28,18 +28,40 @@ if (isset($_SESSION['mensagem_alerta'])) {
 
 // Buscar agendamentos do cliente logado
 $id_cliente_logado = $_SESSION['usuario_id'];
+$termo_busca = $_GET['q'] ?? ''; // NOVO: Captura o termo de busca
+$status_filtro = $_GET['status'] ?? ''; // NOVO: Captura o status do filtro
 $agendamentos = [];
 try {
     $pdo = obterConexaoPDO();
-    $stmt = $pdo->prepare(
-        "SELECT a.id, s.id AS servico_id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome AS nome_prestador, s.descricao AS descricao_servico
-         FROM Agendamento a
-         JOIN Servico s ON a.Servico_id = s.id
-         JOIN Prestador p ON a.Prestador_id = p.id
-         WHERE a.Cliente_id = ?
-         ORDER BY a.data, a.hora"
-    );
-    $stmt->execute([$id_cliente_logado]);
+    $params = [$id_cliente_logado];
+    $where_clauses = [];
+
+    $sql = "SELECT a.id, s.id AS servico_id, s.titulo AS titulo_servico, a.data, a.hora, a.status, p.nome AS nome_prestador, s.descricao AS descricao_servico
+            FROM Agendamento a
+            JOIN Servico s ON a.Servico_id = s.id
+            JOIN Prestador p ON a.Prestador_id = p.id
+            WHERE a.Cliente_id = ?";
+
+    // Adiciona filtro de busca por texto
+    if (!empty($termo_busca)) {
+        $where_clauses[] = "(s.titulo LIKE ? OR s.descricao LIKE ? OR p.nome LIKE ?)";
+        $like_term = "%" . $termo_busca . "%";
+        array_push($params, $like_term, $like_term, $like_term);
+    }
+
+    if (!empty($status_filtro)) {
+        $where_clauses[] = "a.status = ?";
+        $params[] = $status_filtro;
+    }
+
+    if (!empty($where_clauses)) {
+        $sql .= " AND " . implode(" AND ", $where_clauses);
+    }
+
+    $sql .= " ORDER BY a.data DESC, a.hora DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     // CORREÇÃO: Usando error_log e mensagem amigável
@@ -74,6 +96,24 @@ include '../includes/navbar_logged_in.php';
         <?= $mensagem_sucesso ?>
         <?= $mensagem_erro ?>
         <?= $mensagem_alerta ?>
+
+        <!-- Formulário de Filtro e Busca (sem card) -->
+        <div class="d-flex justify-content-end mb-4">
+            <form method="GET" action="meus_agendamentos.php" class="d-flex align-items-center gap-2">
+                <input class="form-control" type="search" name="q" placeholder="Buscar por serviço, prestador..." value="<?= htmlspecialchars($termo_busca) ?>">
+                <select name="status" id="status" class="form-select" style="width: auto;">
+                    <option value="">Todos os Status</option>
+                    <option value="pendente" <?= ($status_filtro === 'pendente') ? 'selected' : '' ?>>Pendente</option>
+                    <option value="aceito" <?= ($status_filtro === 'aceito') ? 'selected' : '' ?>>Aceito</option>
+                    <option value="realizado" <?= ($status_filtro === 'realizado') ? 'selected' : '' ?>>Realizado</option>
+                    <option value="cancelado" <?= ($status_filtro === 'cancelado') ? 'selected' : '' ?>>Cancelado</option>
+                    <option value="remarcado" <?= ($status_filtro === 'remarcado') ? 'selected' : '' ?>>Remarcado</option>
+                </select>
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                <!-- O botão de limpar aparece se qualquer filtro estiver ativo -->
+                <?php if (!empty($status_filtro) || !empty($termo_busca)): ?><a href="meus_agendamentos.php" class="btn btn-outline-secondary">Limpar</a><?php endif; ?>
+            </form>
+        </div>
         
         <div class="card border-0 shadow-sm">
             <div class="card-body">
@@ -93,7 +133,11 @@ include '../includes/navbar_logged_in.php';
                         <tbody>
                             <?php if (empty($agendamentos)): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center">Nenhum agendamento encontrado.</td>
+                                    <?php if (!empty($termo_busca) || !empty($status_filtro)): ?>
+                                        <td colspan="7" class="text-center">Nenhum agendamento encontrado para os filtros aplicados.</td>
+                                    <?php else: ?>
+                                        <td colspan="7" class="text-center">Nenhum agendamento encontrado.</td>
+                                    <?php endif; ?>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($agendamentos as $agendamento): ?>

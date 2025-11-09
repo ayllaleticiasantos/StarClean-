@@ -120,6 +120,12 @@ if (!defined('BASE_URL')) {
                 box-shadow: none !important;
                 border: 1px solid #ccc !important;
             }
+
+            /* NOVO: Força a impressão de cores e fundos em todos os elementos */
+            * {
+                -webkit-print-color-adjust: exact !important; /* Chrome, Safari, Edge */
+                print-color-adjust: exact !important; /* Firefox */
+            }
         }
     </style>
 </head>

@@ -1,49 +1,8 @@
 <?php
-/**
- * Busca coordenadas (latitude e longitude) para um CEP usando a API Nominatim.
- *
- * @param string $cep O CEP a ser buscado.
- * @return array|null Retorna um array com ['latitude', 'longitude'] ou null se não encontrar.
- */
-
-function obterCoordenadasPorCEP(string $cep): ?array
-{
-    // Limpa o CEP para enviar apenas números e adiciona ", Brasil" para precisão
-    $cep_limpo = preg_replace('/[^0-9]/', '', $cep);
-    $endereco_completo = urlencode($cep_limpo . ", Brasil");
-    $url_api = "https://nominatim.openstreetmap.org/search?q={$endereco_completo}&format=json&limit=1";
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url_api);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-    // User-Agent com e-mail válido (IMPORTANTE)
-    curl_setopt($ch, CURLOPT_USERAGENT, 'StarCleanApp/1.0 (starclean.prest.servicos@gmail.com)');
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-    $resposta_json = curl_exec($ch);
-
-    // Trata erros de cURL
-    if (curl_errno($ch)) {
-
-        error_log("Erro cURL: " . curl_error($ch));
-        return null;
-    }
-
-    curl_close($ch);
-
-    if ($resposta_json && ($dados = json_decode($resposta_json, true)) && !empty($dados)) {
-        return ['latitude' => $dados['lat'], 'longitude' => $dados['lon'],];
-    }
-
-    return null;
-}
-
-
 session_start();
 require_once '../config/db.php';
 
 // Segurança: Apenas clientes podem acessar esta página
-
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
     header("Location: ../pages/login.php");
     exit();
@@ -52,7 +11,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') 
 $mensagem = "";
 $id_cliente = $_SESSION['usuario_id'];
 $id_endereco = $_GET['id'] ?? null;
-
 $endereco_existente = null;
 
 // Redireciona se o ID do endereço não foi fornecido
@@ -63,7 +21,6 @@ if (empty($id_endereco) || !is_numeric($id_endereco)) {
 }
 
 try {
-
     $pdo = obterConexaoPDO();
     // 1. Lógica para buscar os dados do endereço existente
     $stmt = $pdo->prepare("SELECT * FROM Endereco WHERE id = ? AND Cliente_id = ?");
@@ -80,7 +37,6 @@ try {
     error_log("Erro ao buscar endereço para edição: " . $e->getMessage());
     $_SESSION['mensagem_erro'] = "Erro ao carregar dados do endereço.";
     header("Location: gerir_enderecos.php");
-
     exit();
 }
 
@@ -93,6 +49,9 @@ $complemento = $endereco_existente['complemento'];
 $bairro = $endereco_existente['bairro'];
 $cidade = $endereco_existente['cidade'];
 $uf = $endereco_existente['uf'];
+// --- NOVO: Captura as coordenadas existentes ---
+$latitude = $endereco_existente['latitude'];
+$longitude = $endereco_existente['longitude'];
 
 
 // --- 2. LÓGICA DE ATUALIZAÇÃO (QUANDO O FORMULÁRIO É ENVIADO VIA POST) ---
@@ -105,6 +64,9 @@ if ($_SERVER["REQUEST_METHOD"]==="POST") {
     $bairro = trim($_POST['bairro']);
     $cidade = trim($_POST['cidade']);
     $uf = trim($_POST['uf']);
+    // --- NOVO: Captura as coordenadas do formulário ---
+    $latitude = $_POST['latitude'] ?? null;
+    $longitude = $_POST['longitude'] ?? null;
     
 
     // --- MELHORIA 1: VALIDAÇÃO NO LADO DO SERVIDOR ---
@@ -115,6 +77,10 @@ if ($_SERVER["REQUEST_METHOD"]==="POST") {
     if (empty($bairro)) { $erros[] = "O campo Bairro é obrigatório."; }
     if (empty($cidade)) { $erros[] = "O campo Cidade é obrigatório."; }
     if (empty($uf) || strlen($uf) !== 2) { $erros[] = "O campo UF deve ter 2 caracteres."; }
+    // --- NOVO: Validação das coordenadas ---
+    if (empty($latitude) || empty($longitude)) {
+        $erros[] = "Localização no mapa é obrigatória. Por favor, arraste o pino para seu endereço exato.";
+    }
 
     if (!empty($erros)) {
         // Se houver erros, monta a mensagem para exibir
@@ -128,23 +94,14 @@ if ($_SERVER["REQUEST_METHOD"]==="POST") {
     }else{
         // Se não houver erros, prossiga com a ATUALIZAÇÃO no banco
         try {
-            
-            // --- MODIFICAÇÃO APLICADA AQUI ---
-            // 1. Busca as coordenadas novamente ao editar, usando APENAS o CEP e previne SQL Injection
-            $coordenadas = obterCoordenadasPorCEP($cep);
-            $latitude = $coordenadas['latitude'] ?? null;
-            $longitude = $coordenadas['longitude'] ?? null;
-            // ************************************
-
-            // 2. Prepara o comando UPDATE com os campos de latitude e longitude
+            // Prepara o comando UPDATE com os campos de latitude e longitude
             $stmt = $pdo->prepare(
                 "UPDATE Endereco 
                  SET cep = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, uf = ?, latitude = ?, longitude = ?
-
                  WHERE id = ? AND Cliente_id = ?"
             );
             
-            // 3. Executa o comando, passando as novas variáveis $latitude e $longitude
+            // Executa o comando, passando as novas variáveis $latitude e $longitude
             $stmt->execute([
                 $cep, 
                 $logradouro, 
@@ -173,7 +130,13 @@ if ($_SERVER["REQUEST_METHOD"]==="POST") {
 
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
+?>
 
+<style>
+    #mapa_selecao { height: 350px; width: 100%; border-radius: 8px; background-color: #f0f0f0; margin-top: 15px; margin-bottom: 15px; }
+</style>
+
+<?php
 ?>
 <button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
     aria-controls="sidebarMenu">
@@ -208,6 +171,14 @@ include '../includes/navbar_logged_in.php';
                         <input type="text" class="form-control" id="cep" name="cep" value="<?= htmlspecialchars($cep) ?>" placeholder="00000-000" required>
                         <div id="cep-status" class="form-text"></div>
                     </div>
+
+                    <!-- NOVO: Container do Mapa -->
+                    <div id="mapa_selecao"></div>
+
+                    <!-- NOVO: Campos ocultos para as coordenadas -->
+                    <input type="hidden" id="latitude" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
+                    <input type="hidden" id="longitude" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
+
                     <div class="mb-3">
                         <label for="logradouro" class="form-label">Logradouro:</label>
                         <input type="text" class="form-control" id="logradouro" name="logradouro" value="<?= htmlspecialchars($logradouro) ?>" placeholder="Ex: Rua das Flores" required>
@@ -243,76 +214,128 @@ include '../includes/navbar_logged_in.php';
 </main>
 
 
+<!-- NOVO: Script completo do mapa, adaptado para a edição -->
 <script>
-    // Script do ViaCEP (para preenchimento automático)
     document.addEventListener('DOMContentLoaded', function() {
+        // --- Variáveis Globais para o Mapa ---
+        let map;
+        let marker;
+        const mapaDiv = document.getElementById('mapa_selecao');
+        const inputLat = document.getElementById('latitude');
+        const inputLon = document.getElementById('longitude');
+
+        // --- Pega as coordenadas iniciais do PHP ---
+        const initialLat = <?= json_encode($latitude) ?>;
+        const initialLon = <?= json_encode($longitude) ?>;
+
+        // --- Funções do Mapa (copiadas de adicionar_endereco.php) ---
+        async function buscarCoordenadas(endereco) {
+            mapaDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Buscando localização...</p>';
+            const apiKey = 'c245633945894b24a123507f84263f38'; // Sua chave OpenCage
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(endereco)}&key=${apiKey}&countrycode=br&limit=1`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data.results && data.results.length > 0) {
+                    const coords = data.results[0].geometry;
+                    return { lat: coords.lat, lon: coords.lng };
+                }
+                return null;
+            } catch (error) {
+                console.error('Erro na API OpenCage:', error);
+                return null;
+            }
+        }
+
+        function iniciarMapa(lat, lon) {
+            mapaDiv.innerHTML = '';
+            if (map) {
+                map.setView([lat, lon], 17);
+            } else {
+                map = L.map('mapa_selecao').setView([lat, lon], 17);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(map);
+            }
+            if (marker) {
+                marker.setLatLng([lat, lon]);
+            } else {
+                marker = L.marker([lat, lon], { draggable: true }).addTo(map);
+                marker.on('dragend', function(event) {
+                    const position = marker.getLatLng();
+                    inputLat.value = position.lat;
+                    inputLon.value = position.lng;
+                });
+            }
+            inputLat.value = lat;
+            inputLon.value = lon;
+            mapaDiv.insertAdjacentHTML('afterbegin', '<p style="text-align:center; background-color:#fff3cd; padding: 5px; margin-bottom: 5px; border-radius: 5px; z-index: 1000; position: relative;">Arraste o pino para o local exato!</p>');
+        }
+
+        function exibirErroMapa() {
+            mapaDiv.innerHTML = '<div class="alert alert-danger" role="alert">Não foi possível carregar o mapa. Tente um CEP próximo.</div>';
+        }
+
+        // --- Lógica do ViaCEP (copiada e adaptada) ---
         const cepInput = document.getElementById('cep');
         const cepStatus = document.getElementById('cep-status');
 
-        // --- FUNÇÃO DE MÁSCARA PARA O CEP ---
         function mascaraCEP(evento) {
-            // Impede a máscara de ser aplicada ao apagar
             if (evento.key === "Backspace") return;
-            // Pega o valor atual e remove tudo que não for número
             let valor = evento.target.value.replace(/\D/g, '');
-            // Aplica a máscara XXXXX-XXX
             valor = valor.replace(/^(\d{5})(\d)/, '$1-$2');
             evento.target.value = valor;
         }
         cepInput.addEventListener('keyup', mascaraCEP);
 
-        cepInput.addEventListener('blur', function() {
-            let cep = cepInput.value.replace(/\D/g, ''); // Remove caracteres não-numéricos
-
+        async function handleCepBlur() {
+            let cep = cepInput.value.replace(/\D/g, '');
             cepStatus.textContent = '';
             cepStatus.className = 'form-text';
 
             if (cep.length === 8) {
                 cepStatus.textContent = 'Buscando CEP...';
                 cepStatus.classList.add('text-primary');
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const data = await response.json();
+                    cepStatus.textContent = '';
+                    if (!data.erro) {
+                        document.getElementById('logradouro').value = data.logradouro;
+                        document.getElementById('bairro').value = data.bairro;
+                        document.getElementById('cidade').value = data.localidade;
+                        document.getElementById('uf').value = data.uf;
+                        document.getElementById('numero').focus();
 
-                fetch(`https://viacep.com.br/ws/${cep}/json/`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Erro na rede ou na resposta da API.');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        cepStatus.textContent = ''; 
-                        if (!data.erro) {
-                            document.getElementById('logradouro').value = data.logradouro;
-                            document.getElementById('bairro').value = data.bairro;
-                            document.getElementById('cidade').value = data.localidade;
-                            document.getElementById('uf').value = data.uf;
-                            document.getElementById('numero').focus();
+                        const enderecoParaBusca = `${data.logradouro}, ${data.localidade}, ${data.uf}`;
+                        const coords = await buscarCoordenadas(enderecoParaBusca);
+                        if (coords) {
+                            iniciarMapa(coords.lat, coords.lon);
                         } else {
-                            cepStatus.textContent = 'CEP não encontrado.';
-                            cepStatus.classList.add('text-danger');
-                            limparCamposEndereco(false); 
+                            exibirErroMapa();
                         }
-                    })
-                    .catch(() => {
-                        cepStatus.textContent = 'Ocorreu um erro ao buscar o CEP.';
+                    } else {
+                        cepStatus.textContent = 'CEP não encontrado.';
                         cepStatus.classList.add('text-danger');
-                        limparCamposEndereco(false);
-                    });
+                        exibirErroMapa();
+                    }
+                } catch (error) {
+                    cepStatus.textContent = 'Ocorreu um erro ao buscar o CEP.';
+                    cepStatus.classList.add('text-danger');
+                    exibirErroMapa();
+                }
             } else if (cep.length > 0) {
                 cepStatus.textContent = 'Formato de CEP inválido. Digite 8 números.';
                 cepStatus.classList.add('text-danger');
             }
-        });
+        }
+        cepInput.addEventListener('blur', handleCepBlur);
 
-        function limparCamposEndereco(limparCep = true) {
-            if (limparCep) {
-                document.getElementById('cep').value = '';
-            }
-            document.getElementById('logradouro').value = '';
-            document.getElementById('bairro').value = '';
-            document.getElementById('cidade').value = '';
-            document.getElementById('uf').value = '';
-            document.getElementById('numero').value = '';
-            document.getElementById('complemento').value = '';
+        // --- NOVO: Inicializa o mapa com os dados existentes ao carregar a página ---
+        if (initialLat && initialLon) {
+            iniciarMapa(initialLat, initialLon);
+        } else {
+            mapaDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Localização não definida. Digite o CEP para carregar o mapa.</p>';
         }
     });
 </script>

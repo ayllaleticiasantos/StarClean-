@@ -5,7 +5,9 @@ require_once '../config/db.php';
 require_once '../includes/log_helper.php'; // Inclui nossa nova função de log
 
 // Segurança: Apenas administradores podem acessar
-if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
+// Segurança: Apenas administradores do tipo 'adminmaster' e 'admmoderador' podem acessar
+$tipo_admin = $_SESSION['admin_tipo'] ?? '';
+if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin' || !in_array($tipo_admin, ['adminmaster', 'admmoderador'])) {
     header("Location: ../pages/login.php");
     exit();
 }

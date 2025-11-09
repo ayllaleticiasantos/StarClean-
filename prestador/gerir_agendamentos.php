@@ -25,10 +25,12 @@ if (isset($_SESSION['mensagem_erro'])) {
 $id_prestador_logado = $_SESSION['usuario_id'];
 $agendamentos = [];
 $termo_busca = $_GET['q'] ?? ''; // Pega o termo de busca da URL
+$status_filtro = $_GET['status'] ?? ''; // NOVO: Captura o status do filtro
 
 try {
     $pdo = obterConexaoPDO();
     $params = [$id_prestador_logado];
+    $where_clauses = [];
 
     $sql = "SELECT a.id, c.nome as nome_cliente, s.titulo as titulo_servico, s.descricao as descricao_servico,
                    a.data, a.hora, a.status, e.logradouro, e.numero, e.bairro
@@ -36,18 +38,23 @@ try {
             JOIN Cliente c ON a.Cliente_id = c.id
             JOIN Servico s ON a.Servico_id = s.id
             JOIN Endereco e ON a.Endereco_id = e.id
-            WHERE a.Prestador_id = ?";
+            WHERE a.Prestador_id = ?"; // Condição base
 
     // Adiciona o filtro se um termo de busca for fornecido
     if (!empty($termo_busca)) {
-        $sql .= " AND (c.nome LIKE ? OR s.titulo LIKE ? OR a.status LIKE ?)";
+        $where_clauses[] = "(c.nome LIKE ? OR s.titulo LIKE ?)";
         $like_term = "%" . $termo_busca . "%";
-        $params[] = $like_term;
-        $params[] = $like_term;
-        $params[] = $like_term;
+        array_push($params, $like_term, $like_term);
     }
 
-    $sql .= " ORDER BY a.data, a.hora";
+    if (!empty($status_filtro)) {
+        $where_clauses[] = "a.status = ?";
+        $params[] = $status_filtro;
+    }
+
+    if (!empty($where_clauses)) {
+        $sql .= " AND " . implode(" AND ", $where_clauses);
+    }
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -82,10 +89,22 @@ include '../includes/navbar_logged_in.php';
     <div class="container-fluid p-4 flex-grow-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Meus Agendamentos</h1>
-            <form method="GET" action="gerir_agendamentos.php" class="d-flex">
-                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por cliente, serviço, status..." value="<?= htmlspecialchars($termo_busca) ?>">
+            <form method="GET" action="gerir_agendamentos.php" class="d-flex gap-2">
+                <!-- NOVO: Filtro de Status -->
+                <div class="flex-shrink-0">
+                    <select name="status" class="form-select" style="width: auto;">
+                        <option value="">Todos os Status</option>
+                        <option value="pendente" <?= ($status_filtro === 'pendente') ? 'selected' : '' ?>>Pendente</option>
+                        <option value="aceito" <?= ($status_filtro === 'aceito') ? 'selected' : '' ?>>Aceito</option>
+                        <option value="realizado" <?= ($status_filtro === 'realizado') ? 'selected' : '' ?>>Realizado</option>
+                        <option value="cancelado" <?= ($status_filtro === 'cancelado') ? 'selected' : '' ?>>Cancelado</option>
+                        <option value="remarcado" <?= ($status_filtro === 'remarcado') ? 'selected' : '' ?>>Remarcado</option>
+                    </select>
+                </div>
+                <input class="form-control" type="search" name="q" placeholder="Buscar por cliente ou serviço..." value="<?= htmlspecialchars($termo_busca) ?>">
                 <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                <?php if (!empty($termo_busca)): ?>
+                <!-- CORREÇÃO: O botão de limpar deve aparecer se QUALQUER filtro estiver ativo -->
+                <?php if (!empty($termo_busca) || !empty($status_filtro)): ?>
                     <a href="gerir_agendamentos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
                 <?php endif; ?>
             </form>
@@ -147,6 +166,9 @@ include '../includes/navbar_logged_in.php';
                                                     break;
                                                 case 'cancelado':
                                                     $badge_class = 'bg-danger';
+                                                    break;
+                                                case 'remarcado':
+                                                    $badge_class = 'bg-light text-dark border';
                                                     break;
                                             }
                                             ?>

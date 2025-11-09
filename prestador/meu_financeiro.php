@@ -77,6 +77,26 @@ include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
 
+<!-- ESTILOS ESPECÍFICOS PARA IMPRESSÃO DESTA PÁGINA -->
+<style>
+    @media print {
+        /* Força a impressão das cores de fundo dos cards de resumo */
+        .card.bg-success, .card.bg-warning {
+            -webkit-print-color-adjust: exact !important; /* Chrome, Safari, Edge */
+            print-color-adjust: exact !important; /* Firefox */
+        }
+
+        /* Garante que o texto dentro dos cards coloridos permaneça visível */
+        .card.bg-success, .card.bg-success .card-title, .card.bg-success .card-text {
+            color: white !important;
+        }
+        .card.bg-warning, .card.bg-warning .card-title, .card.bg-warning .card-text {
+            color: #212529 !important; /* Cor escura padrão do Bootstrap */
+        }
+    }
+</style>
+
+
 <button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
     <i class="fas fa-bars"></i> Menu
 </button>
@@ -95,28 +115,28 @@ include '../includes/navbar_logged_in.php';
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="container-fluid p-4 flex-grow-1">
-        <h1 class="mb-4">Meu Financeiro</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Meu Financeiro</h1>
+            <button type="button" onclick="window.print();" class="btn btn-info no-print"><i class="fas fa-print me-1"></i>Imprimir Relatório</button>
+        </div>
         <?= $mensagem_erro ?>
 
-        <!-- Formulário de Filtro -->
-        <div class="card shadow-sm mb-4 no-print">
-            <div class="card-body">
-                <form method="GET" action="meu_financeiro.php" class="row-03 g-2">
-                    <div class="col-md-6">
-                        <label for="data_inicio" class="form-label">Data Início</label>
-                        <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="<?= htmlspecialchars($data_inicio) ?>">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="data_fim" class="form-label">Data Fim</label>
-                        <input type="date" class="form-control" id="data_fim" name="data_fim" value="<?= htmlspecialchars($data_fim) ?>">
-                    </div>
-                    <div class="col-12 d-flex mt-3">
-                        <button type="submit" class="btn btn-primary me-2"><i class="fas fa-filter me-1"></i>Filtrar</button>
-                        <a href="meu_financeiro.php" class="btn btn-outline-secondary me-2">Limpar Filtro</a>
-                        <button type="button" onclick="window.print();" class="btn btn-info ms-auto" id="btn-print"><i class="fas fa-print me-1"></i>Imprimir Relatório</button>
-                    </div>
-                </form>
-            </div>
+        <!-- Formulário de Filtro (sem card) -->
+        <div class="mb-4 p-3 rounded no-print" style="background-color: #f8f9fa;">
+            <form method="GET" action="meu_financeiro.php" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="data_inicio" class="form-label">Data Início</label>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="<?= htmlspecialchars($data_inicio) ?>">
+                </div>
+                <div class="col-md-5">
+                    <label for="data_fim" class="form-label">Data Fim</label>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="<?= htmlspecialchars($data_fim) ?>">
+                </div>
+                <div class="col-md-2 d-flex">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter"></i></button>
+                    <a href="meu_financeiro.php" class="btn btn-outline-secondary ms-2" title="Limpar Filtro"><i class="fas fa-times"></i></a>
+                </div>
+            </form>
         </div>
 
         <!-- Cards de Resumo -->

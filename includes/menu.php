@@ -4,6 +4,7 @@ if (!defined('BASE_URL')) {
     require_once __DIR__ . '/../config/config.php';
 }
 $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
+$tipo_admin = $_SESSION['admin_tipo'] ?? ''; // Pega o tipo específico do admin
 ?>
 
 <ul class="nav flex-column mt-2h100">
@@ -12,9 +13,12 @@ $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
         <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/dashboard.php"><i class="fas fa-chart-line fa-fw me-2"></i>Dashboard</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_utilizadores.php"><i class="fas fa-users fa-fw me-2"></i>Gerir Utilizadores</a>
-        </li>
+        <!-- CONDIÇÃO DE VISIBILIDADE PARA GERIR UTILIZADORES -->
+        <?php if ($tipo_admin === 'adminmaster'): ?>
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_utilizadores.php"><i class="fas fa-users fa-fw me-2"></i>Gerir Utilizadores</a>
+            </li>
+        <?php endif; ?>
         <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_agendamentos.php"><i class="fas fa-calendar-check fa-fw me-2"></i>Gerir Agendamentos</a>
         </li>
@@ -27,9 +31,12 @@ $tipo_usuario = $_SESSION['usuario_tipo'] ?? '';
         <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerenciar_adm.php"><i class="fas fa-user-shield fa-fw me-2"></i>Gerir Administradores</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_pagina_inicial.php"><i class="fas fa-home fa-fw me-2"></i>Gerir Página Inicial</a>
-        </li>
+        <!-- CONDIÇÃO DE VISIBILIDADE PARA GERIR PÁGINA INICIAL -->
+        <?php if ($tipo_admin === 'adminmaster' || $tipo_admin === 'admmoderador'): ?>
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_pagina_inicial.php"><i class="fas fa-desktop fa-fw me-2"></i>Gerenciar Site</a>
+            </li>
+        <?php endif; ?>
         <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/relatorios.php"><i class="fas fa-chart-pie fa-fw me-2"></i>Relatórios</a>
         </li>

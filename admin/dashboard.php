@@ -2,11 +2,12 @@
 session_start();
 require_once '../config/db.php';
 
-// 1. VERIFICAÇÃO DE SEGURANÇA
+// 1. VERIFICAÇÃO DE SEGURANÇA (CORRIGIDA)
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
 }
+$tipo_admin = $_SESSION['admin_tipo'] ?? ''; // Pega o tipo específico do admin
 
 // 2. LÓGICA DO DASHBOARD (BUSCA DE DADOS)
 $counts = [
@@ -69,15 +70,18 @@ include '../includes/navbar_logged_in.php';
 
         <div class="row mt-4">
             <!-- Cards de Ação -->
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-primary">
-                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-users fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Gerir Utilizadores</h5>
-                        <p class="card-text">Gerir clientes e prestadores de serviço.</p>
-                        <a href="gerir_utilizadores.php" class="btn btn-primary mt-auto">Acessar</a>
+            <!-- CONDIÇÃO DE VISIBILIDADE PARA O CARD "GERIR UTILIZADORES" -->
+            <?php if ($tipo_admin === 'adminmaster'): ?>
+                <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-primary">
+                        <div class="card-body text-center d-flex flex-column"><i class="fas fa-users fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Gerir Utilizadores</h5>
+                            <p class="card-text">Gerir clientes e prestadores de serviço.</p>
+                            <a href="gerir_utilizadores.php" class="btn btn-primary mt-auto">Acessar</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <?php endif; ?>
             <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-success">
                     <div class="card-body text-center d-flex flex-column"><i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
@@ -114,15 +118,20 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm border-secondary">
-                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-desktop fa-3x text-secondary mb-3"></i>
-                        <h5 class="card-title">Gerenciar Site</h5>
-                        <p class="card-text">Gerencie o conteúdo da página inicial.</p>
-                        <a href="gerir_pagina_inicial.php" class="btn btn-secondary mt-auto">Acessar</a>
+            
+            <!-- CONDIÇÃO DE VISIBILIDADE PARA O CARD "GERENCIAR SITE" -->
+            <?php if ($tipo_admin === 'adminmaster' || $tipo_admin === 'admmoderador'): ?>
+                <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-secondary">
+                        <div class="card-body text-center d-flex flex-column"><i class="fas fa-desktop fa-3x text-secondary mb-3"></i>
+                            <h5 class="card-title">Gerenciar Site</h5>
+                            <p class="card-text">Gerencie o conteúdo da página inicial.</p>
+                            <a href="gerir_pagina_inicial.php" class="btn btn-secondary mt-auto">Acessar</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <?php endif; ?>
+
             <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-danger">
                     <div class="card-body text-center d-flex flex-column"><i class="fas fa-chart-pie fa-3x text-danger mb-3"></i>

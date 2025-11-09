@@ -58,45 +58,90 @@ include '../includes/navbar_logged_in.php';
 </div>
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
-
     <div class="container-fluid p-4 flex-grow-1">
-        <h1 class="mb-4">Buscar Serviços</h1>
-
-        <!-- Formulário de Filtro -->
-        <div class="mb-4">
-            <form action="buscar_servicos.php" method="GET" class="d-flex">
-                <input class="form-control me-2" type="search" name="q" placeholder="Buscar por serviço ou prestador..." value="<?= htmlspecialchars($termo_busca) ?>">
-                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                <?php if (!empty($termo_busca)): ?>
-                    <a href="buscar_servicos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
-                <?php endif; ?>
-            </form>
-        </div>
-        
-        <div class="row">
-            <?php if (empty($servicos)): ?>
-                <div class="col-12">
-                    <div class="alert alert-info" role="alert">
-                        Nenhum serviço encontrado para "<?= htmlspecialchars($termo_busca) ?>". Tente uma busca diferente ou limpe o filtro.
+        <div class="container my-3" id="planos">
+            <h2 class="text-center mb-4">O que cada combo oferece</h2>
+            <hr class="my-2">
+            <p class="text-center lead mb-4">Trabalhamos com combos diários e mensais. Veja alguns dos
+                nossos níveis de serviço:</p>
+            <div class="row align-items-center justify-content-center">
+                <div class="col-lg-3 col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Combo Básico</h5>
+                            <p class="card-text small">Inclui: Limpar/lavar o chão, lavar banheiro, lavar louça/pia,
+                                limpar
+                                móveis, limpar espelhos, arrumar cama, limpar fogão, separar o lixo e organizar itens.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            <?php else: ?>
-                <?php foreach ($servicos as $servico): ?>
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title"><?= htmlspecialchars($servico['titulo']) ?></h5>
-                                <p class="card-text text-muted">Por: <?= htmlspecialchars($servico['nome_prestador']) ?></p>
-                                <p class="card-text flex-grow-1"><?= htmlspecialchars($servico['descricao']) ?></p>
-                                <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
-                                    <h4 class="text-success mb-0">R$ <?= number_format($servico['preco'], 2, ',', '.') ?></h4>
-                                    <a href="agendar.php?servico_id=<?= htmlspecialchars($servico['id']) ?>" class="btn btn-primary">Agendar</a>
+                <div class="col-lg-3 col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Combo Intermediário</h5>
+                            <p class="card-text small">Tudo do Básico e mais: encerar piso, tirar teia dos móveis/teto,
+                                limpar micro-ondas, limpeza de fornos.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Combo Brilhante</h5>
+                            <p class="card-text small">Tudo do Intermediário e mais: Lavar portas/janelas, limpar
+                                geladeira,
+                                limpar parede de gordura, limpar lustres e aspirar tapetes e sofás.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid p-4 flex-grow-1">
+            <h1 class="mb-4">Buscar Serviços</h1>
+
+            <!-- Formulário de Filtro -->
+            <div class="mb-4">
+                <form action="buscar_servicos.php" method="GET" class="d-flex">
+                    <input class="form-control me-2" type="search" name="q"
+                        placeholder="Buscar por serviço ou prestador..." value="<?= htmlspecialchars($termo_busca) ?>">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                    <?php if (!empty($termo_busca)): ?>
+                        <a href="buscar_servicos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
+                    <?php endif; ?>
+                </form>
+            </div>
+
+            <div class="row">
+                <?php if (empty($servicos)): ?>
+                    <div class="col-12">
+                        <div class="alert alert-info" role="alert">
+                            Nenhum serviço encontrado para "<?= htmlspecialchars($termo_busca) ?>". Tente uma busca
+                            diferente ou
+                            limpe o filtro.
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($servicos as $servico): ?>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title"><?= htmlspecialchars($servico['titulo']) ?></h5>
+                                    <p class="card-text text-muted">Por: <?= htmlspecialchars($servico['nome_prestador']) ?></p>
+                                    <p class="card-text flex-grow-1"><?= htmlspecialchars($servico['descricao']) ?></p>
+                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
+                                        <h4 class="text-success mb-0">R$ <?= number_format($servico['preco'], 2, ',', '.') ?>
+                                        </h4>
+                                        <a href="agendar.php?servico_id=<?= htmlspecialchars($servico['id']) ?>"
+                                            class="btn btn-primary">Agendar</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </main>

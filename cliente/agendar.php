@@ -1,7 +1,8 @@
 <?php
 session_start();
 require_once '../config/db.php';
-require_once '../config/enviar_email.php'; // 1. Incluir o arquivo de e-mail
+require_once '../config/config.php';
+require_once '../includes/log_helper.php'; // Inclui o helper de log
 
 // Segurança: Apenas clientes podem aceder a esta página
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'cliente') {
@@ -109,32 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
                         $stmt_update->execute([$remarcar_id, $id_cliente]);
                     }
 
+                    $id_novo_agendamento = $pdo->lastInsertId(); // Pega o ID do agendamento recém-criado
                     $pdo->commit(); // Confirma as alterações no banco
 
-                    // 2. Preparar e enviar o e-mail para o prestador
-                    $id_novo_agendamento = $pdo->lastInsertId();
-                    $sql_dados_email = "
-                        SELECT 
-                            a.data, a.hora,
-                            c.nome AS nome_cliente, c.email AS email_cliente,
-                            p.nome AS nome_prestador, p.email AS email_prestador, p.receber_notificacoes_email AS notificacao_prestador,
-                            s.titulo AS titulo_servico,
-                            e.logradouro, e.numero, e.bairro, e.cidade, e.uf
-                        FROM agendamento a
-                        JOIN cliente c ON a.Cliente_id = c.id
-                        JOIN prestador p ON a.Prestador_id = p.id
-                        JOIN servico s ON a.Servico_id = s.id
-                        JOIN endereco e ON a.Endereco_id = e.id
-                        WHERE a.id = ?
-                    ";
-                    $stmt_email = $pdo->prepare($sql_dados_email);
-                    $stmt_email->execute([$id_novo_agendamento]);
-                    $dadosAgendamento = $stmt_email->fetch(PDO::FETCH_ASSOC);
-
-                    if ($dadosAgendamento && $dadosAgendamento['notificacao_prestador'] == 1) {
-                        enviarEmailAgendamento('novo_agendamento_prestador', $dadosAgendamento);
-                    }
-
+                    // Registra a ação no log
+                    registrar_log_usuario('cliente', $id_cliente, 'Criou um novo agendamento', ['agendamento_id' => $id_novo_agendamento, 'servico_id' => $servico['id']]);
+                    // O código de envio de e-mail foi removido daqui.
                     $_SESSION['mensagem_sucesso'] = "Agendamento solicitado com sucesso! Aguarde a confirmação do prestador.";
                     header("Location: meus_agendamentos.php");
                     exit();
