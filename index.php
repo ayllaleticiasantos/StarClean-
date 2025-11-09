@@ -166,40 +166,32 @@ try {
 </div>
 
 <!-- Seção Planos -->
-<div class="container my-5" id="planos">
+<div class="container my-3" id="planos">
     <h2 class="text-center mb-4">Planos que se adaptam à sua rotina</h2>
     <hr class="my-2">
     <p class="text-center lead mb-4">Trabalhamos com combos diários, mensais e personalizados. Veja alguns dos nossos níveis de serviço:</p>
-    <div class="row">
-        <div class="col-lg-3 col-md-6 mb-4">
+    <div class="row align-items-center justify-content-center">
+        <div class="col-lg-3 col-md-3 mb-3">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body text-center">
                     <h5 class="card-title">Combo Básico</h5>
                     <p class="card-text small">Inclui: Limpar/lavar o chão, lavar banheiro, lavar louça/pia, limpar móveis, limpar espelhos, arrumar cama, limpar fogão, separar o lixo e organizar itens.</p>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-3 mb-3">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body text-center">
                     <h5 class="card-title">Combo Intermediário</h5>
                     <p class="card-text small">Tudo do Básico e mais: encerar piso, tirar teia dos móveis/teto, limpar micro-ondas, entre outros.</p>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-3 mb-3">
             <div class="card h-100">
-                <div class="card-body">
+                <div class="card-body text-center">
                     <h5 class="card-title">Combo Brilhante</h5>
                     <p class="card-text small">Tudo do Intermediário e mais: Lavar portas/janelas, limpar geladeira, limpar parede de gordura, limpar lustres e aspirar tapetes e sofás.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Combo Passadeira</h5>
-                    <p class="card-text small">Serviço avulso ou combinado, focado em passar suas roupas.</p>
                 </div>
             </div>
         </div>

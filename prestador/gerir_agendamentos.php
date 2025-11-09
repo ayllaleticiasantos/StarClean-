@@ -154,21 +154,25 @@ include '../includes/navbar_logged_in.php';
                                                 class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>
                                         </td>
                                         <td>
-                                            <div class="btn-group" role="group" aria-label="Ações do Agendamento">
                                             <div class="d-flex gap-1" role="group" aria-label="Ações do Agendamento">
                                                 <?php if ($status === 'pendente'): ?>
-                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito"
-                                                        class="btn btn-sm btn-success">Aceitar</a>
-                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado"
-                                                        class="btn btn-sm btn-danger">Recusar</a>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Aceitar">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Recusar">
+                                                        <i class="fas fa-times"></i>
+                                                    </a>
                                                 <?php elseif ($status === 'aceito'): ?>
-                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado"
-                                                        class="btn btn-sm btn-primary">Concluído?</a>
-                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado"
-                                                        class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja cancelar este agendamento? O cliente será notificado.');">Cancelar</a>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Marcar como Concluído">
+                                                        <i class="fas fa-clipboard-check"></i>
+                                                    </a>
+                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Cancelar Agendamento" onclick="return confirm('Tem certeza que deseja cancelar este agendamento? O cliente será notificado.');">
+                                                        <i class="fas fa-ban"></i>
+                                                    </a>
                                                 <?php endif; ?>
-                                                <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>"
-                                                    class="btn btn-sm btn-info">Visualizar</a>
+                                                <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="Visualizar Detalhes">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

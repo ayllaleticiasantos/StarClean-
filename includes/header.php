@@ -37,6 +37,9 @@ if (!defined('BASE_URL')) {
 
     <!-- Biblioteca de Gráficos (Chart.js) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Biblioteca de Editor de Texto Rico (TinyMCE) -->
+    <script src="https://cdn.tiny.cloud/1/s98nwfy460zya63abrfocp53rjiw5ydguwp2xtm3k7iv6jwu/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Pega o caminho completo da URL atual (ex: /star_clean/pages/sobre.php)

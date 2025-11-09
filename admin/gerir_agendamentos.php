@@ -93,6 +93,7 @@ include '../includes/navbar_logged_in.php';
                         <th>Data</th>
                         <th>Hora</th>
                         <th>Status</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -122,6 +123,23 @@ include '../includes/navbar_logged_in.php';
                                         }
                                     ?>
                                     <span class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($agendamento['status'])) ?></span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <?php if ($agendamento['status'] === 'pendente'): ?>
+                                            <a href="aceitar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="Aceitar em nome do prestador" onclick="return confirm('Tem certeza que deseja aceitar este agendamento?');">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            <a href="processar_agendamento_admin.php?id=<?= $agendamento['id'] ?>&acao=cancelado" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Cancelar Agendamento" onclick="return confirm('Tem certeza que deseja cancelar este agendamento?');">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        <?php elseif ($agendamento['status'] === 'aceito'): ?>
+                                            <a href="processar_agendamento_admin.php?id=<?= $agendamento['id'] ?>&acao=realizado" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Marcar como Concluído">
+                                                <i class="fas fa-clipboard-check"></i>
+                                            </a>
+                                        <?php endif; ?>
+                                        <a href="visualizar_agendamento.php?id=<?= $agendamento['id'] ?>" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="Visualizar Detalhes"><i class="fas fa-eye"></i></a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

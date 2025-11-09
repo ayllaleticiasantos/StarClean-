@@ -61,7 +61,7 @@ CREATE TABLE `agendamento` (
   `Endereco_id` int(11) NOT NULL,
   `data` date NOT NULL,
   `hora` time NOT NULL,
-  `status` enum('pendente','aceito','realizado','cancelado') NOT NULL DEFAULT 'pendente',
+  `status` enum('pendente','aceito','realizado','cancelado','remarcado') NOT NULL DEFAULT 'pendente',
   `observacoes` text DEFAULT NULL,
   `tem_pets` tinyint(1) NOT NULL DEFAULT 0,
   `tem_crianca` tinyint(1) NOT NULL DEFAULT 0,

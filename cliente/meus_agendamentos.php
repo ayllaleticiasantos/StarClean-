@@ -111,6 +111,7 @@ include '../includes/navbar_logged_in.php';
                                                 elseif ($status === 'aceito') $badge_class = 'bg-success';
                                                 elseif ($status === 'realizado') $badge_class = 'bg-primary';
                                                 elseif ($status === 'cancelado') $badge_class = 'bg-danger';
+                                                elseif ($status === 'remarcado') $badge_class = 'bg-light text-dark border';
                                             ?>
                                             <span class="badge <?= $badge_class ?>"><?= htmlspecialchars(ucfirst($status)) ?></span>
                                         </td>
@@ -122,10 +123,10 @@ include '../includes/navbar_logged_in.php';
                                             <?php elseif ($status === 'realizado'): ?>
                                                 <a href="avaliar_servico.php?id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-success" title="Avaliar Serviço"><i class="fas fa-star"></i></a>
                                             <?php elseif ($status === 'cancelado'): ?>
-                                                <a href="agendar.php?servico_id=<?= $agendamento['servico_id'] ?>" class="btn btn-sm btn-primary" title="Remarcar Serviço">
-                                                    <i class="fas fa-redo"></i> Remarcar
+                                                <a href="agendar.php?servico_id=<?= $agendamento['servico_id'] ?>&remarcar_id=<?= $agendamento['id'] ?>" class="btn btn-sm btn-primary" title="Remarcar Serviço">
+                                                    <i class="fas fa-redo"></i>
                                                 </a>
-                                            <?php endif; ?>
+                                            <?php endif; // Nenhuma ação é exibida para status 'remarcado' ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

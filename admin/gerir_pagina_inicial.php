@@ -164,6 +164,9 @@ include '../includes/navbar_logged_in.php';
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="servicos-tab" data-bs-toggle="tab" data-bs-target="#servicos-content" type="button" role="tab">Serviços Cadastrados</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="termos-tab" data-bs-toggle="tab" data-bs-target="#termos-content" type="button" role="tab">Termos de Uso</button>
+            </li>
         </ul>
 
         <div class="tab-content" id="myTabContent">
@@ -259,6 +262,23 @@ include '../includes/navbar_logged_in.php';
                 </form>
             </div>
 
+            <!-- Conteúdo da Aba Termos de Uso -->
+            <div class="tab-pane fade" id="termos-content" role="tabpanel">
+                <form action="gerir_pagina_inicial.php" method="post">
+                    <div class="card mt-3">
+                        <div class="card-header"><h5>Editor dos Termos de Uso</h5></div>
+                        <div class="card-body">
+                            <p class="text-muted">Edite o conteúdo que aparece no pop-up de Termos de Uso. Você pode usar formatação como negrito, listas e links.</p>
+                            <?php $item_termos = $conteudo_geral['termos_de_uso'][0] ?? ['chave' => 'termos_de_uso_conteudo', 'conteudo' => '']; ?>
+                            <textarea id="editor-termos" name="conteudo_geral[<?= $item_termos['chave'] ?>]">
+                                <?= htmlspecialchars($item_termos['conteudo']) ?>
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="mt-4"><button type="submit" class="btn btn-primary btn-lg">Salvar Termos de Uso</button></div>
+                </form>
+            </div>
+
             <!-- Conteúdo da Aba Serviços -->
             <div class="tab-pane fade" id="servicos-content" role="tabpanel">
                 <div class="card mt-3">
@@ -305,3 +325,12 @@ include '../includes/navbar_logged_in.php';
 </main>
 
 <?php include '../includes/footer.php'; ?>
+
+<script>
+  // Inicializa o editor de texto rico TinyMCE
+  tinymce.init({
+    selector: '#editor-termos',
+    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+  });
+</script>

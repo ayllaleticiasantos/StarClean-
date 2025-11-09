@@ -12,6 +12,7 @@ $mensagem = '';
 $servico = null;
 $enderecos_cliente = []; 
 $id_cliente = $_SESSION['usuario_id'];
+$remarcar_id = $_GET['remarcar_id'] ?? null; // <-- NOVO: Captura o ID do agendamento a ser remarcado
 
 // Valida o servico_id
 if (!isset($_GET['servico_id']) || !is_numeric($_GET['servico_id'])) {
@@ -89,7 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
             } else {
                 // Se a validação da data/hora passar, prossegue com o INSERT
                 try {
+                    // --- MUDANÇA: Inicia uma transação para garantir a integridade dos dados ---
                     $pdo = obterConexaoPDO();
+                    $pdo->beginTransaction();
                     
                     $stmt = $pdo->prepare(
                         "INSERT INTO Agendamento (cliente_id, prestador_id, servico_id, endereco_id, data, hora, status, observacoes, tem_pets, tem_crianca, possui_aspirador)
@@ -97,10 +100,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
                     );
                     $stmt->execute([$id_cliente, $prestador_id, $servico['id'], $endereco_id, $data, $hora, $status, $observacoes, $tem_pets, $tem_crianca, $possui_aspirador]);
 
+                    // --- NOVO: Se for uma remarcação, atualiza o status do agendamento antigo ---
+                    if (!empty($remarcar_id)) {
+                        $stmt_update = $pdo->prepare(
+                            "UPDATE Agendamento SET status = 'remarcado' WHERE id = ? AND Cliente_id = ? AND status = 'cancelado'"
+                        );
+                        $stmt_update->execute([$remarcar_id, $id_cliente]);
+                    }
+
+                    $pdo->commit(); // Confirma as alterações no banco
+
                     $_SESSION['mensagem_sucesso'] = "Agendamento solicitado com sucesso! Aguarde a confirmação do prestador.";
                     header("Location: meus_agendamentos.php");
                     exit();
                 } catch (PDOException $e) {
+                    $pdo->rollBack(); // Desfaz as alterações em caso de erro
                     $mensagem = '<div class="alert alert-danger">Erro ao solicitar o agendamento. Verifique se a data e hora são válidas.</div>';
                     error_log("Erro no INSERT de Agendamento: " . $e->getMessage());
                 }
@@ -158,7 +172,8 @@ include '../includes/navbar_logged_in.php';
                     <h5>Detalhes do Agendamento</h5>
                 </div>
                 <div class="card-body">
-                    <form action="agendar.php?servico_id=<?= htmlspecialchars($servico['id']) ?>" method="post" onsubmit="return validarDisponibilidade(event)">
+                    <!-- MUDANÇA: Adiciona o remarcar_id na action do formulário -->
+                    <form action="agendar.php?servico_id=<?= htmlspecialchars($servico['id']) ?>&remarcar_id=<?= htmlspecialchars($remarcar_id) ?>" method="post" onsubmit="return validarDisponibilidade(event)">
                         
                         <div class="mb-3">
                             <label for="endereco_id" class="form-label">Selecione o Endereço:</label>
