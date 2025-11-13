@@ -106,6 +106,23 @@ INSERT INTO `agendamento` (`id`, `Cliente_id`, `Prestador_id`, `Servico_id`, `En
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `notificacoes`
+--
+
+CREATE TABLE `notificacoes` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `tipo_usuario` enum('admin','cliente','prestador') NOT NULL,
+  `mensagem` varchar(255) NOT NULL,
+  `link` varchar(255) DEFAULT NULL,
+  `lida` tinyint(1) NOT NULL DEFAULT 0,
+  `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `avaliacao_prestador`
 --
 
@@ -592,6 +609,13 @@ ALTER TABLE `log_prestador_atividades`
   ADD KEY `fk_log_prestador_idx` (`prestador_id`);
 
 --
+-- Índices de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_usuario_lida` (`usuario_id`,`tipo_usuario`,`lida`);
+
+--
 -- Índices de tabela `prestador`
 --
 ALTER TABLE `prestador`
@@ -682,6 +706,12 @@ ALTER TABLE `log_cliente_atividades`
 -- AUTO_INCREMENT de tabela `log_prestador_atividades`
 --
 ALTER TABLE `log_prestador_atividades`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

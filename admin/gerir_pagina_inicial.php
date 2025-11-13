@@ -225,8 +225,12 @@ include '../includes/navbar_logged_in.php';
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="index-content" role="tabpanel">
                 <form action="gerir_pagina_inicial.php" method="post" enctype="multipart/form-data">
-                    <div class="card mt-3">
-                        <div class="card-header"><h5>Textos da Página Inicial</h5></div>
+                    <div class="card mt-3 shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Textos da Página Inicial</h5>
+                            <input type="text" id="filtroConteudoIndex" class="form-control form-control-sm" placeholder="Filtrar itens do carrossel/cards..." style="width: 300px;">
+                        </div>
+
                         <div class="card-body">
                             <?php foreach ($conteudo_geral['index'] ?? [] as $item): ?>
                                 <div class="mb-3">
@@ -257,7 +261,7 @@ include '../includes/navbar_logged_in.php';
                             </div>
                             <div class="accordion" id="accordion-<?= $tipo_atual ?>">
                         <?php endif; ?>
-                        <div class="accordion-item mb-3 shadow-sm">
+                        <div class="accordion-item mb-3 shadow-sm" data-filter-text-index="<?= strtolower(htmlspecialchars($item['titulo'] . ' ' . $item['texto'])) ?>">
                             <h2 class="accordion-header" id="heading-<?= $item['id'] ?>">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?= $item['id'] ?>">
                                     <strong>Item #<?= $item['ordem'] ?>:</strong>&nbsp;<?= htmlspecialchars($item['titulo']) ?>
@@ -296,7 +300,10 @@ include '../includes/navbar_logged_in.php';
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; if (!empty($conteudos)) echo '</div>'; ?>
+                    <?php endforeach; ?>
+                    <?php if (!empty($conteudos)) echo '</div>'; ?>
+                    <div id="nenhumItemIndexEncontrado" class="alert alert-warning text-center mt-3" style="display: none;">Nenhum item encontrado para o filtro informado.</div>
+
                     <div class="mt-4"><button type="submit" class="btn btn-primary btn-lg">Salvar Alterações da Página Inicial</button></div>
                 </form>
             </div>
@@ -398,12 +405,17 @@ include '../includes/navbar_logged_in.php';
 
             <div class="tab-pane fade" id="blocos-content" role="tabpanel">
                 <div class="card mt-4 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Gerenciador de Conteúdo da Página Inicial</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center no-print">
+                        <h5 class="mb-0">Gerenciador de Conteúdo</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" id="filtroBlocos" class="form-control form-control-sm" placeholder="Filtrar por título ou tipo..." style="width: 250px;">
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBloco">
                             <i class="fas fa-plus me-2"></i>Adicionar Novo Conteúdo
                         </button>
+                        </div>
                     </div>
+
+
                     <div class="card-body">
                         <p class="text-muted">Adicione, edite e reordene os blocos de conteúdo que aparecem na sua página inicial. Arraste e solte para reordenar.</p>
                         
@@ -412,8 +424,7 @@ include '../includes/navbar_logged_in.php';
                         <?php else: ?>
                             <ul class="list-group">
                                 <?php foreach ($blocos_conteudo as $bloco): ?>
-                                    <?php $dados_bloco = json_decode($bloco['conteudo_json'], true); ?>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <?php $dados_bloco = json_decode($bloco['conteudo_json'], true); ?>                                    <li class="list-group-item d-flex justify-content-between align-items-center" data-filter-text-bloco="<?= strtolower(htmlspecialchars($bloco['titulo_admin'] . ' ' . $bloco['tipo_bloco'])) ?>">
                                         <div>
                                             <span class="badge bg-secondary me-2">Ordem: <?= $bloco['ordem'] ?></span>
                                             <strong><?= htmlspecialchars($bloco['titulo_admin']) ?></strong>
@@ -428,12 +439,15 @@ include '../includes/navbar_logged_in.php';
                                                 data-bloco-ordem="<?= $bloco['ordem'] ?>"
                                                 data-bloco-ativo="<?= $bloco['ativo'] ?>"
                                                 data-bloco-conteudo='<?= htmlspecialchars($bloco['conteudo_json'], ENT_QUOTES, 'UTF-8') ?>'>
-                                                Editar
-                                            </button>
+                                                Editar</button> 
+                                            <a href="excluir_conteudo_pagina.php?id=<?= $bloco['id'] ?>&tabela=blocos_conteudo" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir permanentemente este bloco? Esta ação não pode ser desfeita.');">
+                                                Excluir
+                                            </a>
                                         </div>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
+                            <div id="nenhumBlocoEncontrado" class="alert alert-warning text-center mt-3" style="display: none;">Nenhum bloco de conteúdo encontrado para o filtro informado.</div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -456,7 +470,7 @@ include '../includes/navbar_logged_in.php';
 
                     <div class="mb-3">
                         <label for="bloco_titulo_admin" class="form-label">Título de Identificação (visível somente para administradores)</label>
-                        <input type="text" class="form-control" id="bloco_titulo_admin" name="bloco_titulo_admin" placeholder="Ex: Seção de Boas-Vindas" required>
+                        <input type="text" class="form-control" id="bloco_titulo_admin" name="bloco_titulo_admin" placeholder="Ex: Seção de Boas-Vindas da Home" required>
                     </div>
 
                     <div class="row">
@@ -469,7 +483,7 @@ include '../includes/navbar_logged_in.php';
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="bloco_ordem" class="form-label">Ordem de Exibição</label>
-                            <input type="number" class="form-control" id="bloco_ordem" name="bloco_ordem" value="0" placeholder="Escolha a ordem de exibição do bloco" required>
+                            <input type="number" class="form-control" id="bloco_ordem" name="bloco_ordem" value="0" placeholder="0" required>
                         </div>
                     </div>
 
@@ -489,7 +503,7 @@ include '../includes/navbar_logged_in.php';
                             </div>
                             <div class="mb-3">
                                 <label for="bloco_card_texto" class="form-label">Texto do Card</label>
-                                <textarea class="form-control" name="bloco_card_texto" id="bloco_card_texto" rows="4" placeholder="Descreva sobre o que se trata este conteúdo..."></textarea>
+                                <textarea class="form-control" name="bloco_card_texto" id="bloco_card_texto" rows="4" placeholder="Descreva sobre o que se trata este card..."></textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="bloco_card_imagem" class="form-label">Imagem do Card</label>
@@ -600,25 +614,59 @@ include '../includes/navbar_logged_in.php';
       });
   });
 
-  // Filtro dinâmico para a aba de serviços
-  const filtroServicosInput = document.getElementById('filtroServicos');
-  if (filtroServicosInput) {
-      filtroServicosInput.addEventListener('keyup', function() {
-          const termoBusca = this.value.toLowerCase();
-          const itensAccordion = document.querySelectorAll('#accordion-servicos .accordion-item');
-          const mensagemNenhumResultado = document.getElementById('nenhumServicoEncontrado');
-          let resultadosEncontrados = 0;
+  document.addEventListener('DOMContentLoaded', function() {
+      // Função genérica para filtrar
+      function configurarFiltro(inputId, containerSelector, itemSelector, noResultsId, dataAttribute) {
+          const input = document.getElementById(inputId);
+          if (!input) return;
 
-          itensAccordion.forEach(function(item) {
-              const textoItem = item.getAttribute('data-filter-text');
-              if (textoItem.includes(termoBusca)) {
-                  item.style.display = '';
-                  resultadosEncontrados++;
-              } else {
-                  item.style.display = 'none';
+          input.addEventListener('keyup', function() {
+              const termoBusca = this.value.toLowerCase();
+              const itens = document.querySelectorAll(`${containerSelector} ${itemSelector}`);
+              const mensagemNenhumResultado = document.getElementById(noResultsId);
+              let resultadosEncontrados = 0;
+
+              itens.forEach(function(item) {
+                  const textoItem = item.getAttribute(dataAttribute);
+                  if (textoItem && textoItem.includes(termoBusca)) {
+                      item.style.display = '';
+                      resultadosEncontrados++;
+                  } else {
+                      item.style.display = 'none';
+                  }
+              });
+
+              if (mensagemNenhumResultado) {
+                  mensagemNenhumResultado.style.display = resultadosEncontrados > 0 ? 'none' : 'block';
               }
           });
-          mensagemNenhumResultado.style.display = resultadosEncontrados > 0 ? 'none' : 'block';
-      });
-  }
+      }
+
+      // Filtro para a aba de SERVIÇOS
+      configurarFiltro(
+          'filtroServicos',
+          '#accordion-servicos',
+          '.accordion-item',
+          'nenhumServicoEncontrado',
+          'data-filter-text'
+      );
+
+      // Filtro para a aba de CONTEÚDO DA PÁGINA INICIAL (Carrossel e Cards)
+      configurarFiltro(
+          'filtroConteudoIndex',
+          '#index-content',
+          '.accordion-item',
+          'nenhumItemIndexEncontrado',
+          'data-filter-text-index'
+      );
+
+      // Filtro para a aba de BLOCOS DE CONTEÚDO
+      configurarFiltro(
+          'filtroBlocos',
+          '#blocos-content .list-group',
+          '.list-group-item',
+          'nenhumBlocoEncontrado',
+          'data-filter-text-bloco'
+      );
+  });
 </script>
