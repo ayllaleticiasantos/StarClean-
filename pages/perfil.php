@@ -3,7 +3,6 @@ session_start();
 require_once '../includes/validation_helper.php'; // Inclui o nosso helper
 require_once '../config/db.php';
 
-// Segurança: Se não estiver logado, redireciona para o login
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: ../pages/login.php");
     exit();
@@ -12,7 +11,6 @@ if (!isset($_SESSION['usuario_id'])) {
 $id_usuario = $_SESSION['usuario_id'];
 $tipo_usuario = $_SESSION['usuario_tipo'];
 
-// Determina a tabela correta com base no tipo de usuário
 $tabela = '';
 $coluna_nome = '';
 switch ($tipo_usuario) {
@@ -30,25 +28,22 @@ switch ($tipo_usuario) {
         break;
 }
 
-// Lógica para processar os formulários
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = obterConexaoPDO();
 
-    // Formulário de atualização de dados
     if (isset($_POST['atualizar_dados'])) {
         $nome = trim($_POST['nome']);
         $email = trim($_POST['email']);
 
         $stmt = $pdo->prepare("UPDATE `$tabela` SET `$coluna_nome` = ?, email = ? WHERE id = ?");
         if ($stmt->execute([$nome, $email, $id_usuario])) {
-            $_SESSION['usuario_nome'] = $nome; // Atualiza o nome na sessão também
+            $_SESSION['usuario_nome'] = $nome;
             $_SESSION['mensagem_sucesso'] = "Dados atualizados com sucesso!";
         } else {
             $_SESSION['mensagem_erro'] = "Erro ao atualizar os dados.";
         }
     }
     
-    // Formulário de alteração de senha
     if (isset($_POST['alterar_senha'])) {
         $senha_atual = $_POST['senha_atual'];
         $nova_senha = $_POST['nova_senha'];
@@ -61,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($nova_senha !== $confirmar_nova_senha) {
             $_SESSION['mensagem_erro'] = "As novas senhas não correspondem.";
         } else {
-            // Busca a senha atual no banco de dados para verificação
             $stmt = $pdo->prepare("SELECT password FROM `$tabela` WHERE id = ?");
             $stmt->execute([$id_usuario]);
             $usuario = $stmt->fetch();
@@ -69,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$usuario || !password_verify($senha_atual, $usuario['password'])) {
                 $_SESSION['mensagem_erro'] = "A senha atual está incorreta.";
             } else {
-                // Se tudo estiver correto, atualiza a senha
                 $nova_senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
                 $stmt_update = $pdo->prepare("UPDATE `$tabela` SET password = ? WHERE id = ?");
                 if ($stmt_update->execute([$nova_senha_hash, $id_usuario])) {
@@ -81,12 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Redireciona para a mesma página para evitar reenvio do formulário
     header("Location: perfil.php");
     exit();
 }
-
-// Busca os dados atuais do usuário para exibir no formulário
 $pdo = obterConexaoPDO();
 $stmt = $pdo->prepare("SELECT `$coluna_nome` as nome, email FROM `$tabela` WHERE id = ?");
 $stmt->execute([$id_usuario]);
@@ -195,7 +185,6 @@ include '../includes/navbar_logged_in.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // --- LÓGICA DE VALIDAÇÃO DE SENHA (FRONTEND) ---
     const senhaInput = document.getElementById('nova_senha');
     const requirements = {
         length: document.getElementById('length'),
@@ -229,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     senhaInput.addEventListener('input', validatePassword);
 
-    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
     function setupTogglePassword(inputId, buttonId, iconId) {
         const input = document.getElementById(inputId);
         const button = document.getElementById(buttonId);

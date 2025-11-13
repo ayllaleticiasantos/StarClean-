@@ -2,17 +2,15 @@
 session_start();
 require_once '../config/db.php'; 
 
-// Lógica para buscar avaliações
 $avaliacoes = [];
 $erro_banco = '';
 try {
     $pdo = obterConexaoPDO();
 
-    // Consulta SQL para buscar as avaliações mais recentes e o nome do cliente
     $stmt = $pdo->prepare(
         "SELECT ap.comentario, ap.nota, ap.oculto, c.nome AS nome_cliente 
          FROM avaliacao_prestador ap
-         JOIN cliente c ON ap.Cliente_id = c.id
+         JOIN cliente c ON ap.Cliente_id = c.id 
          WHERE ap.comentario IS NOT NULL AND ap.nota IS NOT NULL
          ORDER BY ap.id DESC"
     );
@@ -24,7 +22,6 @@ try {
     $erro_banco = '<div class="alert alert-danger text-center">Não foi possível carregar as avaliações no momento.</div>';
 }
 
-// CORREÇÃO: Removido include '../config/config.php';
 include '../includes/header.php';
 include '../includes/navbar.php';
 
@@ -54,8 +51,7 @@ include '../includes/navbar.php';
                             <div class="card-body d-flex flex-column">
                                 
                                 <div class="text-center mb-3">
-                                    <?php 
-                                        // Geração dinâmica das estrelas
+                                    <?php
                                         $nota = (int)$avaliacao['nota'];
                                         for ($i = 1; $i <= 5; $i++): 
                                     ?>

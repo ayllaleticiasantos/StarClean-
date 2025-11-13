@@ -3,7 +3,6 @@ session_start();
 require_once '../includes/validation_helper.php'; // Inclui o nosso helper
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -13,19 +12,17 @@ $pdo = obterConexaoPDO();
 $mensagem_erro = '';
 $mensagem_sucesso = '';
 
-// --- 1. LÓGICA DE ATUALIZAÇÃO (QUANDO O FORMULÁRIO É ENVIADO VIA POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
     $nome = trim($_POST['nome']);
     $sobrenome = trim($_POST['sobrenome']);
     $email = trim($_POST['email']);
     $tipo = $_POST['tipo'];
-    $senha = $_POST['senha']; // Nova senha (opcional)
+    $senha = $_POST['senha']; 
 
     if ($id && !empty($nome) && !empty($email) && !empty($tipo)) {
         try {
             if (!empty($senha)) {
-                // Valida a nova senha
                 $erros_senha = validarSenhaForte($senha);
                 if (!empty($erros_senha)) {
                     $_SESSION['mensagem_erro'] = "A nova senha não é forte o suficiente: <ul><li>" . implode("</li><li>", $erros_senha) . "</li></ul>";
@@ -33,32 +30,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit();
                 }
 
-                // Se a senha for forte, atualiza
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare(
                     "UPDATE Administrador SET nome = ?, sobrenome = ?, email = ?, tipo = ?, password = ? WHERE id = ?"
                 );
                 $stmt->execute([$nome, $sobrenome, $email, $tipo, $senhaHash, $id]);
             } else {
-                // Atualiza sem alterar a senha
                 $stmt = $pdo->prepare(
                     "UPDATE Administrador SET nome = ?, sobrenome = ?, email = ?, tipo = ? WHERE id = ?"
                 );
                 $stmt->execute([$nome, $sobrenome, $email, $tipo, $id]);
+            //     registrar_log_admin($id_admin_logado, "Excluiu um utilizador do tipo $tipo com ID $id.");
             }
 
             $_SESSION['mensagem_sucesso'] = "Administrador atualizado com sucesso!";
-            header("Location: dashboard.php"); // Redireciona para o painel
+            header("Location: dashboard.php");
             exit();
 
         } catch (PDOException $e) {
-            // Código 23000 é para violação de chave única (email duplicado)
             if ($e->getCode() == 23000) {
                 $_SESSION['mensagem_erro'] = "Erro: O e-mail informado já está em uso por outra conta.";
             } else {
                 $_SESSION['mensagem_erro'] = "Erro ao atualizar o administrador.";
             }
-            // Redireciona de volta para a página de edição para mostrar o erro
             header("Location: editar_adm.php?id=" . $id);
             exit();
         }
@@ -69,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// --- 2. LÓGICA PARA BUSCAR DADOS (QUANDO A PÁGINA É CARREGADA VIA GET) ---
 $admin_atual = null;
 $id_admin_para_editar = $_GET['id'] ?? null;
 
@@ -88,12 +81,12 @@ if ($id_admin_para_editar && is_numeric($id_admin_para_editar)) {
         die("Erro ao buscar dados do administrador: " . $e->getMessage());
     }
 } else {
-    // Se não houver ID, não há quem editar.
     header("Location: dashboard.php");
+    registrar_log_admin($id_admin_logado, "Editou um utilizador do tipo $tipo com ID $id.");
+
     exit();
 }
 
-// --- 3. HTML DA PÁGINA ---
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
@@ -147,7 +140,6 @@ include '../includes/navbar_logged_in.php';
                     </div>
                     <small class="form-text text-muted">Preencha apenas se desejar alterar a senha atual. Se preenchido, deve ser uma senha forte.</small>
                     
-                    <!-- Requisitos da Senha (Feedback Visual) -->
                     <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
                         <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
                         <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
@@ -188,7 +180,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function validatePassword() {
         const value = senhaInput.value;
 
-        // Se o campo estiver vazio, esconde a lista e não valida
         if (value.length === 0) {
             requirementsList.style.display = 'none';
             return;
@@ -210,17 +201,14 @@ document.addEventListener('DOMContentLoaded', function() {
     senhaInput.addEventListener('input', validatePassword);
     validatePassword(); // Executa uma vez ao carregar para esconder a lista se o campo estiver vazio
 
-    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
     const toggleButton = document.getElementById('toggleSenha');
     const icon = document.getElementById('iconSenha');
 
     if (toggleButton && senhaInput && icon) {
         toggleButton.addEventListener('click', function() {
-            // Alterna o tipo do input
             const type = senhaInput.getAttribute('type') === 'password' ? 'text' : 'password';
             senhaInput.setAttribute('type', type);
             
-            // Alterna o ícone
             icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
         });
     }

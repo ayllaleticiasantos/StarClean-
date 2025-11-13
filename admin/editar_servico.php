@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -17,12 +16,9 @@ $id_servico = $_GET['id'] ?? null;
 try {
     $pdo = obterConexaoPDO();
     
-    // 1. Buscar todos os prestadores para o campo de seleção
-    // Nota: A coluna 'nome' é usada para o Prestador (conforme o schema do seu banco)
     $stmt_prestadores = $pdo->query("SELECT id, nome FROM Prestador ORDER BY nome ASC");
     $prestadores = $stmt_prestadores->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Lógica para buscar o serviço atual (GET)
     if (empty($id_servico) || !is_numeric($id_servico)) {
         $_SESSION['mensagem_erro'] = "ID do serviço não fornecido ou inválido.";
         header("Location: dashboard.php");
@@ -39,7 +35,6 @@ try {
         exit();
     }
     
-    // Lógica para exibir mensagens de feedback
     if (isset($_SESSION['mensagem_sucesso'])) {
         $mensagem_sucesso = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_sucesso'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
         unset($_SESSION['mensagem_sucesso']);
@@ -54,43 +49,35 @@ try {
     $mensagem_erro = '<div class="alert alert-danger">Erro ao carregar dados essenciais.</div>';
 }
 
-// --- 3. Lógica de Atualização (POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico_atual) {
-    // Coleta os dados do formulário
     $titulo = trim($_POST['titulo']);
     $descricao = trim($_POST['descricao']);
     $preco_formatado = $_POST['preco'];
     $prestador_id_novo = $_POST['prestador_id'] ?? null; 
+    $oculto = isset($_POST['oculto']) ? 1 : 0;
 
-    // --- LÓGICA PARA LIMPAR A MÁSCARA DE MOEDA ---
-    // Remove "R$", espaços em branco e o separador de milhar (.)
     $preco_limpo = preg_replace('/[R$\s\.]/', '', $preco_formatado);
-    // Substitui a vírgula decimal por um ponto decimal
     $preco = str_replace(',', '.', $preco_limpo);
 
-    // Validação
     if (empty($titulo) || empty($preco) || empty($prestador_id_novo)) {
         $_SESSION['mensagem_erro'] = "O título, o preço e o prestador são obrigatórios. Certifique-se de que o preço é um valor válido.";
     } else {
         try {
             $pdo = obterConexaoPDO();
             
-            // Executa o UPDATE no banco de dados
             $stmt = $pdo->prepare(
-                "UPDATE Servico SET prestador_id = ?, titulo = ?, descricao = ?, preco = ? WHERE id = ?"
+                "UPDATE Servico SET prestador_id = ?, titulo = ?, descricao = ?, preco = ?, oculto = ? WHERE id = ?"
             );
-            $stmt->execute([$prestador_id_novo, $titulo, $descricao, $preco, $id_servico]);
+            $stmt->execute([$prestador_id_novo, $titulo, $descricao, $preco, $oculto, $id_servico]);
 
             $_SESSION['mensagem_sucesso'] = "Serviço #{$id_servico} atualizado com sucesso!";
-            // Redireciona para o painel de administração (ou para a página de listagem)
-            header("Location: dashboard.php"); 
+            header("Location: gerir_pagina_inicial.php#servicos-tab"); 
             exit();
 
         } catch (PDOException $e) {
             $_SESSION['mensagem_erro'] = "Erro ao atualizar o serviço. Detalhes: " . htmlspecialchars($e->getMessage());
         }
     }
-    // Se houver erro, recarrega a página de edição para mostrar a mensagem
     header("Location: editar_servico.php?id=" . $id_servico);
     exit();
 }
@@ -134,7 +121,6 @@ include '../includes/navbar_logged_in.php';
                             <select class="form-select" id="prestador_id" name="prestador_id" required>
                                 <option value="">-- Selecione o Prestador --</option>
                                 <?php foreach ($prestadores as $prestador): 
-                                    // Marca o prestador atual como selecionado
                                     $selected = ($prestador['id'] == $servico_atual['prestador_id']) ? 'selected' : '';
                                 ?>
                                     <option value="<?= htmlspecialchars($prestador['id']) ?>" <?= $selected ?>>
@@ -159,6 +145,11 @@ include '../includes/navbar_logged_in.php';
                             <input type="text" class="form-control" id="preco" name="preco" value="R$ <?= number_format($servico_atual['preco'], 2, ',', '.') ?>" required placeholder="Ex: R$ 50,00">
                         </div>
 
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" id="oculto" name="oculto" value="1" <?= $servico_atual['oculto'] ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="oculto">Ocultar este serviço (não aparecerá nas buscas dos clientes)</label>
+                        </div>
+
                         <button type="submit" class="btn btn-warning">Salvar Alterações</button>
                         <a href="dashboard.php" class="btn btn-secondary">Cancelar</a>
                     </form>
@@ -178,20 +169,14 @@ include '../includes/footer.php';
 document.addEventListener('DOMContentLoaded', function() {
     const precoInput = document.getElementById('preco');
 
-    // Função para formatar o valor como moeda brasileira
     function formatarMoeda(e) {
-        // Remove todos os caracteres que não são dígitos
         let valor = e.target.value.replace(/\D/g, '');
 
-        // Converte para número e divide por 100 para obter os centavos
         valor = (parseFloat(valor) / 100).toFixed(2);
 
-        // Formata usando as regras do Brasil (R$, vírgula para centavos, ponto para milhares)
-        // Se o valor for inválido (NaN), retorna uma string vazia
         e.target.value = isNaN(valor) ? '' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
     }
 
-    // Adiciona o evento 'input' para formatar enquanto o usuário digita
     precoInput.addEventListener('input', formatarMoeda);
 });
 </script>

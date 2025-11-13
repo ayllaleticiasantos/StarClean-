@@ -6,7 +6,6 @@ require_once '../config/db.php';
 $mensagem = '';
 $token_valido = false;
 
-// 1. Verifica se o token foi passado na URL
 if (!isset($_GET['token'])) {
     die("Token não fornecido.");
 }
@@ -16,12 +15,10 @@ $token = $_GET['token'];
 try {
     $pdo = obterConexaoPDO();
 
-    // 2. Busca o token no banco de dados
     $stmt = $pdo->prepare("SELECT * FROM redefinicao_senha WHERE token = ?");
     $stmt->execute([$token]);
     $pedido = $stmt->fetch();
 
-    // 3. Verifica se o token existe e não expirou
     if ($pedido && new DateTime() < new DateTime($pedido['data_expiracao'])) {
         $token_valido = true;
         $email_usuario = $pedido['email'];
@@ -34,12 +31,10 @@ try {
 }
 
 
-// 4. Se o formulário de nova senha foi enviado e o token é válido
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido) {
     $nova_senha = $_POST['nova_senha'];
     $confirmar_senha = $_POST['confirmar_senha'];
 
-    // Valida a força da nova senha
     $erros_senha = validarSenhaForte($nova_senha);
 
     if (!empty($erros_senha)) {
@@ -48,10 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido) {
     elseif ($nova_senha !== $confirmar_senha) {
         $mensagem = '<div class="alert alert-danger">As senhas não correspondem.</div>';
     } else {
-        // Criptografa a nova senha
         $senhaHash = password_hash($nova_senha, PASSWORD_DEFAULT);
         
-        // Atualiza a senha na tabela correta (clientes, prestadores ou administradores)
         $tabela_atualizada = false;
         foreach (['Cliente', 'Prestador', 'Administrador'] as $tabela) {
             $stmt = $pdo->prepare("UPDATE `$tabela` SET password = ? WHERE email = ?");
@@ -64,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido) {
         }
         
         if ($tabela_atualizada) {
-            // Exclui o token do banco para que não possa ser usado novamente
             $stmt = $pdo->prepare("DELETE FROM redefinicao_senha WHERE email = ?");
             $stmt->execute([$email_usuario]);
 
@@ -142,7 +134,6 @@ document.addEventListener('DOMContentLoaded', function() {
         function validatePassword() {
             const value = senhaInput.value;
 
-            // Função para atualizar o requisito na UI
             const updateRequirement = (req, isValid) => {
                 if (isValid) {
                     req.classList.remove('text-danger');
@@ -177,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmarSenhaInput.addEventListener('input', checkPasswordMatch);
     }
 
-    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
     function setupTogglePassword(inputId, buttonId, iconId) {
         const input = document.getElementById(inputId);
         const button = document.getElementById(buttonId);

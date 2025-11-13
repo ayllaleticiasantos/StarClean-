@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -11,7 +10,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
 $agendamento = null;
 $mensagem_erro = '';
 
-// Verifica se o ID do agendamento foi passado na URL
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     $_SESSION['mensagem_erro'] = "ID do agendamento não fornecido ou inválido.";
     header("Location: gerir_agendamentos.php");
@@ -23,7 +21,6 @@ $agendamento_id = $_GET['id'];
 try {
     $pdo = obterConexaoPDO();
     
-    // Query completa para buscar todos os detalhes do agendamento
     $stmt = $pdo->prepare("
         SELECT 
             a.id, a.data, a.hora, a.status, a.observacoes, a.tem_pets, a.tem_crianca, a.possui_aspirador,

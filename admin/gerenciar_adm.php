@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -12,7 +11,6 @@ $pdo = obterConexaoPDO();
 $mensagem_sucesso = '';
 $mensagem_erro = '';
 
-// Lógica para exibir mensagens de feedback
 if (isset($_SESSION['mensagem_sucesso'])) {
     $mensagem_sucesso = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_sucesso'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
     unset($_SESSION['mensagem_sucesso']);
@@ -22,7 +20,6 @@ if (isset($_SESSION['mensagem_erro'])) {
     unset($_SESSION['mensagem_erro']);
 }
 
-// --- LÓGICA DE BUSCA E FILTRO ---
 $administradores = [];
 $termo_busca = $_GET['search'] ?? '';
 
@@ -31,7 +28,6 @@ try {
     $params = [];
 
     if (!empty($termo_busca)) {
-        // Adiciona a cláusula WHERE para filtrar por nome ou email
         $sql .= " WHERE nome LIKE ? OR email LIKE ?";
         $params[] = "%" . $termo_busca . "%";
         $params[] = "%" . $termo_busca . "%";
@@ -109,7 +105,7 @@ include '../includes/navbar_logged_in.php';
                                         <td><?= htmlspecialchars($admin['tipo']) ?></td>
                                         <td>
                                             <a href="editar_adm.php?id=<?= $admin['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
-                                            <?php if ($admin['id'] != $_SESSION['usuario_id']): // Impede que o admin se auto-exclua ?>
+                                            <?php if ($admin['id'] != $_SESSION['usuario_id']): ?>
                                                 <a href="excluir_adm.php?id=<?= $admin['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este administrador?');">Excluir</a>
                                             <?php endif; ?>
                                         </td>

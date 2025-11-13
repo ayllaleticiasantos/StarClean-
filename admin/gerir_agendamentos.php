@@ -2,8 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// 1. LÓGICA PHP DA PÁGINA
-// Segurança: Apenas administradores podem aceder a esta página
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -11,7 +9,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
 
 $agendamentos = [];
 $termo_busca = $_GET['q'] ?? '';
-$status_filtro = $_GET['status'] ?? ''; // NOVO: Captura o status do filtro
+$status_filtro = $_GET['status'] ?? '';
 $mensagem_erro = '';
 
 try {
@@ -25,7 +23,6 @@ try {
          JOIN Prestador p ON a.Prestador_id = p.id
          JOIN Servico s ON a.Servico_id = s.id";
 
-    // --- LÓGICA DE FILTRO DINÂMICO ---
     $where_clauses = [];
 
     if (!empty($termo_busca)) {
@@ -40,7 +37,7 @@ try {
     }
 
     if (!empty($where_clauses)) {
-        $sql .= " WHERE " . implode(" AND ", $where_clauses); // A lógica aqui já está correta, mas vamos garantir a limpeza do botão.
+        $sql .= " WHERE " . implode(" AND ", $where_clauses);
     }
 
     $sql .= " ORDER BY a.data DESC, a.hora DESC";
@@ -50,12 +47,10 @@ try {
     $agendamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
-    // Melhor prática: logar o erro e mostrar uma mensagem amigável
     error_log("Erro ao buscar agendamentos: " . $e->getMessage());
     $mensagem_erro = '<div class="alert alert-danger">Não foi possível carregar os agendamentos. Tente novamente mais tarde.</div>';
 }
 
-// 2. INCLUSÃO DO CABEÇALHO E NAVBAR
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 
@@ -84,7 +79,6 @@ include '../includes/navbar_logged_in.php';
                 <p class="lead">Visualize e filtre todos os agendamentos do sistema.</p>
             </div>
             <form method="GET" action="gerir_agendamentos.php" class="d-flex align-items-center gap-2">
-                <!-- NOVO: Filtro de Status -->
                 <div class="flex-shrink-0">
                     <select name="status" class="form-select" style="width: auto;">
                         <option value="">Todos os Status</option>
@@ -97,7 +91,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
                 <input class="form-control" type="search" name="q" placeholder="Buscar por cliente, prestador..." value="<?= htmlspecialchars($termo_busca) ?>" style="width: 250px;">
                 <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                <!-- CORREÇÃO: O botão de limpar deve aparecer se QUALQUER filtro estiver ativo -->
                 <?php if (!empty($termo_busca) || !empty($status_filtro)): ?>
                     <a href="gerir_agendamentos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
                 <?php endif; ?>
@@ -176,6 +169,5 @@ include '../includes/navbar_logged_in.php';
     </div>
 </main>
 <?php 
-// 5. INCLUSÃO DO RODAPÉ
 include '../includes/footer.php';
 ?>

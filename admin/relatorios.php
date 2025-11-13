@@ -2,24 +2,22 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
 }
 
-// --- LÓGICA PARA BUSCAR DADOS FINANCEIROS ---
 $mensagem_erro = '';
-$ano_selecionado = $_GET['ano'] ?? date('Y'); // Pega o ano do filtro ou o ano atual
+$ano_selecionado = $_GET['ano'] ?? date('Y');
 $dados_grafico = [
-    'realizado' => array_fill(0, 12, 0), // Array com 12 meses, inicializados em 0
+    'realizado' => array_fill(0, 12, 0),
     'aceito' => array_fill(0, 12, 0)
 ];
 $servicos_realizados_detalhes = [];
 $servicos_aceitos_detalhes = [];
 $servicos_pendentes_detalhes = [];
 $servicos_cancelados_detalhes = [];
-$agendamentos_mapa = []; // NOVO: Array para os dados do mapa
+$agendamentos_mapa = [];
 $dados_status_grafico = [
     'realizado' => 0,
     'cancelado' => 0,
@@ -29,7 +27,6 @@ $dados_status_grafico = [
 try {
     $pdo = obterConexaoPDO();
 
-    // Função para buscar dados e preencher o array do gráfico
     function buscarDadosPorStatus($pdo, $status, $ano) {
         $sql = "SELECT MONTH(a.data) as mes, SUM(s.preco) as total
                 FROM Agendamento a
@@ -42,19 +39,16 @@ try {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Busca dados para serviços 'realizado'
     $resultados_realizado = buscarDadosPorStatus($pdo, 'realizado', $ano_selecionado);
     foreach ($resultados_realizado as $row) {
         $dados_grafico['realizado'][$row['mes'] - 1] = (float)$row['total'];
     }
 
-    // Busca dados para serviços 'aceito'
     $resultados_aceito = buscarDadosPorStatus($pdo, 'aceito', $ano_selecionado);
     foreach ($resultados_aceito as $row) {
         $dados_grafico['aceito'][$row['mes'] - 1] = (float)$row['total'];
     }
 
-    // Busca contagem de status (realizado vs cancelado) para o gráfico de pizza
     $sql_status = "SELECT status, COUNT(*) as total
                    FROM Agendamento
                    WHERE status IN ('realizado', 'cancelado', 'pendente') AND YEAR(data) = ?
@@ -67,7 +61,6 @@ try {
         $dados_status_grafico[$row['status']] = (int)$row['total'];
     }
 
-    // --- NOVO: BUSCAR LISTAS DETALHADAS DE AGENDAMENTOS ---
     $sql_detalhes_base = "SELECT a.data, c.nome as nome_cliente, p.nome as nome_prestador, s.titulo, s.preco, a.status
                           FROM Agendamento a
                           JOIN Cliente c ON a.Cliente_id = c.id
@@ -75,24 +68,20 @@ try {
                           JOIN Servico s ON a.Servico_id = s.id
                           WHERE YEAR(a.data) = ?";
 
-    // Busca detalhes de serviços 'realizado' (Pagos)
     $stmt_realizados = $pdo->prepare($sql_detalhes_base . " AND a.status = 'realizado' ORDER BY a.data DESC");
     $stmt_realizados->execute([$ano_selecionado]);
     $servicos_realizados_detalhes = $stmt_realizados->fetchAll(PDO::FETCH_ASSOC);
 
-    // Busca detalhes de serviços 'aceito' (A Receber)
     $stmt_aceitos = $pdo->prepare($sql_detalhes_base . " AND a.status = 'aceito' ORDER BY a.data ASC");
     $stmt_aceitos->execute([$ano_selecionado]);
     $servicos_aceitos_detalhes = $stmt_aceitos->fetchAll(PDO::FETCH_ASSOC);
 
-    // Busca detalhes de serviços 'pendente' e 'cancelado'
     $stmt_outros = $pdo->prepare($sql_detalhes_base . " AND a.status IN ('pendente', 'cancelado') ORDER BY a.data DESC");
     $stmt_outros->execute([$ano_selecionado]);
     foreach ($stmt_outros->fetchAll(PDO::FETCH_ASSOC) as $servico) {
         $servico['status'] === 'pendente' ? $servicos_pendentes_detalhes[] = $servico : $servicos_cancelados_detalhes[] = $servico;
     }
 
-    // --- NOVO: BUSCAR DADOS PARA O MAPA DE AGENDAMENTOS ---
     $sql_mapa = "SELECT 
                     a.data, a.hora,
                     c.nome AS nome_cliente,
@@ -117,28 +106,23 @@ try {
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
-<!-- ESTILOS ESPECÍFICOS PARA IMPRESSÃO DESTA PÁGINA -->
 <style>
-    /* Estilo padrão para o contêiner do gráfico na tela */
     .chart-container {
         position: relative;
         width: 100%;
-        height: 400px; /* Altura padrão para exibição na tela */
+        height: 400px;
     }
-    /* Garante que o canvas preencha o contêiner */
     .chart-container canvas {
         max-width: 100% !important;
-        height: 100% !important; /* Garante que o canvas preencha a altura do contêiner */
+        height: 100% !important;
     }
 
     @media print {
-        /* Força o início de uma nova página para os elementos com esta classe */
         .page-break-before {
             page-break-before: always;
         }
-        /* Sobrescreve a altura padrão para a impressão */
         .chart-container {
-            height: 50vh; /* Usa 50% da altura da viewport de impressão */
+            height: 50vh;
         }
     }
 </style>
@@ -171,7 +155,6 @@ include '../includes/navbar_logged_in.php';
         <?php if ($mensagem_erro): ?>
             <div class="alert alert-danger"><?= $mensagem_erro ?></div>
         <?php else: ?>
-            <!-- Filtro de Ano (sem card) -->
             <div class="d-flex justify-content-end mb-4 no-print">
                 <form method="GET" action="relatorios.php" class="d-flex align-items-center gap-2">
                     <label for="ano" class="form-label mb-0">Ano:</label>
@@ -184,7 +167,6 @@ include '../includes/navbar_logged_in.php';
                 </form>
             </div>
 
-            <!-- Card do Gráfico -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header">
                     <h5 class="mb-0">Faturamento Mensal vs. A Receber (Ano: <?= htmlspecialchars($ano_selecionado) ?>)</h5>
@@ -198,7 +180,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
             </div>
 
-            <!-- Tabela de Serviços Faturados -->
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-success text-white"><h5 class="mb-0">Detalhes dos Serviços Faturados (Concluídos)</h5></div>
                 <div class="card-body">
@@ -217,7 +198,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
             </div>
 
-            <!-- Tabela de Serviços a Receber -->
             <div class="card shadow-sm mt-4">
                 <div class="card-header bg-warning text-dark"><h5 class="mb-0">Detalhes dos Serviços a Receber (Aceitos)</h5></div>
                 <div class="card-body">
@@ -238,7 +218,6 @@ include '../includes/navbar_logged_in.php';
 
             <h1 class="mt-5 page-break-before">Relatório de Serviços Realizados e Cancelados</h1>
             <hr class="no-print">
-            <!-- Card do Gráfico de Status -->
             <div class="card shadow-sm mt-4">
                 <div class="card-header">
                     <h5 class="mb-0">Proporção de Serviços Realizados vs. Cancelados (Ano: <?= htmlspecialchars($ano_selecionado) ?>)</h5>
@@ -255,7 +234,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
             </div>
             
-            <!-- Tabela Detalhada de Status -->
             <div class="card shadow-sm mt-4">
                 <div class="card-header"><h5 class="mb-0">Detalhes por Status do Agendamento</h5></div>
                 <div class="card-body">
@@ -263,7 +241,6 @@ include '../includes/navbar_logged_in.php';
                         <table class="table table-sm table-striped">
                             <thead><tr><th>Data</th><th>Cliente</th><th>Prestador</th><th>Serviço</th><th>Status</th></tr></thead>
                             <tbody>
-                                <!-- Serviços Pendentes -->
                                 <?php if(!empty($servicos_pendentes_detalhes)): ?>
                                     <tr><td colspan="5" class="table-warning fw-bold">Serviços Pendentes</td></tr>
                                     <?php foreach($servicos_pendentes_detalhes as $servico): ?>
@@ -271,7 +248,6 @@ include '../includes/navbar_logged_in.php';
                                     <?php endforeach; ?>
                                 <?php endif; ?>
 
-                                <!-- Serviços Realizados (Concluídos) -->
                                 <?php if(!empty($servicos_realizados_detalhes)): ?>
                                     <tr><td colspan="5" class="table-primary fw-bold">Serviços Concluídos</td></tr>
                                     <?php foreach($servicos_realizados_detalhes as $servico): ?>
@@ -279,7 +255,6 @@ include '../includes/navbar_logged_in.php';
                                     <?php endforeach; ?>
                                 <?php endif; ?>
 
-                                <!-- Serviços Cancelados -->
                                 <?php if(!empty($servicos_cancelados_detalhes)): ?>
                                     <tr><td colspan="5" class="table-danger fw-bold">Serviços Cancelados</td></tr>
                                     <?php foreach($servicos_cancelados_detalhes as $servico): ?>
@@ -288,7 +263,6 @@ include '../includes/navbar_logged_in.php';
                                 <?php endif; ?>
 
                                 <?php 
-                                    // Mensagem se todas as listas estiverem vazias
                                     if (empty($servicos_pendentes_detalhes) && empty($servicos_realizados_detalhes) && empty($servicos_cancelados_detalhes)) {
                                         echo '<tr><td colspan="5" class="text-center">Nenhum agendamento encontrado para os status selecionados no período.</td></tr>';
                                     }
@@ -299,7 +273,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
             </div>
 
-            <!-- NOVO: MAPA DE AGENDAMENTOS -->
             <h1 class="mt-5 page-break-before">Mapa de Agendamentos</h1>
             <hr class="no-print">
             <div class="card shadow-sm mt-4">
@@ -317,7 +290,6 @@ include '../includes/navbar_logged_in.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Verifica se o elemento canvas existe antes de criar o gráfico
     const agendamentosParaMapa = <?= json_encode($agendamentos_mapa); ?>;
 
         const dadosGrafico = <?= json_encode($dados_grafico); ?>;
@@ -347,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 ]
             },
             options: {
-                maintainAspectRatio: false, // Permite que o gráfico preencha o contêiner
+                maintainAspectRatio: false,
                 responsive: true,
                 scales: {
                     y: {
@@ -386,28 +358,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     }]
                 },
                 options: { 
-                    maintainAspectRatio: false, // Permite que o gráfico preencha o contêiner
+                    maintainAspectRatio: false,
                     responsive: true
                 }
         });
     }
 
-    // --- NOVO: LÓGICA PARA O MAPA DE AGENDAMENTOS ---
     const mapaContainer = document.getElementById('mapaAgendamentos');
     if (mapaContainer) {
-        // Inicializa o mapa, centralizado em Brasília (ajuste se necessário)
         const map = L.map('mapaAgendamentos').setView([-15.793889, -47.882778], 10);
 
-        // Adiciona a camada de mapa do OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        // --- NOVA LÓGICA DE AGRUPAMENTO ---
         if (agendamentosParaMapa && agendamentosParaMapa.length > 0) {
-            const locations = {}; // Objeto para agrupar agendamentos por localização
+            const locations = {};
 
-            // 1. Agrupa os agendamentos por coordenadas
             agendamentosParaMapa.forEach(agendamento => {
                 if (agendamento.latitude && agendamento.longitude) {
                     const key = `${agendamento.latitude},${agendamento.longitude}`;
@@ -415,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         locations[key] = {
                             lat: parseFloat(agendamento.latitude),
                             lon: parseFloat(agendamento.longitude),
-                            cliente: agendamento.nome_cliente, // Pega o nome do primeiro cliente encontrado
+                            cliente: agendamento.nome_cliente,
                             agendamentos: []
                         };
                     }
@@ -423,12 +390,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            // 2. Itera sobre as localizações agrupadas e cria um marcador para cada uma
             for (const key in locations) {
                 const locationData = locations[key];
                 const totalAgendamentos = locationData.agendamentos.length;
 
-                // Monta o conteúdo do popup dinamicamente
                 let popupContent = `<b>Cliente:</b> ${locationData.cliente}<br>`;
                 popupContent += `<b>Total de Agendamentos:</b> ${totalAgendamentos}<hr>`;
                 
@@ -442,7 +407,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     `;
                 });
 
-                // Adiciona o marcador ao mapa
                 L.marker([locationData.lat, locationData.lon]).addTo(map).bindPopup(popupContent);
             }
         } else {

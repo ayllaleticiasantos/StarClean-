@@ -4,34 +4,36 @@ include 'includes/navbar.php';
 require_once 'config/config.php';
 require_once 'config/db.php';
 
-// Buscar conteúdo dinâmico do banco de dados
 $carousel_slides = [];
 $cards_destaque = [];
+$blocos_conteudo = [];
+$avisos_ativos = [];
 $conteudo_pagina = [];
 
 try {
     $pdo = obterConexaoPDO();
 
-    // Busca slides do carrossel ativos
-    $stmt_carousel = $pdo->query("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'carousel' AND ativo = 1 ORDER BY ordem ASC");
+    $stmt_carousel = $pdo->query("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'carousel' AND ativo = 1 AND oculto = 0 ORDER BY ordem ASC");
     $carousel_slides = $stmt_carousel->fetchAll(PDO::FETCH_ASSOC);
 
-    // Busca cards de destaque ativos
-    $stmt_cards = $pdo->query("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'card' AND ativo = 1 ORDER BY ordem ASC");
+    $stmt_cards = $pdo->query("SELECT * FROM conteudo_pagina_inicial WHERE tipo_conteudo = 'card' AND ativo = 1 AND oculto = 0 ORDER BY ordem ASC");
     $cards_destaque = $stmt_cards->fetchAll(PDO::FETCH_ASSOC);
 
-    // Busca os textos da página inicial da nova tabela
-    $stmt_geral = $pdo->query("SELECT chave, conteudo FROM conteudo_geral WHERE pagina = 'index'");
+    $stmt_geral = $pdo->query("SELECT chave, conteudo FROM conteudo_geral WHERE pagina = 'index' AND oculto = 0");
     foreach ($stmt_geral->fetchAll(PDO::FETCH_ASSOC) as $item) {
         $conteudo_pagina[$item['chave']] = $item['conteudo'];
     }
 
+    $stmt_blocos = $pdo->query("SELECT * FROM blocos_conteudo WHERE pagina = 'index' AND ativo = 1 ORDER BY ordem ASC");
+    $blocos_conteudo = $stmt_blocos->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
-    // Em caso de erro, a página pode ficar em branco, mas não quebrará. O erro será logado.
     error_log("Erro ao buscar conteúdo da página inicial: " . $e->getMessage());
 }
 ?>
 <main>
+    <?php // include __DIR__ . '/includes/avisos_section.php'; ?>
+
     <div>
         <div id="carouselInicialSC" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-indicators">
@@ -163,7 +165,36 @@ try {
         </div>
     </div>
 
-    <!-- Seção Processo -->
+    <div class="container my-5">
+        <?php foreach ($blocos_conteudo as $bloco): ?>
+            <?php 
+                $dados = json_decode($bloco['conteudo_json'], true);
+            ?>
+
+            <?php if ($bloco['tipo_bloco'] === 'texto_simples'): ?>
+                <div class="my-5">
+                    <?= $dados['texto'] ?>
+                </div>
+
+            <?php elseif ($bloco['tipo_bloco'] === 'card_imagem_texto' && $dados): ?>
+                <div class="card mb-4 shadow-sm">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="<?= BASE_URL . '/' . htmlspecialchars($dados['imagem_url']) ?>" class="img-fluid rounded-start" alt="<?= htmlspecialchars($dados['titulo']) ?>" style="object-fit: cover; height: 100%;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title"><?= htmlspecialchars($dados['titulo']) ?></h5>
+                                <p class="card-text"><?= nl2br(htmlspecialchars($dados['texto'])) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+
     <div class="container my-5" id="processo">
         <h2 class="text-center mb-4">Nosso Processo Simplificado</h2>
         <hr class="my-3">
@@ -196,7 +227,6 @@ try {
         </div>
     </div>
 
-    <!-- Seção Planos -->
     <div class="container my-3" id="planos">
         <h2 class="text-center mb-4">O que cada combo oferece</h2>
         <hr class="my-2">

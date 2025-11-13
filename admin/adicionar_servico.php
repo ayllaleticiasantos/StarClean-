@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -15,11 +14,9 @@ $prestadores = [];
 try {
     $pdo = obterConexaoPDO();
     
-    // Buscar todos os prestadores para o campo de seleção
     $stmt = $pdo->query("SELECT id, nome FROM Prestador ORDER BY nome ASC");
     $prestadores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Lógica para exibir mensagens de feedback
     if (isset($_SESSION['mensagem_sucesso'])) {
         $mensagem_sucesso = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_sucesso'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
         unset($_SESSION['mensagem_sucesso']);
@@ -34,34 +31,30 @@ try {
     $mensagem_erro = '<div class="alert alert-danger">Erro ao carregar a lista de prestadores.</div>';
 }
 
-// Verifica se o formulário foi submetido
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Coleta os dados do formulário
     $titulo = trim($_POST['titulo']);
     $descricao = trim($_POST['descricao']);
     $preco = $_POST['preco'];
-    $prestador_id = $_POST['prestador_id'] ?? null; // ID do prestador selecionado
+    $prestador_id = $_POST['prestador_id'] ?? null;
 
-    // Validação
     if (empty($titulo) || empty($preco) || empty($prestador_id)) {
         $_SESSION['mensagem_erro'] = "O título, o preço e o prestador são obrigatórios.";
     } else {
         try {
             $pdo = obterConexaoPDO();
             
-            // Insere o serviço no banco de dados, ATRELADO ao Prestador selecionado
             $stmt = $pdo->prepare("INSERT INTO Servico (prestador_id, titulo, descricao, preco) VALUES (?, ?, ?, ?)");
             $stmt->execute([$prestador_id, $titulo, $descricao, $preco]);
 
             $_SESSION['mensagem_sucesso'] = "Serviço adicionado com sucesso e atrelado ao Prestador ID: " . $prestador_id;
-            header("Location: adicionar_servico.php"); // Redireciona para evitar reenvio do formulário
+            header("Location: adicionar_servico.php");
             exit();
 
         } catch (PDOException $e) {
             $_SESSION['mensagem_erro'] = "Erro ao adicionar o serviço. Detalhes: " . htmlspecialchars($e->getMessage());
         }
-    }
-    // Se houver erro, redireciona de volta para o formulário para exibir a mensagem
+    }    registrar_log_admin($id_admin_logado, " Adicionou um serviço ao prestador com ID $prestador_id.");
+
     header("Location: adicionar_servico.php");
     exit();
 }
@@ -146,19 +139,14 @@ include '../includes/footer.php';
 document.addEventListener('DOMContentLoaded', function() {
     const precoInput = document.getElementById('preco');
 
-    // Função para formatar o valor como moeda brasileira
     function formatarMoeda(e) {
-        // Remove todos os caracteres que não são dígitos
         let valor = e.target.value.replace(/\D/g, '');
 
-        // Converte para número e divide por 100 para obter os centavos
         valor = (parseFloat(valor) / 100).toFixed(2);
 
-        // Formata usando as regras do Brasil (R$, vírgula para centavos, ponto para milhares)
         e.target.value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
     }
 
-    // Adiciona o evento 'input' para formatar enquanto o usuário digita
     precoInput.addEventListener('input', formatarMoeda);
 });
 </script>

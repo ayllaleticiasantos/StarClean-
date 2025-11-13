@@ -25,9 +25,9 @@ try {
         $sql = "UPDATE Agendamento SET notificacao_cliente_lida = TRUE WHERE Cliente_id = ? AND status = 'aceito'";
         $params = [$id_usuario];
     } elseif ($tipo_usuario === 'admin') {
-        // Marca como lidas as notificações de agendamentos realizados
-        $sql = "UPDATE Agendamento SET notificacao_admin_lida = TRUE WHERE status = 'realizado'";
-        $params = []; // Admin vê todas
+        // CORREÇÃO: Atualiza a tabela 'notificacoes' para o admin logado
+        $sql = "UPDATE notificacoes SET lida = TRUE WHERE usuario_id = ? AND tipo_usuario = 'admin'";
+        $params = [$id_usuario];
     }
 
     if (!empty($sql)) {

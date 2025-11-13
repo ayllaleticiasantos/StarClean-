@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Se não estiver logado, redireciona para o login
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: ../pages/login.php");
     exit();
@@ -11,7 +10,6 @@ if (!isset($_SESSION['usuario_id'])) {
 $id_usuario = $_SESSION['usuario_id'];
 $tipo_usuario = $_SESSION['usuario_tipo'];
 
-// Determina a tabela correta com base no tipo de usuário
 $tabela = '';
 switch ($tipo_usuario) {
     case 'cliente': $tabela = 'cliente'; break;
@@ -19,11 +17,9 @@ switch ($tipo_usuario) {
     case 'admin': $tabela = 'administrador'; break;
 }
 
-// Lógica para processar o formulário quando for enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tabela) {
     $pdo = obterConexaoPDO();
 
-    // Se a checkbox estiver marcada, o valor é 1 (true), senão é 0 (false)
     $valor_notificacao = isset($_POST['notificacaoEmail']) ? 1 : 0;
 
     $stmt = $pdo->prepare("UPDATE `$tabela` SET receber_notificacoes_email = ? WHERE id = ?");
@@ -33,13 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tabela) {
         $_SESSION['mensagem_erro'] = "Erro ao salvar as preferências.";
     }
     
-    // Redireciona para a mesma página para evitar reenvio
     header("Location: configuracoes.php");
     exit();
 }
 
-// Busca a preferência atual do usuário no banco de dados para exibir na página
-$prefere_email = 1; // Valor padrão
+$prefere_email = 1;
 if ($tabela) {
     $pdo = obterConexaoPDO();
     $stmt = $pdo->prepare("SELECT receber_notificacoes_email FROM `$tabela` WHERE id = ?");
@@ -50,10 +44,8 @@ if ($tabela) {
     }
 }
 
-// --- Inclusão dos ficheiros de layout ---
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
-// CORREÇÃO: Removida a inclusão de sidebar aqui.
 ?>
 
 <button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
@@ -74,7 +66,6 @@ include '../includes/navbar_logged_in.php';
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
     
-    <!-- CORREÇÃO: Abrindo a div de conteúdo aqui, que é fechada implicitamente no footer -->
     <div class="container-fluid p-4 flex-grow-1"> 
         <h1>Configurações</h1>
         <hr>
@@ -125,6 +116,5 @@ include '../includes/navbar_logged_in.php';
 </main>
 
 <?php 
-// O footer fechará a estrutura principal que foi aberta no header e sidebar
 include '../includes/footer.php'; 
 ?>

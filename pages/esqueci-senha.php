@@ -2,7 +2,7 @@
 session_start();
 require_once '../config/db.php';
 require_once '../config/config.php';
-require_once '../config/enviar_email.php'; // Incluir o novo script
+require_once '../config/enviar_email.php';
 
 $mensagem = '';
 
@@ -37,10 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $link_redefinicao = BASE_URL . "/pages/redefinir-senha.php?token=" . $token;
                 
-                // --- CHAMADA REAL PARA ENVIAR O E-MAIL ---
                 $email_enviado = enviarEmailRecuperacao($email, $link_redefinicao);
                 
-                // A mensagem genérica é exibida por segurança, mesmo que o envio falhe.
                 $mensagem = '<div class="alert alert-success">Se o e-mail estiver registado, um link para redefinir a senha foi enviado.</div>';
                 
             } else {
@@ -65,7 +63,7 @@ include '../includes/navbar.php';
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="card p-4 shadow-sm" style="width: 100%; max-width: 450px;">
         <h3 class="text-center mb-4">Recuperar Senha</h3>
-        <p class="text-center text-muted mb-4">Insira seu e-mail e nós enviaremos um link para você voltar a aceder à sua conta.</p>
+        <p class="text-center text-muted mb-4">Insira seu e-mail e nós enviaremos um link para você voltar a acessar à sua conta.</p>
 
         <?php if($mensagem) { echo $mensagem; } ?>
 

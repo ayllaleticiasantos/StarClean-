@@ -1,28 +1,25 @@
 <?php
 include '../config/config.php';
-require_once '../config/db.php'; // Adicionado para conexão com o banco
+require_once '../config/db.php';
 include '../includes/header.php';
 include '../includes/navbar.php';
 
-// --- LÓGICA PARA BUSCAR SERVIÇOS DO BANCO DE DADOS ---
 $servicos = [];
-$termo_busca = $_GET['q'] ?? ''; // Pega o termo de busca da URL
+$termo_busca = $_GET['q'] ?? '';
 $mensagem_erro = '';
 
 try {
     $pdo = obterConexaoPDO();
     
-    $sql = "SELECT s.titulo, s.descricao, s.preco FROM Servico s";
+    $sql = "SELECT s.titulo, s.descricao, s.preco FROM Servico s WHERE s.oculto = 0";
     $params = [];
 
-    // Se houver um termo de busca, adiciona o filtro
     if (!empty($termo_busca)) {
-        $sql .= " WHERE s.titulo LIKE ? OR s.descricao LIKE ?";
+        $sql .= " AND (s.titulo LIKE ? OR s.descricao LIKE ?)";
         $like_term = "%" . $termo_busca . "%";
         $params = [$like_term, $like_term];
     }
 
-    // Ordenação customizada: primeiro por nível (básico, intermediário, brilhante) e depois por preço
     $sql .= " ORDER BY 
                 CASE 
                     WHEN s.titulo LIKE '%básico%' OR s.descricao LIKE '%básico%' THEN 1
@@ -46,7 +43,6 @@ try {
     style="background: url(../img/cleaning.jpeg) center/cover no-repeat; height: 400px; display: flex; align-items: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
     <div class="container">
         <h1 class="display-3 fw-bold text-center color-white">Conheça alguns dos nossos serviços</h1>
-        <!-- <p class="lead col-lg-8 mx-auto text-center text-white">Na StarClean, oferecemos uma variedade de serviços de limpeza para atender às suas necessidades. Confira alguns deles:</p> -->
     </div>
 </header>
 <main>
@@ -59,7 +55,6 @@ try {
             <div class="alert alert-danger"><?= $mensagem_erro ?></div>
         <?php endif; ?>
 
-        <!-- Formulário de Filtro -->
         <div class="mb-4">
             <form action="servicos.php" method="GET" class="d-flex">
                 <input class="form-control me-2" type="search" name="q" placeholder="Buscar por serviço..." value="<?= htmlspecialchars($termo_busca) ?>">

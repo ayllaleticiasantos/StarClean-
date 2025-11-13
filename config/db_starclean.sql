@@ -442,7 +442,8 @@ CREATE TABLE `servico` (
   `descricao` text NOT NULL,
   `preco` double NOT NULL,
   `duracao_estimada` time DEFAULT NULL,
-  `prestador_id` int(11) NOT NULL
+  `prestador_id` int(11) NOT NULL,
+  `oculto` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0 = visível, 1 = oculto'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --

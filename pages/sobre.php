@@ -2,17 +2,15 @@
 require_once '../config/config.php';
 require_once '../config/db.php';
 
-// Busca os textos da página 'sobre' do banco de dados
 $conteudo_pagina = [];
 try {
     $pdo = obterConexaoPDO();
-    $stmt_geral = $pdo->query("SELECT chave, conteudo FROM conteudo_geral WHERE pagina = 'sobre'");
+    $stmt_geral = $pdo->query("SELECT chave, conteudo FROM conteudo_geral WHERE pagina = 'sobre' AND oculto = 0");
     foreach ($stmt_geral->fetchAll(PDO::FETCH_ASSOC) as $item) {
         $conteudo_pagina[$item['chave']] = $item['conteudo'];
     }
 } catch (PDOException $e) {
     error_log("Erro ao buscar conteúdo da página Sobre: " . $e->getMessage());
-    // Define valores padrão em caso de erro para a página não quebrar
     $conteudo_pagina = [
         'sobre_hero_titulo' => 'Sobre a StarClean',
         'sobre_hero_subtitulo' => 'Conheça nossa jornada e nossos valores.',
@@ -27,7 +25,7 @@ try {
 
 include '../includes/header.php';
 
-include '../includes/navbar.php'; // Sempre exibe a navbar pública
+include '../includes/navbar.php';
 ?>
 
 <header class="hero-section" style="background: url('<?= BASE_URL ?>/img/cleaning.jpeg') center/cover no-repeat; height: 400px; display: flex; align-items: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">

@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas prestadores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
@@ -12,7 +11,6 @@ $id_prestador = $_SESSION['usuario_id'];
 $mensagem_sucesso = '';
 $mensagem_erro = '';
 
-// --- LÓGICA PARA ADICIONAR UMA DATA DE INDISPONIBILIDADE ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['data_indisponivel'])) {
     $data = $_POST['data_indisponivel'];
 
@@ -25,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['data_indisponivel']))
             $stmt->execute([$id_prestador, $data]);
             $mensagem_sucesso = "Data marcada como indisponível com sucesso!";
         } catch (PDOException $e) {
-            if ($e->getCode() == 23000) { // Código para violação de chave única
+            if ($e->getCode() == 23000) {
                 $mensagem_erro = "Esta data já está marcada como indisponível.";
             } else {
                 $mensagem_erro = "Erro ao marcar a data. Tente novamente.";
@@ -35,12 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['data_indisponivel']))
     }
 }
 
-// --- LÓGICA PARA REMOVER UMA DATA DE INDISPONIBILIDADE ---
 if (isset($_GET['remover_id'])) {
     $id_para_remover = $_GET['remover_id'];
     try {
         $pdo = obterConexaoPDO();
-        // A cláusula `prestador_id` garante que um prestador só pode remover suas próprias datas
         $stmt = $pdo->prepare("DELETE FROM indisponibilidade_prestador WHERE id = ? AND prestador_id = ?");
         $stmt->execute([$id_para_remover, $id_prestador]);
         $mensagem_sucesso = "A data foi liberada e está disponível novamente.";
@@ -50,7 +46,6 @@ if (isset($_GET['remover_id'])) {
     }
 }
 
-// --- BUSCAR DATAS JÁ MARCADAS ---
 $datas_indisponiveis = [];
 try {
     $pdo = obterConexaoPDO();
@@ -91,7 +86,6 @@ include '../includes/navbar_logged_in.php';
         <?php if ($mensagem_erro): ?><div class="alert alert-danger"><?= $mensagem_erro ?></div><?php endif; ?>
 
         <div class="row">
-            <!-- Formulário para adicionar data -->
             <div class="col-lg-4 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-header">
@@ -109,7 +103,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
             </div>
 
-            <!-- Lista de datas já marcadas -->
             <div class="col-lg-8">
                 <div class="card shadow-sm">
                     <div class="card-header">

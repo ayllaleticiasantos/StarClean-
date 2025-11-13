@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -12,7 +11,6 @@ $pdo = obterConexaoPDO();
 $mensagem_erro = '';
 $mensagem_sucesso = '';
 
-// --- 1. LÓGICA DE ATUALIZAÇÃO (QUANDO O FORMULÁRIO É ENVIADO VIA POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
     $tipo = $_POST['tipo'] ?? null;
@@ -20,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($id && $tipo) {
         try {
             if ($tipo === 'cliente') {
-                // Coleta todos os dados do formulário de cliente
                 $nome = trim($_POST['nome']);
                 $sobrenome = trim($_POST['sobrenome']);
                 $email = trim($_POST['email']);
@@ -32,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$nome, $sobrenome, $email, $telefone, $cpf, $data_nascimento, $id]);
 
             } elseif ($tipo === 'prestador') {
-                // Coleta todos os dados do formulário de prestador
                 $nome_razao_social = trim($_POST['nome']);
                 $sobrenome_nome_fantasia = trim($_POST['sobrenome']);
                 $email = trim($_POST['email']);
@@ -61,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 
-// --- 2. LÓGICA PARA BUSCAR DADOS (QUANDO A PÁGINA É CARREGADA VIA GET) ---
 $utilizador = null;
 if (isset($_GET['id']) && isset($_GET['tipo'])) {
     $id = $_GET['id'];
@@ -89,7 +84,6 @@ if (isset($_GET['id']) && isset($_GET['tipo'])) {
     die("Parâmetros inválidos para edição.");
 }
 
-// --- 3. HTML DA PÁGINA ---
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';   
 ?>
@@ -194,7 +188,6 @@ include '../includes/navbar_logged_in.php';
 <?php include '../includes/footer.php'; ?>
 <script>
  // CORREÇÃO APLICADA AQUI: O script foi ajustado para procurar o ID correto (telefone)
-    // --- MÁSCARA DE TELEFONE ---
     function mascaraTelefone(evento) {
         if (evento.key === "Backspace") return;
         let valor = evento.target.value.replace(/\D/g, '');
@@ -203,7 +196,6 @@ include '../includes/navbar_logged_in.php';
         evento.target.value = valor;
     }
     
-    // Procura por todos os campos com ID 'telefone'
     const inputTelefone = document.getElementById('telefone');
     if (inputTelefone) inputTelefone.addEventListener('keyup', mascaraTelefone);
     

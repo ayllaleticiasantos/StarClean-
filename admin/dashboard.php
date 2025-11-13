@@ -2,14 +2,12 @@
 session_start();
 require_once '../config/db.php';
 
-// 1. VERIFICAÇÃO DE SEGURANÇA (CORRIGIDA)
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
 }
-$tipo_admin = $_SESSION['admin_tipo'] ?? ''; // Pega o tipo específico do admin
+$tipo_admin = $_SESSION['admin_tipo'] ?? '';
 
-// 2. LÓGICA DO DASHBOARD (BUSCA DE DADOS)
 $counts = [
     'clientes' => 0,
     'prestadores' => 0,
@@ -17,7 +15,6 @@ $counts = [
 ];
 try {
     $pdo = obterConexaoPDO();
-    // Consulta otimizada para buscar todos os dados de uma vez
     $stmt = $pdo->query("
         SELECT 
             (SELECT COUNT(*) FROM Cliente) AS total_clientes,
@@ -34,13 +31,9 @@ try {
     error_log("Erro ao buscar dados do dashboard do admin: " . $e->getMessage());
 }
 
-// 3. INCLUSÃO DO CABEÇALHO E NAVBAR
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 
-// =========================================================================
-// 4. ESTRUTURA DA SIDEBAR RESPONSIVA COMEÇA AQUI
-// =========================================================================
 ?>
 
 <button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
@@ -69,8 +62,6 @@ include '../includes/navbar_logged_in.php';
         <p>O seu tipo de utilizador é: <strong><?= htmlspecialchars($_SESSION['usuario_tipo']) ?></strong>.</p>
 
         <div class="row mt-4">
-            <!-- Cards de Ação -->
-            <!-- CONDIÇÃO DE VISIBILIDADE PARA O CARD "GERIR UTILIZADORES" -->
             <?php if ($tipo_admin === 'adminmaster'): ?>
                 <div class="col-12 col-sm-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm border-primary">
@@ -119,7 +110,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
             </div>
             
-            <!-- CONDIÇÃO DE VISIBILIDADE PARA O CARD "GERENCIAR SITE" -->
             <?php if ($tipo_admin === 'adminmaster' || $tipo_admin === 'admmoderador'): ?>
                 <div class="col-12 col-sm-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm border-secondary">
@@ -153,7 +143,6 @@ include '../includes/navbar_logged_in.php';
         </div>
 
         <div class="row mt-2">
-            <!-- Cards de Informação -->
             <div class="col-12 col-sm-6 col-lg-3 mb-4 align-self-stretch">
                 <div class="card h-100 shadow-sm border-primary text-center">
                     <div class="card-body">
@@ -202,6 +191,5 @@ include '../includes/navbar_logged_in.php';
     </div>
 </main>
 <?php
-// 6. INCLUSÃO DO RODAPÉ
 include '../includes/footer.php';
 ?>

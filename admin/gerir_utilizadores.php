@@ -2,16 +2,12 @@
 session_start();
 require_once '../config/db.php';
 
-// 1. LÓGICA PHP DA PÁGINA
-// Segurança: Apenas administradores podem acessar
- // Segurança: Apenas administradores do tipo 'adminmaster' podem acessar
 $tipo_admin = $_SESSION['admin_tipo'] ?? '';
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin' || $tipo_admin !== 'adminmaster') {
     header("Location: ../pages/login.php");
     exit();
 }
 
-// Lógica para mensagens de feedback
 $mensagem_sucesso = '';
 if (isset($_SESSION['mensagem_sucesso'])) {
     $mensagem_sucesso = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_sucesso'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
@@ -23,7 +19,6 @@ if (isset($_SESSION['mensagem_erro'])) {
     unset($_SESSION['mensagem_erro']);
 }
 
-// --- LÓGICA DE PESQUISA ---
 $termo_pesquisa = $_GET['q'] ?? '';
 $clientes = [];
 $prestadores = [];
@@ -32,8 +27,6 @@ try {
     $pdo = obterConexaoPDO();
     $params = [];
     
-    // --- BUSCA DE CLIENTES COM FILTRO ---
-    // Adicionado 'sobrenome' no SELECT para exibir o nome completo
     $sql_clientes = "SELECT id, nome, sobrenome, telefone, cpf, email, criado_em FROM Cliente";
     if (!empty($termo_pesquisa)) {
         $sql_clientes .= " WHERE nome LIKE ? OR sobrenome LIKE ? OR email LIKE ?";
@@ -44,7 +37,6 @@ try {
     $stmt_clientes->execute($params_clientes ?? []);
     $clientes = $stmt_clientes->fetchAll();
 
-    // --- BUSCA DE PRESTADORES COM FILTRO ---
     $sql_prestadores = "SELECT id, CONCAT(nome, ' ', sobrenome) AS nome_completo, cpf, email, telefone, criado_em FROM Prestador";
     if (!empty($termo_pesquisa)) {
         $sql_prestadores .= " WHERE nome LIKE ? OR sobrenome LIKE ? OR email LIKE ? OR cpf LIKE ?";
@@ -60,7 +52,6 @@ try {
     $mensagem_erro = '<div class="alert alert-danger">Não foi possível carregar os dados dos utilizadores. Tente novamente mais tarde.</div>';
 }
 
-// 2. INCLUSÃO DO CABEÇALHO E LAYOUT
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
@@ -89,7 +80,6 @@ include '../includes/navbar_logged_in.php';
         <?= $mensagem_sucesso ?>
         <?= $mensagem_erro ?>
 
-        <!-- Filtro de Pesquisa -->
         <div class="mb-4 d-flex justify-content-end">
             <form action="gerir_utilizadores.php" method="GET" class="d-flex align-items-center">
                 <input class="form-control me-2" type="search" name="q" placeholder="Pesquisar por nome, email, CPF/CNPJ..." value="<?= htmlspecialchars($termo_pesquisa) ?>" aria-label="Pesquisar">
@@ -183,6 +173,5 @@ include '../includes/navbar_logged_in.php';
     </div>
 </main>
 <?php 
-// 3. INCLUSÃO DO RODAPÉ
 include '../includes/footer.php'; 
 ?>

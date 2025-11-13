@@ -2,37 +2,31 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
 }
 
-$filtro_tipo = $_GET['tipo'] ?? ''; // Captura o filtro da URL
+$filtro_tipo = $_GET['tipo'] ?? '';
 $logs = [];
 try {
     $pdo = obterConexaoPDO();
 
-    // --- LÓGICA DE FILTRO ---
     $queries = [];
 
-    // Query para logs de admin
     if (empty($filtro_tipo) || $filtro_tipo === 'admin') {
         $queries[] = "(SELECT 'admin' as tipo_usuario, a.nome, a.email, l.acao, l.detalhes, l.data_ocorrencia
                       FROM log_atividades l JOIN administrador a ON l.admin_id = a.id)";
     }
-    // Query para logs de cliente
     if (empty($filtro_tipo) || $filtro_tipo === 'cliente') {
         $queries[] = "(SELECT 'cliente' as tipo_usuario, c.nome, c.email, l.acao, l.detalhes, l.data_ocorrencia
                       FROM log_cliente_atividades l JOIN cliente c ON l.cliente_id = c.id)";
     }
-    // Query para logs de prestador
     if (empty($filtro_tipo) || $filtro_tipo === 'prestador') {
         $queries[] = "(SELECT 'prestador' as tipo_usuario, p.nome, p.email, l.acao, l.detalhes, l.data_ocorrencia
                       FROM log_prestador_atividades l JOIN prestador p ON l.prestador_id = p.id)";
     }
 
-    // Monta a query final unindo as partes necessárias
     $sql = implode(' UNION ALL ', $queries) . " ORDER BY data_ocorrencia DESC";
 
     $stmt = $pdo->query($sql);
@@ -70,7 +64,6 @@ include '../includes/navbar_logged_in.php';
                 <h1 class="mb-0">Log de Atividades</h1>
                 <p class="lead text-muted">Ações importantes realizadas por todos os usuários no sistema.</p>
             </div>
-            <!-- Formulário de Filtro -->
             <form method="GET" action="visualizar_logs.php" class="d-flex align-items-center gap-2">
                 <label for="tipo" class="form-label mb-0">Filtrar por:</label>
                 <select name="tipo" id="tipo" class="form-select" style="width: auto;">

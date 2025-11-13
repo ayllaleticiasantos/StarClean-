@@ -2,13 +2,11 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem aceder a esta página
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
 }
 
-// Lógica para exibir mensagens de sucesso ou erro
 $mensagem_sucesso = '';
 if (isset($_SESSION['mensagem_sucesso'])) {
     $mensagem_sucesso = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . $_SESSION['mensagem_sucesso'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
@@ -21,7 +19,6 @@ if (isset($_SESSION['mensagem_erro'])) {
     unset($_SESSION['mensagem_erro']);
 }
 
-// Buscar TODOS os serviços, juntando-os com o nome do Prestador
 $servicos = [];
 $termo_busca = $_GET['q'] ?? '';
 
@@ -29,7 +26,6 @@ try {
     $pdo = obterConexaoPDO();
     $params = [];
     
-    // Juntando a tabela Servico com a tabela Prestador para obter o nome 
     $sql = "SELECT s.id, s.titulo, s.descricao, s.preco, p.nome AS nome_prestador, p.id AS prestador_id
          FROM Servico s
          JOIN Prestador p ON s.prestador_id = p.id";

@@ -2,20 +2,16 @@
 session_start();
 require_once '../config/db.php';
 
-// Inclui o helper de validação de senha
 require_once '../includes/validation_helper.php';
 
 $mensagem = '';
 
-// Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Campos comuns que sempre virão do formulário
     $tipo_usuario = $_POST['tipo'] ?? '';
     $email = trim($_POST['email']);
     $senha = $_POST['senha'];
     $confirmar_senha = $_POST['confirmar_senha'];
 
-    // 1. Valida a força da senha
     $erros_senha = validarSenhaForte($senha);
 
     if (!empty($erros_senha)) {
@@ -26,11 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
         try {
-            // Assume-se que obterConexaoPDO() retorna um objeto PDO configurado
             $pdo = obterConexaoPDO(); 
 
             switch ($tipo_usuario) {
-                // --- CASO CLIENTE ---
                 case 'cliente':
                     $nome = trim($_POST['nome']);
                     $sobrenome = trim($_POST['sobrenome']);
@@ -53,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit();
                     break;
 
-                // --- CASO PRESTADOR ---
                 case 'prestador':
                     $nomeRazao = trim($_POST['nome_prestador']);
                     $sobrenomeFantasia = trim($_POST['sobrenome_prestador']);
@@ -67,13 +60,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         break;
                     }
 
-                    $admin_id_responsavel = 1; // ID do admin padrão (deve existir na tabela administrador)
+                    $admin_id_responsavel = 1;
 
                     $stmt = $pdo->prepare(
                         "INSERT INTO prestador (nome, sobrenome, cpf, email, telefone, especialidade, descricao, password, Administrador_id) 
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                     );
                     $stmt->execute([$nomeRazao, $sobrenomeFantasia, $cpfCnpj, $email, $telefone, $especialidade, $descricao, $senhaHash, $admin_id_responsavel]);
+
+                    if ($stmt->rowCount() > 0) { // Garante que o cadastro foi bem-sucedido
+                        // A lógica de notificação agora está no lugar certo.
+                        $stmt_admins = $pdo->query("SELECT id FROM administrador");
+                        $admin_ids = $stmt_admins->fetchAll(PDO::FETCH_COLUMN);
+
+                        if ($admin_ids) {
+                            $stmt_notif = $pdo->prepare(
+                                "INSERT INTO notificacoes (usuario_id, tipo_usuario, mensagem, link, lida) VALUES (?, 'admin', ?, ?, FALSE)"
+                            );
+                            foreach ($admin_ids as $admin_id) {
+                                $mensagem_notif = "Novo prestador cadastrado: " . htmlspecialchars($nomeRazao);
+                                $stmt_notif->execute([$admin_id, $mensagem_notif, 'admin/gerir_utilizadores.php']);
+                            }
+                        }
+                    }
+
                     $_SESSION['mensagem_sucesso'] = "Prestador cadastrado com sucesso! Faça o login.";
                     header("Location: login.php");
                     exit();
@@ -89,8 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $mensagem = '<div class="alert alert-danger">Ocorreu um erro no sistema. Tente novamente.</div>';
             }
-            // É crucial registrar o erro para debug!
-            error_log('Erro no cadastro: ' . $e->getMessage()); 
+            error_log('Erro no cadastro: ' . $e->getMessage());
         }
     }
 }
@@ -133,7 +142,6 @@ include '../includes/navbar.php';
                 </div>
             </div>
 
-            <!-- Requisitos da Senha (Feedback Visual) -->
             <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
                 <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
                 <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
@@ -249,8 +257,6 @@ include '../includes/navbar.php';
             if (tipoSelecionado === 'prestador') {
                 configurarCampoDocumento();
             } else if (tipoSelecionado === 'cliente') {
-                // Garante que a validação de idade seja executada ao voltar para a aba de cliente
-                // e que o botão de cadastro seja reavaliado.
                 validarIdade();
             }
         }
@@ -258,7 +264,6 @@ include '../includes/navbar.php';
         toggleCampos();
     });
 
-    // --- MÁSCARA DE TELEFONE ---
     function mascaraTelefone(evento) {
         if (evento.key === "Backspace") return;
         let valor = evento.target.value.replace(/\D/g, '');
@@ -271,7 +276,6 @@ include '../includes/navbar.php';
     if (inputTelefoneCliente) inputTelefoneCliente.addEventListener('keyup', mascaraTelefone);
     if (inputTelefonePrestador) inputTelefonePrestador.addEventListener('keyup', mascaraTelefone);
 
-    // --- FUNÇÕES DE MÁSCARA E VALIDAÇÃO (CPF E CNPJ) ---
     function mascaraCPF(evento) {
         if (evento.key === "Backspace") return;
         let valor = evento.target.value.replace(/\D/g, '');
@@ -330,7 +334,6 @@ include '../includes/navbar.php';
         return true;
     }
 
-    // --- LÓGICA DO CAMPO DE CPF (CLIENTE) ---
     const inputCpfCliente = document.getElementById('cpf');
     const cpfError = document.getElementById('cpfError');
     if (inputCpfCliente) {
@@ -346,7 +349,6 @@ include '../includes/navbar.php';
         });
     }
 
-    // --- LÓGICA DINÂMICA PARA O CAMPO CPF/CNPJ (PRESTADOR) ---
     const tipoDocRadios = document.querySelectorAll('input[name="tipo_documento_prestador"]');
     const inputCpfCnpjPrestador = document.getElementById('cpf_prestador');
     const labelCpfCnpj = document.getElementById('label_doc_prestador');
@@ -357,7 +359,6 @@ include '../includes/navbar.php';
 
         const tipoSelecionado = document.querySelector('input[name="tipo_documento_prestador"]:checked').value;
 
-        // Limpa listeners e valor/erros ao trocar
         inputCpfCnpjPrestador.removeEventListener('keyup', mascaraCPF);
         inputCpfCnpjPrestador.removeEventListener('keyup', mascaraCNPJ);
         inputCpfCnpjPrestador.value = '';
@@ -369,7 +370,7 @@ include '../includes/navbar.php';
             inputCpfCnpjPrestador.placeholder = '000.000.000-00';
             inputCpfCnpjPrestador.maxLength = 14;
             inputCpfCnpjPrestador.addEventListener('keyup', mascaraCPF);
-        } else { // CNPJ
+        } else {
             labelCpfCnpj.textContent = 'CNPJ:';
             inputCpfCnpjPrestador.placeholder = '00.000.000/0000-00';
             inputCpfCnpjPrestador.maxLength = 18;
@@ -395,14 +396,11 @@ include '../includes/navbar.php';
     if (inputCpfCnpjPrestador) inputCpfCnpjPrestador.addEventListener('blur', validarDocumentoPrestador);
     if (tipoDocRadios.length > 0) configurarCampoDocumento();
 
-
-    // --- VALIDAÇÃO GERAL DO FORMULÁRIO ANTES DO ENVIO ---
     const formCadastro = document.getElementById('formCadastro');
     if (formCadastro) {
         formCadastro.addEventListener('submit', function (evento) {
             const tipoSelecionado = document.querySelector('input[name="tipo"]:checked').value;
 
-            // Validação do Cliente
             if (tipoSelecionado === 'cliente') {
                 if (inputCpfCliente && inputCpfCliente.value.length > 0 && !validaCPF(inputCpfCliente.value)) {
                     evento.preventDefault();
@@ -412,7 +410,6 @@ include '../includes/navbar.php';
                 }
             }
 
-            // Validação do Prestador
             if (tipoSelecionado === 'prestador') {
                 if (inputCpfCnpjPrestador && inputCpfCnpjPrestador.value.length > 0) {
                     const tipoDoc = document.querySelector('input[name="tipo_documento_prestador"]:checked').value;
@@ -429,7 +426,6 @@ include '../includes/navbar.php';
         });
     }
 
-    // --- LÓGICA DE VALIDAÇÃO DE SENHA (FRONTEND) ---
     const senhaInput = document.getElementById('senha');
     const requirements = {
         length: document.getElementById('length'),
@@ -465,7 +461,6 @@ include '../includes/navbar.php';
         senhaInput.addEventListener('input', validatePassword);
     }
 
-    // --- LÓGICA DE COMPARAÇÃO DE SENHAS (FRONTEND) ---
     const confirmarSenhaInput = document.getElementById('confirmar_senha');
 
     function checkPasswordMatch() {
@@ -479,7 +474,6 @@ include '../includes/navbar.php';
     senhaInput.addEventListener('input', checkPasswordMatch);
     confirmarSenhaInput.addEventListener('input', checkPasswordMatch);
 
-    // --- LÓGICA DE VALIDAÇÃO DE IDADE (CLIENTE) ---
     const dataNascimentoInput = document.getElementById('data_nascimento');
     const ageError = document.getElementById('ageError');
     const btnCadastrar = document.getElementById('btnCadastrar');
@@ -512,7 +506,6 @@ include '../includes/navbar.php';
         dataNascimentoInput.addEventListener('change', validarIdade);
     }
 
-    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
     function setupTogglePassword(inputId, buttonId, iconId) {
         const input = document.getElementById(inputId);
         const button = document.getElementById(buttonId);

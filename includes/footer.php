@@ -3,10 +3,8 @@
 </footer>
 
 <?php
-// --- LÓGICA PARA BUSCAR O CONTEÚDO DOS TERMOS DE USO ---
 $conteudo_termos = '<p>O conteúdo dos Termos de Uso não pôde ser carregado.</p>';
 try {
-    // Garante que a conexão PDO esteja disponível
     if (!function_exists('obterConexaoPDO')) {
         require_once __DIR__ . '/../config/db.php';
     }
@@ -32,7 +30,6 @@ try {
             </div>
 
             <div class="modal-body">
-                <!-- O conteúdo dos termos é inserido aqui pelo código PHP -->
                 <?= $conteudo_termos ?>
             </div>
         </div>

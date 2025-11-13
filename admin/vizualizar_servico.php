@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -11,14 +10,12 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
 $servico = null;
 $mensagem_erro = '';
 
-// Verifica se o ID do serviço foi passado na URL
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $servico_id = $_GET['id'];
 
     try {
         $pdo = obterConexaoPDO();
         
-        // Busca os detalhes do serviço e o nome do prestador
         $stmt = $pdo->prepare("SELECT s.id, s.titulo, s.descricao, s.preco, p.nome AS nome_prestador, p.id AS prestador_id
                                FROM Servico s
                                JOIN Prestador p ON s.prestador_id = p.id

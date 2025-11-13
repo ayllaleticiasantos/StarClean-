@@ -2,8 +2,6 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/log_helper.php';
-
-// Segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();
@@ -19,22 +17,19 @@ if (!$usuario_id || !$tipo || !in_array($tipo, ['cliente', 'prestador'])) {
     exit();
 }
 
-$tabela = $tipo; // 'cliente' ou 'prestador'
+$tabela = $tipo;
 
 try {
     $pdo = obterConexaoPDO();
 
-    // Antes de deletar, busca os dados do usuário para registrar no log
     $stmt_select = $pdo->prepare("SELECT id, nome, email FROM `$tabela` WHERE id = ?");
     $stmt_select->execute([$usuario_id]);
     $usuario_para_deletar = $stmt_select->fetch(PDO::FETCH_ASSOC);
 
     if ($usuario_para_deletar) {
-        // Deleta o usuário
-        $stmt_delete = $pdo->prepare("DELETE FROM `$tabela` WHERE id = ?");
+        $stmt_delete = $pdo->prepare(query: "DELETE FROM `$tabela` WHERE id = ?");
         $stmt_delete->execute([$usuario_id]);
 
-        // Prepara os detalhes para o log
         $detalhes_log = [
             'usuario_deletado_id' => $usuario_para_deletar['id'],
             'nome' => $usuario_para_deletar['nome'],
@@ -42,7 +37,6 @@ try {
             'tipo' => $tipo
         ];
 
-        // Registra a ação no log
         registrar_log_admin($id_admin_logado, "Deletou um usuário do tipo '$tipo'", $detalhes_log);
 
         $_SESSION['mensagem_sucesso'] = "Usuário deletado com sucesso!";

@@ -1,7 +1,4 @@
 <?php
-// cadastraadm.php
-
-// Database connection (adjust credentials as needed)
 include('../config/config.php');
 include('../config/db.php');
 include('../includes/validation_helper.php'); // Inclui o nosso helper
@@ -18,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $senha = $_POST['senha'];
     $tipo = $_POST['tipo'];
 
-    // Validação da senha
     $erros_senha = validarSenhaForte($senha); 
 
     if (!empty($erros_senha)) {
@@ -32,13 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute(['nome' => $nome, 'sobrenome' => $sobrenome, 'email' => $email, 'password' => $senhaHash, 'tipo' => $tipo]);
             $mensagem = 'Administrador cadastrado com sucesso!';
         } catch (PDOException $e) {
-            if ($e->getCode() == 23000) { // Código de erro para violação de chave única
+            if ($e->getCode() == 23000) {
                 $mensagem = 'Erro: Email já cadastrado.';
             } else {
                 $mensagem = 'Erro ao cadastrar administrador: ' . $e->getMessage();
             }
         }
     }
+       registrar_log_admin($id_admin_logado, "Cadastrou um administrador do tipo $tipo.");
+ 
 }
 
 include '../includes/header.php';
@@ -143,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const value = senhaInput.value;
         let allValid = true;
 
-        // Função para atualizar o requisito na UI
         const updateRequirement = (req, isValid) => {
             if (isValid) {
                 req.classList.remove('text-danger');
@@ -166,17 +163,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     senhaInput.addEventListener('input', validatePassword);
 
-    // --- LÓGICA PARA MOSTRAR/OCULTAR SENHA ---
     const toggleButton = document.getElementById('toggleSenha');
     const icon = document.getElementById('iconSenha');
 
     if (toggleButton && senhaInput && icon) {
         toggleButton.addEventListener('click', function() {
-            // Alterna o tipo do input
             const type = senhaInput.getAttribute('type') === 'password' ? 'text' : 'password';
             senhaInput.setAttribute('type', type);
             
-            // Alterna o ícone
             icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
         });
     }
