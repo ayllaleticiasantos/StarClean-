@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento_detalhes) {
             // Registra a ação no log
             registrar_log_usuario('cliente', $id_cliente_logado, 'Editou o agendamento', ['agendamento_id' => $agendamento_id, 'nova_data' => $data_nova, 'nova_hora' => $hora_nova]);
 
-            $_SESSION['mensagem_sucesso'] = "Agendamento #{$agendamento_id} atualizado com sucesso.";
+            $_SESSION['mensagem_sucesso'] = "Agendamento atualizado com sucesso.";
             header("Location: meus_agendamentos.php");
             exit();
         } catch (PDOException $e) {
