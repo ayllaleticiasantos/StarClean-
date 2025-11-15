@@ -29,7 +29,7 @@ try {
 
     // Busca agendamentos CANCELADOS não lidos
     $stmt_cancelados = $pdo->prepare(
-        "SELECT a.id, p.nome AS nome_prestador, s.titulo AS titulo_servico, a.data, a.hora
+        "SELECT a.id, p.nome AS nome_prestador, s.titulo AS titulo_servico, a.data, a.hora, a.motivo_cancelamento
          FROM Agendamento a
          JOIN Prestador p ON a.Prestador_id = p.id
          JOIN Servico s ON a.Servico_id = s.id
@@ -71,8 +71,13 @@ include '../includes/navbar_logged_in.php';
 
         <?php foreach ($notificacoes_canceladas as $notificacao): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <h4 class="alert-heading">Agendamento Cancelado!</h4>
-                <p>O prestador <strong><?= htmlspecialchars($notificacao['nome_prestador']) ?></strong> cancelou o serviço "<strong><?= htmlspecialchars($notificacao['titulo_servico']) ?></strong>" que estava agendado para o dia <strong><?= date('d/m/Y', strtotime($notificacao['data'])) ?></strong>.</p>
+                <?php if ($notificacao['motivo_cancelamento'] === 'conflito_horario'): ?>
+                    <h4 class="alert-heading">Horário Indisponível!</h4>
+                    <p>O prestador <strong><?= htmlspecialchars($notificacao['nome_prestador']) ?></strong> já possui outro serviço no horário solicitado para "<strong><?= htmlspecialchars($notificacao['titulo_servico']) ?></strong>".</p>
+                <?php else: ?>
+                    <h4 class="alert-heading">Agendamento Cancelado!</h4>
+                    <p>O prestador <strong><?= htmlspecialchars($notificacao['nome_prestador']) ?></strong> cancelou o serviço "<strong><?= htmlspecialchars($notificacao['titulo_servico']) ?></strong>" que estava agendado para o dia <strong><?= date('d/m/Y', strtotime($notificacao['data'])) ?></strong>.</p>
+                <?php endif; ?>
                 <hr>
                 <p class="mb-0">Você pode ir para a página <a href="meus_agendamentos.php" class="alert-link">Meus Agendamentos</a> para remarcar o serviço.</p>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -128,7 +133,7 @@ include '../includes/navbar_logged_in.php';
                     <div class="card-body text-center d-flex flex-column">
                         <i class="fas fa-user-edit fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">Meu Perfil</h5>
-                        <p class="card-text">Mantenha seus dados de contato e de acesso atualizados.</p>
+                        <p class="card-text">Mantenha seus dados de contato, senha e endereços atualizados.</p>
                         <a href="../pages/perfil.php" class="btn btn-warning mt-auto">Acessar</a>
                     </div>
                 </div>

@@ -89,8 +89,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
             if ($dt_agendada < $dt_atual) {
                 // A data e hora escolhidas estão no passado ou muito próximas do presente.
                 $mensagem = '<div class="alert alert-danger">Não é possível agendar serviços para datas ou horários que já passaram. Escolha uma data e hora futura.</div>';
-            } else {
-                // Se a validação da data/hora passar, prossegue com o INSERT
+            } else if (isset($servico['prestador_id'])) {
+                // --- NOVA VALIDAÇÃO: VERIFICA SE O PRESTADOR JÁ TEM AGENDAMENTO ACEITO NO HORÁRIO ---
+                $stmt_check_horario = $pdo->prepare(
+                    "SELECT COUNT(*) FROM Agendamento WHERE Prestador_id = ? AND data = ? AND hora = ? AND status = 'aceito'"
+                );
+                $stmt_check_horario->execute([$servico['prestador_id'], $data, $hora]);
+                $agendamentos_no_horario = $stmt_check_horario->fetchColumn();
+
+                if ($agendamentos_no_horario > 0) {
+                    $mensagem = '<div class="alert alert-danger">Este prestador já possui um serviço aceito neste mesmo dia e horário. Por favor, escolha outro horário.</div>';
+                }
+                // --- CORREÇÃO: O código de inserção foi movido para DENTRO do else da validação de horário ---
+                else { 
+                    // Se a validação da data/hora e do horário do prestador passar, prossegue com o INSERT
+                    try {
+                        // --- MUDANÇA: Inicia uma transação para garantir a integridade dos dados ---
+                        $pdo = obterConexaoPDO();
+                        $pdo->beginTransaction();
+                        
+                        $stmt = $pdo->prepare(
+                            "INSERT INTO Agendamento (cliente_id, prestador_id, servico_id, endereco_id, data, hora, status, observacoes, tem_pets, tem_crianca, possui_aspirador)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                        );
+                        $stmt->execute([$id_cliente, $prestador_id, $servico['id'], $endereco_id, $data, $hora, $status, $observacoes, $tem_pets, $tem_crianca, $possui_aspirador]);
+    
+                        // --- NOVO: Se for uma remarcação, atualiza o status do agendamento antigo ---
+                        if (!empty($remarcar_id)) {
+                            $stmt_update = $pdo->prepare(
+                                "UPDATE Agendamento SET status = 'remarcado' WHERE id = ? AND Cliente_id = ? AND status = 'cancelado'"
+                            );
+                            $stmt_update->execute([$remarcar_id, $id_cliente]);
+                        }
+    
+                        $id_novo_agendamento = $pdo->lastInsertId(); // Pega o ID do agendamento recém-criado
+                        $pdo->commit(); // Confirma as alterações no banco
+    
+                        // Registra a ação no log
+                        registrar_log_usuario('cliente', $id_cliente, 'Criou um novo agendamento', ['agendamento_id' => $id_novo_agendamento, 'servico_id' => $servico['id']]);
+                        // O código de envio de e-mail foi removido daqui.
+                        $_SESSION['mensagem_sucesso'] = "Agendamento solicitado com sucesso! Aguarde a confirmação do prestador.";
+                        header("Location: meus_agendamentos.php");
+                        exit();
+                    } catch (PDOException $e) {
+                        $pdo->rollBack(); // Desfaz as alterações em caso de erro
+                        $mensagem = '<div class="alert alert-danger">Erro ao solicitar o agendamento. Verifique se a data e hora são válidas.</div>';
+                        error_log("Erro no INSERT de Agendamento: " . $e->getMessage());
+                    }
+                }
+            } 
+            // --- CORREÇÃO: O bloco de código abaixo se tornou redundante e foi removido ---
+            /* else {
                 try {
                     // --- MUDANÇA: Inicia uma transação para garantir a integridade dos dados ---
                     $pdo = obterConexaoPDO();
@@ -124,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
                     $mensagem = '<div class="alert alert-danger">Erro ao solicitar o agendamento. Verifique se a data e hora são válidas.</div>';
                     error_log("Erro no INSERT de Agendamento: " . $e->getMessage());
                 }
-            }
+            } */
 
         } catch (Exception $e) {
              $mensagem = '<div class="alert alert-danger">Formato de data/hora inválido.</div>';

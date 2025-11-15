@@ -62,6 +62,9 @@ $tipo_admin = $_SESSION['admin_tipo'] ?? ''; // Pega o tipo específico do admin
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/prestador/meu_financeiro.php"><i class="fas fa-dollar-sign fa-fw me-2"></i>Meu Financeiro</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/prestador/minhas_avaliacoes.php"><i class="fas fa-star fa-fw me-2"></i>Minhas Avaliações</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/pages/configuracoes.php"><i class="fas fa-cog fa-fw me-2"></i>Configurações</a>
         </li>
 

@@ -1,93 +1,138 @@
 <?php
 session_start();
-require_once '../includes/validation_helper.php'; // Inclui o nosso helper
 require_once '../config/db.php';
+require_once '../config/config.php';
+require_once '../includes/log_helper.php';
+require_once '../includes/validation_helper.php';
 
-if (!isset($_SESSION['usuario_id'])) {
-    header("Location: ../pages/login.php");
+// 1. SEGURANÇA: VERIFICA SE O USUÁRIO ESTÁ LOGADO
+if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['usuario_tipo'])) {
+    header("Location: login.php");
     exit();
 }
 
 $id_usuario = $_SESSION['usuario_id'];
 $tipo_usuario = $_SESSION['usuario_tipo'];
-
 $tabela = '';
-$coluna_nome = '';
+$id_coluna = 'id';
+
+// Determina a tabela correta com base no tipo de usuário
 switch ($tipo_usuario) {
     case 'cliente':
         $tabela = 'Cliente';
-        $coluna_nome = 'nome';
         break;
     case 'prestador':
         $tabela = 'Prestador';
-        $coluna_nome = 'nome';
         break;
     case 'admin':
         $tabela = 'Administrador';
-        $coluna_nome = 'nome';
         break;
+    default:
+        // Se o tipo de usuário for inválido, redireciona
+        header("Location: login.php");
+        exit();
 }
 
+$mensagem_sucesso = '';
+$mensagem_erro = '';
+
+// 2. PROCESSAMENTO DO FORMULÁRIO
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = obterConexaoPDO();
-
+    
+    // --- AÇÃO: ATUALIZAR DADOS PESSOAIS ---
     if (isset($_POST['atualizar_dados'])) {
-        $nome = trim($_POST['nome']);
-        $email = trim($_POST['email']);
+        try {
+            if ($tipo_usuario === 'cliente') {
+                $nome = $_POST['nome'];
+                $sobrenome = $_POST['sobrenome'];
+                $telefone = $_POST['telefone'];
+                $data_nascimento = $_POST['data_nascimento'];
 
-        $stmt = $pdo->prepare("UPDATE `$tabela` SET `$coluna_nome` = ?, email = ? WHERE id = ?");
-        if ($stmt->execute([$nome, $email, $id_usuario])) {
-            $_SESSION['usuario_nome'] = $nome;
-            $_SESSION['mensagem_sucesso'] = "Dados atualizados com sucesso!";
-        } else {
-            $_SESSION['mensagem_erro'] = "Erro ao atualizar os dados.";
+                $stmt = $pdo->prepare("UPDATE Cliente SET nome = ?, sobrenome = ?, telefone = ?, data_nascimento = ? WHERE id = ?");
+                $stmt->execute([$nome, $sobrenome, $telefone, $data_nascimento, $id_usuario]);
+
+            } elseif ($tipo_usuario === 'prestador') {
+                $nome = $_POST['nome'];
+                $sobrenome = $_POST['sobrenome'];
+                $telefone = $_POST['telefone'];
+                $especialidade = $_POST['especialidade'];
+                $descricao = $_POST['descricao'];
+
+                $stmt = $pdo->prepare("UPDATE Prestador SET nome = ?, sobrenome = ?, telefone = ?, especialidade = ?, descricao = ? WHERE id = ?");
+                $stmt->execute([$nome, $sobrenome, $telefone, $especialidade, $descricao, $id_usuario]);
+
+            } elseif ($tipo_usuario === 'admin') {
+                $nome = $_POST['nome'];
+                $sobrenome = $_POST['sobrenome'];
+
+                $stmt = $pdo->prepare("UPDATE Administrador SET nome = ?, sobrenome = ? WHERE id = ?");
+                $stmt->execute([$nome, $sobrenome, $id_usuario]);
+            }
+
+            $_SESSION['usuario_nome'] = $nome; // Atualiza o nome na sessão
+            $mensagem_sucesso = "Seus dados foram atualizados com sucesso!";
+
+        } catch (PDOException $e) {
+            $mensagem_erro = "Erro ao atualizar os dados. Tente novamente.";
+            error_log("Erro ao atualizar perfil ($tipo_usuario): " . $e->getMessage());
         }
     }
-    
-    if (isset($_POST['alterar_senha'])) {
+
+    // --- AÇÃO: ATUALIZAR SENHA ---
+    if (isset($_POST['atualizar_senha'])) {
         $senha_atual = $_POST['senha_atual'];
         $nova_senha = $_POST['nova_senha'];
-        $confirmar_nova_senha = $_POST['confirmar_nova_senha'];
+        $confirmar_senha = $_POST['confirmar_senha'];
 
-        $erros_senha = validarSenhaForte($nova_senha);
+        // Busca a senha atual no banco
+        $stmt_pass = $pdo->prepare("SELECT password FROM $tabela WHERE id = ?");
+        $stmt_pass->execute([$id_usuario]);
+        $usuario_db = $stmt_pass->fetch();
 
-        if (!empty($erros_senha)) {
-            $_SESSION['mensagem_erro'] = "A nova senha não é forte o suficiente: <ul><li>" . implode("</li><li>", $erros_senha) . "</li></ul>";
-        } elseif ($nova_senha !== $confirmar_nova_senha) {
-            $_SESSION['mensagem_erro'] = "As novas senhas não correspondem.";
+        if (!$usuario_db || !password_verify($senha_atual, $usuario_db['password'])) {
+            $mensagem_erro = "A senha atual está incorreta.";
+        } elseif ($nova_senha !== $confirmar_senha) {
+            $mensagem_erro = "A nova senha e a confirmação não correspondem.";
         } else {
-            $stmt = $pdo->prepare("SELECT password FROM `$tabela` WHERE id = ?");
-            $stmt->execute([$id_usuario]);
-            $usuario = $stmt->fetch();
-
-            if (!$usuario || !password_verify($senha_atual, $usuario['password'])) {
-                $_SESSION['mensagem_erro'] = "A senha atual está incorreta.";
+            $erros_senha = validarSenhaForte($nova_senha);
+            if (!empty($erros_senha)) {
+                $mensagem_erro = "A nova senha não é forte o suficiente: <ul><li>" . implode("</li><li>", $erros_senha) . "</li></ul>";
             } else {
+                // Se tudo estiver OK, atualiza a senha
                 $nova_senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
-                $stmt_update = $pdo->prepare("UPDATE `$tabela` SET password = ? WHERE id = ?");
-                if ($stmt_update->execute([$nova_senha_hash, $id_usuario])) {
-                    $_SESSION['mensagem_sucesso'] = "Senha alterada com sucesso!";
-                } else {
-                    $_SESSION['mensagem_erro'] = "Ocorreu um erro ao alterar a senha.";
-                }
+                $stmt_update = $pdo->prepare("UPDATE $tabela SET password = ? WHERE id = ?");
+                $stmt_update->execute([$nova_senha_hash, $id_usuario]);
+                $mensagem_sucesso = "Senha alterada com sucesso!";
             }
         }
     }
-    
-    header("Location: perfil.php");
-    exit();
 }
-$pdo = obterConexaoPDO();
-$stmt = $pdo->prepare("SELECT `$coluna_nome` as nome, email FROM `$tabela` WHERE id = ?");
-$stmt->execute([$id_usuario]);
-$usuario_atual = $stmt->fetch();
 
+// 3. BUSCAR DADOS ATUAIS DO USUÁRIO PARA EXIBIR NO FORMULÁRIO
+$usuario = null;
+try {
+    $pdo = obterConexaoPDO();
+    $stmt = $pdo->prepare("SELECT * FROM $tabela WHERE id = ?");
+    $stmt->execute([$id_usuario]);
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$usuario) {
+        // Força o logout se o usuário não for encontrado no banco
+        session_destroy();
+        header("Location: login.php?mensagem=Sessão inválida.");
+        exit();
+    }
+} catch (PDOException $e) {
+    $mensagem_erro = "Erro ao carregar os dados do perfil.";
+    error_log("Erro ao buscar dados do perfil ($tipo_usuario): " . $e->getMessage());
+}
 
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
-<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
-    aria-controls="sidebarMenu">
+
+<button class="btn btn-primary d-md-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
     <i class="fas fa-bars"></i> Menu
 </button>
 
@@ -100,92 +145,179 @@ include '../includes/navbar_logged_in.php';
         <?php include '../includes/menu.php'; ?>
     </div>
 </div>
+
 <main class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-<div class="container-fluid p-4 flex-grow-1">
-    
-    <h1>Meu Perfil</h1>
-    <hr>
+    <div class="container-fluid p-4 flex-grow-1">
+        <h1 class="mb-4">Meu Perfil</h1>
 
-    <?php 
-    if (isset($_SESSION['mensagem_sucesso'])) {
-        echo '<div class="alert alert-success">' . $_SESSION['mensagem_sucesso'] . '</div>';
-        unset($_SESSION['mensagem_sucesso']);
-    }
-    if (isset($_SESSION['mensagem_erro'])) {
-        echo '<div class="alert alert-danger">' . $_SESSION['mensagem_erro'] . '</div>';
-        unset($_SESSION['mensagem_erro']);
-    }
-    ?>
+        <?php if ($mensagem_sucesso): ?><div class="alert alert-success"><?= $mensagem_sucesso ?></div><?php endif; ?>
+        <?php if ($mensagem_erro): ?><div class="alert alert-danger"><?= $mensagem_erro ?></div><?php endif; ?>
 
-    <div class="card shadow-sm mb-5">
-        <div class="card-header responsive">
-            <h5>Dados Pessoais</h5>
-        </div>
-        <div class="card-body">
-            <form action="perfil.php" method="POST">
-                <div class="mb-3">
-                    <label for="nome" class="form-label">Nome Completo</label>
-                    <input type="text" class="form-control" id="nome" name="nome" value="<?= htmlspecialchars($usuario_atual['nome']) ?>" required>
+        <?php if ($usuario): ?>
+            <ul class="nav nav-tabs" id="perfilTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="dados-pessoais-tab" data-bs-toggle="tab" data-bs-target="#dados-pessoais" type="button" role="tab">Dados Pessoais</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="seguranca-tab" data-bs-toggle="tab" data-bs-target="#seguranca" type="button" role="tab">Segurança</button>
+                </li>
+            </ul>
+
+            <div class="tab-content card shadow-sm" id="perfilTabContent">
+                <!-- ABA DE DADOS PESSOAIS -->
+                <div class="tab-pane fade show active" id="dados-pessoais" role="tabpanel">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4">Editar Informações Pessoais</h5>
+                        <form action="perfil.php" method="post">
+                            <input type="hidden" name="atualizar_dados" value="1">
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nome" class="form-label">Nome:</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" value="<?= htmlspecialchars($usuario['nome']) ?>" required placeholder="Seu primeiro nome">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="sobrenome" class="form-label">Sobrenome:</label>
+                                    <input type="text" class="form-control" id="sobrenome" name="sobrenome" value="<?= htmlspecialchars($usuario['sobrenome']) ?>" required placeholder="Seu sobrenome">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email:</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($usuario['email']) ?>" disabled readonly>
+                                <small class="form-text text-muted">O e-mail não pode ser alterado.</small>
+                            </div>
+
+                            <?php if ($tipo_usuario === 'cliente'): ?>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="telefone" class="form-label">Telefone:</label>
+                                        <input type="text" class="form-control" id="telefone" name="telefone" value="<?= htmlspecialchars($usuario['telefone']) ?>" required placeholder="(XX) XXXXX-XXXX">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="data_nascimento" class="form-label">Data de Nascimento:</label>
+                                        <input type="date" class="form-control" id="data_nascimento" name="data_nascimento" value="<?= htmlspecialchars($usuario['data_nascimento']) ?>" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cpf" class="form-label">CPF:</label>
+                                    <input type="text" class="form-control" id="cpf" name="cpf" value="<?= htmlspecialchars($usuario['cpf']) ?>" disabled readonly>
+                                    <small class="form-text text-muted">O CPF não pode ser alterado.</small>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if ($tipo_usuario === 'prestador'): ?>
+                                <div class="mb-3">
+                                    <label for="telefone" class="form-label">Telefone:</label>
+                                    <input type="text" class="form-control" id="telefone" name="telefone" value="<?= htmlspecialchars($usuario['telefone']) ?>" required placeholder="(XX) XXXXX-XXXX">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="especialidade" class="form-label">Especialidade:</label>
+                                    <input type="text" class="form-control" id="especialidade" name="especialidade" value="<?= htmlspecialchars($usuario['especialidade']) ?>" required placeholder="Ex: Limpeza residencial, pós-obra...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="descricao" class="form-label">Descrição:</label>
+                                    <textarea class="form-control" id="descricao" name="descricao" rows="4" placeholder="Fale um pouco sobre você e seus serviços..."><?= htmlspecialchars($usuario['descricao']) ?></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cpf" class="form-label">CPF:</label>
+                                    <input type="text" class="form-control" id="cpf" name="cpf" value="<?= htmlspecialchars($usuario['cpf']) ?>" disabled readonly>
+                                    <small class="form-text text-muted">O CPF não pode ser alterado.</small>
+                                </div>
+                            <?php endif; ?>
+
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">E-mail</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($usuario_atual['email']) ?>" required>
+
+                <!-- ABA DE SEGURANÇA -->
+                <div class="tab-pane fade" id="seguranca" role="tabpanel">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4">Alterar Senha</h5>
+                        <form action="perfil.php" method="post">
+                            <input type="hidden" name="atualizar_senha" value="1">
+                            <div class="mb-3">
+                                <label for="senha_atual" class="form-label">Senha Atual:</label>
+                                <input type="password" class="form-control" id="senha_atual" name="senha_atual" required placeholder="Digite sua senha atual">
+                            </div>
+                            <div class="mb-3">
+                                <label for="nova_senha" class="form-label">Nova Senha:</label>
+                                <input type="password" class="form-control" id="nova_senha" name="nova_senha" required placeholder="Crie uma nova senha forte" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="A senha deve atender a todos os requisitos de segurança.">
+                            </div>
+                            <!-- Requisitos da Senha (Feedback Visual) -->
+                            <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
+                                <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
+                                <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
+                                <li id="uppercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra maiúscula</li>
+                                <li id="number" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um número</li>
+                                <li id="special" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um caractere especial (!@#$%)</li>
+                            </ul>
+                            <div class="mb-3">
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmar_senha" class="form-label">Confirmar Nova Senha:</label>
+                                <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" required placeholder="Confirme a nova senha">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Alterar Senha</button>
+                        </form>
+                    </div>
                 </div>
-                <button type="submit" name="atualizar_dados" class="btn btn-primary">Salvar Alterações</button>
-            </form>
-        </div>
+
+            </div>
+
+        <?php else: ?>
+            <div class="alert alert-danger">Não foi possível carregar os dados do seu perfil. Por favor, tente fazer login novamente.</div>
+        <?php endif; ?>
     </div>
-
-    <div class="card shadow-sm mb-5">
-        <div class="card-header responsive">
-            <h5>Alterar Senha</h5>
-        </div>
-        <div class="card-body">
-            <form action="perfil.php" method="POST">
-                <div class="mb-3">
-                    <label for="senha_atual" class="form-label">Senha Atual</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="senha_atual" placeholder="Digite sua senha atual" name="senha_atual" required>
-                        <button class="btn btn-outline-secondary" type="button" id="toggleSenhaAtual"><i class="fas fa-eye" id="iconSenhaAtual"></i></button>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="nova_senha" class="form-label">Nova Senha</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="nova_senha" placeholder="Digite sua nova senha" name="nova_senha" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="A senha deve conter no mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e um caractere especial.">
-                        <button class="btn btn-outline-secondary" type="button" id="toggleNovaSenha"><i class="fas fa-eye" id="iconNovaSenha"></i></button>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="confirmar_nova_senha" class="form-label">Confirmar Nova Senha</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="confirmar_nova_senha" placeholder="Confirme sua nova senha" name="confirmar_nova_senha" required>
-                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmarNovaSenha"><i class="fas fa-eye" id="iconConfirmarNovaSenha"></i></button>
-                    </div>
-                </div>
-
-                <ul id="password-requirements" class="list-unstyled mt-2 text-muted small">
-                    <li id="length" class="text-danger"><i class="fas fa-times-circle me-1"></i> Mínimo de 8 caracteres</li>
-                    <li id="lowercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra minúscula</li>
-                    <li id="uppercase" class="text-danger"><i class="fas fa-times-circle me-1"></i> Uma letra maiúscula</li>
-                    <li id="number" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um número</li>
-                    <li id="special" class="text-danger"><i class="fas fa-times-circle me-1"></i> Um caractere especial (!@#$%)</li>
-                </ul>
-
-                <button type="submit" name="alterar_senha" class="btn btn-primary">Alterar Senha</button>
-            </form>
-        </div>
-    </div>
-</div>
 </main>
 
-<?php include '../includes/footer.php'; ?>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    // Lógica para manter a aba ativa após o post (recarregamento da página)
+    const activeTab = localStorage.getItem('activePerfilTab');
+    if (activeTab) {
+        const tabElement = document.querySelector('#perfilTab button[data-bs-target="' + activeTab + '"]');
+        if (tabElement) {
+            new bootstrap.Tab(tabElement).show();
+        }
+    }
+
+    // Salva a aba clicada no localStorage
+    const tabButtons = document.querySelectorAll('#perfilTab button[data-bs-toggle="tab"]');
+    tabButtons.forEach(button => {
+        button.addEventListener('shown.bs.tab', function (event) {
+            localStorage.setItem('activePerfilTab', event.target.getAttribute('data-bs-target'));
+        });
+    });
+
+    // Limpa o localStorage ao sair da página para não interferir em outras sessões
+    window.addEventListener('beforeunload', function() {
+        // Se o formulário foi submetido, não limpa para poder mostrar a msg de sucesso na aba correta
+        if (!document.querySelector('form').classList.contains('submitting')) {
+             localStorage.removeItem('activePerfilTab');
+        }
+    });
+    document.querySelector('form').addEventListener('submit', function() {
+        this.classList.add('submitting');
+    });
+
+    // Máscara de telefone (exemplo simples)
+    const phoneInput = document.getElementById('telefone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value.slice(0, 15);
+        });
+    }
+
+    // --- LÓGICA PARA VALIDAÇÃO DE SENHA FORTE ---
     const senhaInput = document.getElementById('nova_senha');
+    const requirementsList = document.getElementById('password-requirements');
     const requirements = {
         length: document.getElementById('length'),
         lowercase: document.getElementById('lowercase'),
@@ -194,45 +326,46 @@ document.addEventListener('DOMContentLoaded', function() {
         special: document.getElementById('special')
     };
 
-    function validatePassword() {
-        const value = senhaInput.value;
+    if (senhaInput && requirementsList) {
+        function validatePassword() {
+            const value = senhaInput.value;
 
-        const updateRequirement = (req, isValid) => {
-            if (isValid) {
-                req.classList.remove('text-danger');
-                req.classList.add('text-success');
-                req.querySelector('i').className = 'fas fa-check-circle me-1';
-            } else {
-                req.classList.remove('text-success');
-                req.classList.add('text-danger');
-                req.querySelector('i').className = 'fas fa-times-circle me-1';
-            }
-        };
+            // Esconde a lista se o campo estiver vazio
+            requirementsList.style.display = value.length > 0 ? 'block' : 'none';
 
-        updateRequirement(requirements.length, value.length >= 8);
-        updateRequirement(requirements.lowercase, /[a-z]/.test(value));
-        updateRequirement(requirements.uppercase, /[A-Z]/.test(value));
-        updateRequirement(requirements.number, /\d/.test(value));
-        updateRequirement(requirements.special, /[\W_]/.test(value));
-    }
+            const updateRequirement = (req, isValid) => {
+                if (req) {
+                    req.className = isValid ? 'text-success' : 'text-danger';
+                    req.querySelector('i').className = isValid ? 'fas fa-check-circle me-1' : 'fas fa-times-circle me-1';
+                }
+            };
 
-    senhaInput.addEventListener('input', validatePassword);
-
-    function setupTogglePassword(inputId, buttonId, iconId) {
-        const input = document.getElementById(inputId);
-        const button = document.getElementById(buttonId);
-        const icon = document.getElementById(iconId);
-
-        if (input && button && icon) {
-            button.addEventListener('click', function() {
-                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                input.setAttribute('type', type);
-                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-            });
+            updateRequirement(requirements.length, value.length >= 8);
+            updateRequirement(requirements.lowercase, /[a-z]/.test(value));
+            updateRequirement(requirements.uppercase, /[A-Z]/.test(value));
+            updateRequirement(requirements.number, /\d/.test(value));
+            updateRequirement(requirements.special, /[\W_]/.test(value));
         }
+
+        senhaInput.addEventListener('input', validatePassword);
+        validatePassword(); // Executa uma vez para definir o estado inicial (escondido)
     }
-    setupTogglePassword('senha_atual', 'toggleSenhaAtual', 'iconSenhaAtual');
-    setupTogglePassword('nova_senha', 'toggleNovaSenha', 'iconNovaSenha');
-    setupTogglePassword('confirmar_nova_senha', 'toggleConfirmarNovaSenha', 'iconConfirmarNovaSenha');
 });
 </script>
+
+<?php include '../includes/footer.php'; ?>
+
+
+<style>
+/* Adiciona um espaçamento interno consistente para todas as abas */
+.tab-content > .tab-pane {
+    border: 1px solid #dee2e6;
+    border-top: 0;
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* Remove a borda do card para que ele se integre com as abas */
+.tab-content.card {
+    border: none;
+}
+</style>

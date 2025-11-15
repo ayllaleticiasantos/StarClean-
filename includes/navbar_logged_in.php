@@ -84,7 +84,17 @@ if (isset($_SESSION['usuario_id'])) {
                             <?php else: ?>
                                 <li>
                                     <a class="dropdown-item" href="<?= $link_destino ?>">
-                                        <!-- A lógica para clientes e prestadores continua aqui -->
+                                        <small>
+                                            <?php if ($tipo_usuario === 'prestador'): ?>
+                                                <i class="fas fa-calendar-plus me-2 text-info"></i>
+                                                Novo agendamento de <strong><?= htmlspecialchars($notification['nome_cliente']) ?></strong>
+                                                <br>
+                                                <small class="text-muted d-block">Para <?= date('d/m/Y', strtotime($notification['data'])) ?></small>
+                                            <?php elseif ($tipo_usuario === 'cliente'): ?>
+                                                <i class="fas fa-info-circle me-2 <?= $notification['status'] === 'aceito' ? 'text-success' : 'text-danger' ?>"></i>
+                                                Agendamento de <strong><?= htmlspecialchars($notification['titulo_servico']) ?></strong> foi <strong><?= htmlspecialchars($notification['status']) ?></strong>.
+                                            <?php endif; ?>
+                                        </small>
                                     </a>
                                 </li>
                             <?php endif; ?>

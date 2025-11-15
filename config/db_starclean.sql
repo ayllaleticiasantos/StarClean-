@@ -69,7 +69,8 @@ CREATE TABLE `agendamento` (
   `possui_aspirador` tinyint(1) NOT NULL DEFAULT 0,
   `notificacao_prestador_lida` tinyint(1) NOT NULL DEFAULT 0,
   `notificacao_cliente_lida` tinyint(1) NOT NULL DEFAULT 0,
-  `notificacao_admin_lida` tinyint(1) NOT NULL DEFAULT 0
+  `notificacao_admin_lida` tinyint(1) NOT NULL DEFAULT 0,
+  `motivo_cancelamento` varchar(255) DEFAULT NULL COMMENT 'Registra o motivo do cancelamento (ex: conflito_horario)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -77,7 +78,7 @@ CREATE TABLE `agendamento` (
 --
 
 INSERT INTO `agendamento` (`id`, `Cliente_id`, `Prestador_id`, `Servico_id`, `Endereco_id`, `data`, `hora`, `status`, `observacoes`, `tem_pets`, `tem_crianca`, `possui_aspirador`, `notificacao_prestador_lida`, `notificacao_cliente_lida`, `notificacao_admin_lida`) VALUES
-(1, 2, 1, 15, 20, '2025-10-24', '12:00:00', 'realizado', 'Limpeza de 3 salas comerciais.', 0, 0, 0, 0, 0, 1),
+(1, 2, 1, 15, 20, '2025-10-24', '12:00:00', 'realizado', 'Limpeza de 3 salas comerciais.', 0, 0, 0, 0, 0, 1, NULL),
 (2, 4, 1, 15, 16, '2025-10-31', '13:00:00', 'remarcado', 'escritorio\r\n', 0, 0, 0, 0, 0, 0),
 (3, 4, 1, 15, 16, '2025-10-30', '12:00:00', 'remarcado', '', 0, 0, 0, 0, 0, 0),
 (5, 4, 4, 16, 16, '2025-10-28', '12:03:00', 'realizado', '', 0, 0, 0, 0, 0, 1),
