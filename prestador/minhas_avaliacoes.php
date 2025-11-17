@@ -12,7 +12,8 @@ $id_prestador = $_SESSION['usuario_id'];
 $avaliacoes = [];
 $stats = ['total' => 0, 'media' => 0];
 $mensagem_erro = '';
-$termo_busca = $_GET['q'] ?? ''; // Captura o termo de busca
+$termo_busca = $_GET['q'] ?? ''; 
+$filtro_nota = $_GET['nota'] ?? ''; 
 
 try {
     $pdo = obterConexaoPDO();
@@ -30,6 +31,11 @@ try {
         $like_term = "%" . $termo_busca . "%";
         $params_avaliacoes[] = $like_term;
         $params_avaliacoes[] = $like_term;
+    }
+
+    if (!empty($filtro_nota) && is_numeric($filtro_nota)) {
+        $sql_avaliacoes .= " AND ap.nota = ?";
+        $params_avaliacoes[] = $filtro_nota;
     }
 
     $sql_avaliacoes .= " ORDER BY ap.id DESC";
@@ -107,11 +113,17 @@ include '../includes/navbar_logged_in.php';
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Comentários Recebidos</h5>
-                <form method="GET" action="minhas_avaliacoes.php" class="d-flex" style="width: 100%; max-width: 300px;">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Buscar por cliente ou comentário..." value="<?= htmlspecialchars($termo_busca) ?>">
+                <form method="GET" action="minhas_avaliacoes.php" class="d-flex align-items-center gap-2">
+                    <select name="nota" class="form-select" style="width: auto;">
+                        <option value="">Todas as Notas</option>
+                        <?php for ($i = 5; $i >= 1; $i--): ?>
+                            <option value="<?= $i ?>" <?= ($filtro_nota == $i) ? 'selected' : '' ?>><?= $i ?> Estrela(s)</option>
+                        <?php endfor; ?>
+                    </select>
+                    <input class="form-control" type="search" name="q" placeholder="Buscar por cliente ou comentário..." value="<?= htmlspecialchars($termo_busca) ?>" style="width: 250px;">
                     <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                    <?php if (!empty($termo_busca)): ?>
-                        <a href="minhas_avaliacoes.php" class="btn btn-outline-secondary ms-2" title="Limpar Busca">
+                    <?php if (!empty($termo_busca) || !empty($filtro_nota)): ?>
+                        <a href="minhas_avaliacoes.php" class="btn btn-outline-secondary" title="Limpar Filtros">
                             <i class="fas fa-times"></i>
                         </a>
                     <?php endif; ?>
@@ -119,8 +131,8 @@ include '../includes/navbar_logged_in.php';
             </div>
             <div class="card-body">
                 <?php if (empty($avaliacoes)): ?>
-                    <?php if (!empty($termo_busca)): ?>
-                        <p class="text-muted text-center">Nenhuma avaliação encontrada para "<?= htmlspecialchars($termo_busca) ?>".</p>
+                    <?php if (!empty($termo_busca) || !empty($filtro_nota)): ?>
+                        <p class="text-muted text-center">Nenhuma avaliação encontrada para os filtros aplicados.</p>
                     <?php else: ?>
                         <p class="text-muted text-center">Você ainda não recebeu nenhuma avaliação com comentário.</p>
                     <?php endif; ?>

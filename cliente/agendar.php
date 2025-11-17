@@ -83,12 +83,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $servico && !empty($enderecos_clien
             $dt_agendada = new DateTime($data_hora_agendada);
             $dt_atual = new DateTime($data_hora_atual);
 
-            // Adiciona um buffer de 5 minutos
-            $dt_atual->modify('+5 minutes'); 
+            // Adiciona um buffer de 4 horas para agendamentos no mesmo dia
+            $dt_atual->modify('+4 hours'); 
 
             if ($dt_agendada < $dt_atual) {
                 // A data e hora escolhidas estão no passado ou muito próximas do presente.
-                $mensagem = '<div class="alert alert-danger">Não é possível agendar serviços para datas ou horários que já passaram. Escolha uma data e hora futura.</div>';
+                $mensagem = '<div class="alert alert-danger">Agendamentos para o mesmo dia devem ser feitos com no mínimo 4 horas de antecedência. Por favor, escolha um horário futuro.</div>';
             } else if (isset($servico['prestador_id'])) {
                 // --- NOVA VALIDAÇÃO: VERIFICA SE O PRESTADOR JÁ TEM AGENDAMENTO ACEITO NO HORÁRIO ---
                 $stmt_check_horario = $pdo->prepare(

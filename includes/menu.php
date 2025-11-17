@@ -23,6 +23,9 @@ $tipo_admin = $_SESSION['admin_tipo'] ?? ''; // Pega o tipo específico do admin
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_agendamentos.php"><i class="fas fa-calendar-check fa-fw me-2"></i>Gerir Agendamentos</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/gerir_avaliacoes.php"><i class="fas fa-star-half-alt fa-fw me-2"></i>Gerir Avaliações</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link text-dark" href="<?= BASE_URL ?>/admin/adicionar_servico.php"><i class="fas bi bi-plus-square-fill fa-fw me-2"></i>Cadastrar Serviço</a>
         </li>
         <li class="nav-item">     

@@ -5,6 +5,7 @@ include('../includes/validation_helper.php'); // Inclui o nosso helper
 
 session_start();
 require_once '../config/db.php';
+$id_admin_logado = $_SESSION['usuario_id']; // <-- Adicionado para pegar o ID do admin logado
 
 $mensagem = '';
 

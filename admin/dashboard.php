@@ -131,6 +131,15 @@ include '../includes/navbar_logged_in.php';
                     </div>
                 </div>
             </div>
+             <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-custom-orange">
+                    <div class="card-body text-center d-flex flex-column"><i class="fas fa-star-half-alt fa-3x text-custom-orange mb-3"></i>
+                        <h5 class="card-title">Gerir Avaliações</h5>
+                        <p class="card-text">Visualize e modere as avaliações de clientes.</p>
+                        <a href="gerir_avaliacoes.php" class="btn btn-custom-orange mt-auto">Acessar</a>
+                    </div>
+                </div>
+            </div>
             <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-light">
                     <div class="card-body text-center d-flex flex-column"><i class="fas fa-history fa-3x text-dark mb-3"></i>
@@ -190,6 +199,26 @@ include '../includes/navbar_logged_in.php';
         </div>
     </div>
 </main>
+
+<style>
+    .border-custom-orange {
+        border-color: #fd7e14 !important;
+    }
+    .text-custom-orange {
+        color: #fd7e14 !important;
+    }
+    .btn-custom-orange {
+        background-color: #fd7e14;
+        border-color: #fd7e14;
+        color: #fff;
+    }
+    .btn-custom-orange:hover {
+        background-color: #e47112; /* Um tom um pouco mais escuro para o hover */
+        border-color: #d16810;
+        color: #fff;
+    }
+</style>
+
 <?php
 include '../includes/footer.php';
 ?>
