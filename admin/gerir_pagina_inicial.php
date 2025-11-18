@@ -67,7 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_bloco'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['conteudo_geral'])) {
+    $acao = $_POST['acao'] ?? '';
+
+    // Ação para salvar textos gerais (usado nas abas 'Página Inicial' e 'Sobre')
+    if ($acao === 'salvar_conteudo_geral' && isset($_POST['conteudo_geral'])) {
         foreach ($_POST['conteudo_geral'] as $chave => $valor) {
             $conteudo = trim($valor['conteudo']);
             $oculto = isset($valor['oculto']) ? 1 : 0;
@@ -77,7 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mensagem_sucesso = "Conteúdo de texto atualizado com sucesso!";
     }
 
-    if (isset($_POST['conteudo'])) {
+    // Ação para salvar itens do carrossel/cards (usado na aba 'Página Inicial')
+    if ($acao === 'salvar_itens_pagina_inicial' && isset($_POST['conteudo'])) {
         try {
             $pdo = obterConexaoPDO();
             $pdo->beginTransaction();
@@ -85,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($_POST['conteudo'] as $id => $dados) {
                 $titulo = $dados['titulo'];
                 $texto = $dados['texto'];
-                $ativo = isset($dados['ativo']) ? 1 : 0;
                 $oculto = isset($dados['oculto']) ? 1 : 0; // Novo campo: oculto
 
                 // Lógica de upload de imagem
@@ -103,9 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $stmt = $pdo->prepare(
-                    "UPDATE conteudo_pagina_inicial SET titulo = ?, texto = ?, imagem_url = ?, ativo = ?, oculto = ?, editado_por_admin_id = ? WHERE id = ?"
+                    "UPDATE conteudo_pagina_inicial SET titulo = ?, texto = ?, imagem_url = ?, oculto = ?, editado_por_admin_id = ? WHERE id = ?"
                 );
-                $stmt->execute([$titulo, $texto, $imagem_url, $ativo, $oculto, $id_admin_logado, $id]);
+                $stmt->execute([$titulo, $texto, $imagem_url, $oculto, $id_admin_logado, $id]);
             }
 
             $pdo->commit();
@@ -120,7 +123,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    registrar_log_admin($id_admin_logado, "Editou o conteúdo das páginas (inicial/sobre).");
+    // Ação para salvar os Termos de Uso
+    if ($acao === 'salvar_termos' && isset($_POST['conteudo_geral']['termos_de_uso_conteudo'])) {
+        $conteudo = $_POST['conteudo_geral']['termos_de_uso_conteudo']['conteudo'];
+        $stmt = obterConexaoPDO()->prepare("UPDATE conteudo_geral SET conteudo = ?, editado_por_admin_id = ? WHERE chave = 'termos_de_uso_conteudo'");
+        $stmt->execute([$conteudo, $id_admin_logado]);
+        $mensagem_sucesso = "Termos de Uso atualizados com sucesso!";
+    }
+
+    if (!empty($mensagem_sucesso)) {
+        registrar_log_admin($id_admin_logado, "Editou o conteúdo do site.");
+    }
 }
 
 $conteudos = [];
@@ -138,7 +151,7 @@ try {
         $pdo = obterConexaoPDO();
     }
     
-    $stmt_geral = $pdo->query("SELECT * FROM conteudo_geral ORDER BY pagina, id");
+    $stmt_geral = $pdo->query("SELECT *, CASE WHEN chave = 'termos_de_uso_conteudo' THEN 'termos_de_uso' ELSE pagina END as pagina_grupo FROM conteudo_geral ORDER BY pagina, id");
     foreach ($stmt_geral->fetchAll(PDO::FETCH_ASSOC) as $item) {
         $conteudo_geral[$item['pagina']][] = $item;
     }
@@ -224,7 +237,8 @@ include '../includes/navbar_logged_in.php';
 
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="index-content" role="tabpanel">
-                <form action="gerir_pagina_inicial.php" method="post" enctype="multipart/form-data">
+                <form action="gerir_pagina_inicial.php#index-tab" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="acao" value="salvar_itens_pagina_inicial">
                     <div class="card mt-3 shadow-sm">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Textos da Página Inicial</h5>
@@ -232,20 +246,22 @@ include '../includes/navbar_logged_in.php';
                         </div>
 
                         <div class="card-body">
-                            <?php foreach ($conteudo_geral['index'] ?? [] as $item): ?>
-                                <div class="mb-3">
-                                    <label for="cg-<?= $item['chave'] ?>" class="form-label"><strong><?= htmlspecialchars($item['titulo']) ?></strong></label>
-                                    <?php if ($item['tipo'] === 'textarea'): ?>
-                                        <textarea class="form-control" id="cg-<?= $item['chave'] ?>" name="conteudo_geral[<?= $item['chave'] ?>][conteudo]" rows="3" placeholder="Digite o texto para esta seção..."><?= htmlspecialchars($item['conteudo']) ?></textarea>
-                                    <?php else: ?>
-                                        <input type="text" class="form-control" id="cg-<?= $item['chave'] ?>" name="conteudo_geral[<?= $item['chave'] ?>][conteudo]" value="<?= htmlspecialchars($item['conteudo']) ?>" placeholder="Digite o título para esta seção...">
-                                    <?php endif; ?>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="oculto-cg-<?= $item['chave'] ?>" name="conteudo_geral[<?= $item['chave'] ?>][oculto]" value="1" <?= $item['oculto'] ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="oculto-cg-<?= $item['chave'] ?>">Ocultar este item do site</label>
+                            <div id="containerConteudoGeralIndex">
+                                <?php foreach ($conteudo_geral['index'] ?? [] as $item): ?>
+                                    <div class="mb-3" data-filter-text-geral-index="<?= strtolower(htmlspecialchars($item['titulo'] . ' ' . $item['conteudo'])) ?>">
+                                        <label for="cg-<?= $item['chave'] ?>" class="form-label"><strong><?= htmlspecialchars($item['titulo']) ?></strong></label>
+                                        <?php if ($item['tipo'] === 'textarea'): ?>
+                                            <textarea class="form-control" id="cg-<?= $item['chave'] ?>" name="conteudo_geral[<?= $item['chave'] ?>][conteudo]" rows="3" placeholder="Digite o texto para esta seção..."><?= htmlspecialchars($item['conteudo']) ?></textarea>
+                                        <?php else: ?>
+                                            <input type="text" class="form-control" id="cg-<?= $item['chave'] ?>" name="conteudo_geral[<?= $item['chave'] ?>][conteudo]" value="<?= htmlspecialchars($item['conteudo']) ?>" placeholder="Digite o título para esta seção...">
+                                        <?php endif; ?>
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="oculto-cg-<?= $item['chave'] ?>" name="conteudo_geral[<?= $item['chave'] ?>][oculto]" value="1" <?= $item['oculto'] ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="oculto-cg-<?= $item['chave'] ?>">Ocultar este item do site</label>
+                                        </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
 
@@ -285,11 +301,7 @@ include '../includes/navbar_logged_in.php';
                                         <?php endif; ?>
                                         <input type="file" class="form-control" id="imagem-<?= $item['id'] ?>" name="conteudo[<?= $item['id'] ?>][imagem]" accept="image/png, image/jpeg, image/jpg">
                                         <small class="form-text text-muted">Envie uma nova imagem para substituir a atual.</small>
-                                    </div>
-                                    <!-- <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="ativo-<?= $item['id'] ?>" name="conteudo[<?= $item['id'] ?>][ativo]" value="1" <?= $item['ativo'] ? 'checked' : '' ?>>
-                                        <label class="form-check-label" for="ativo-<?= $item['id'] ?>">Exibir este item na página inicial</label>
-                                    </div> -->
+                                    </div> 
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch" id="oculto-<?= $item['id'] ?>" name="conteudo[<?= $item['id'] ?>][oculto]" value="1" <?= $item['oculto'] ? 'checked' : '' ?>>
@@ -309,9 +321,12 @@ include '../includes/navbar_logged_in.php';
             </div>
 
             <div class="tab-pane fade" id="sobre-content" role="tabpanel">
-                <form action="gerir_pagina_inicial.php" method="post">
+                <form action="gerir_pagina_inicial.php#sobre-tab" method="post">
+                    <input type="hidden" name="acao" value="salvar_conteudo_geral">
                     <div class="card mt-3">
-                        <div class="card-header"><h5>Textos da Página Sobre</h5></div>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>Textos da Página Sobre</h5>
+                        </div>
                         <div class="card-body">
                             <?php foreach ($conteudo_geral['sobre'] ?? [] as $item): ?>
                                 <div class="mb-3">
@@ -334,7 +349,8 @@ include '../includes/navbar_logged_in.php';
             </div>
 
             <div class="tab-pane fade" id="termos-content" role="tabpanel">
-                <form action="gerir_pagina_inicial.php" method="post">
+                <form action="gerir_pagina_inicial.php#termos-tab" method="post">
+                    <input type="hidden" name="acao" value="salvar_termos">
                     <div class="card mt-3">
                         <div class="card-header"><h5>Editor dos Termos de Uso</h5></div>
                         <div class="card-body">

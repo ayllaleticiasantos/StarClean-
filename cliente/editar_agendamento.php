@@ -85,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $agendamento_detalhes) {
     } 
     // Opcional: Impedir edição se a data for muito próxima (ex: menos de 4 horas)
      elseif ($dt_agendada < (new DateTime())->modify('+4 hours')) {
+    } elseif ($dt_agendada < (new DateTime())->modify('+4 hours')) {
         $mensagem = '<div class="alert alert-danger">A data/hora escolhida deve ter no mínimo 4 horas de antecedência.</div>';
         $validacao_ok = false;
     }
