@@ -2,13 +2,11 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas prestadores podem aceder a esta página
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
 }
 
-// Lógica para exibir mensagens de sucesso ou erro
 $mensagem_sucesso = '';
 if (isset($_SESSION['mensagem_sucesso'])) {
     $mensagem_sucesso = '<div class="alert alert-success">' . $_SESSION['mensagem_sucesso'] . '</div>';
@@ -21,7 +19,6 @@ if (isset($_SESSION['mensagem_erro'])) {
     unset($_SESSION['mensagem_erro']);
 }
 
-// Buscar apenas os serviços do prestador que está logado
 $id_prestador_logado = $_SESSION['usuario_id'];
 $servicos = [];
 $termo_busca = $_GET['q'] ?? '';
@@ -32,7 +29,6 @@ try {
 
     $sql = "SELECT * FROM Servico WHERE prestador_id = ?";
 
-    // Adiciona o filtro se um termo de busca for fornecido
     if (!empty($termo_busca)) {
         $sql .= " AND (titulo LIKE ? OR descricao LIKE ?)";
         $like_term = "%" . $termo_busca . "%";

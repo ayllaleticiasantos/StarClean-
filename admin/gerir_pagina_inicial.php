@@ -38,7 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_bloco'])) {
                 if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
                 $nome_arquivo = uniqid() . '-' . basename($_FILES['bloco_card_imagem']['name']);
                 $caminho_arquivo = $upload_dir . $nome_arquivo;
+                
                 if (move_uploaded_file($_FILES['bloco_card_imagem']['tmp_name'], $caminho_arquivo)) {
+                    if ($bloco_id && $imagem_url && file_exists('../' . $imagem_url)) {
+                        @unlink('../' . $imagem_url);
+                    }
                     $imagem_url = 'img/blocos/' . $nome_arquivo;
                 } else {
                     $mensagem_erro = "Falha ao mover o arquivo de imagem do bloco.";
@@ -59,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_bloco'])) {
                 $stmt->execute([$titulo_admin, $tipo_bloco, $conteudo_json, $ordem, $ativo, $id_admin_logado]);
                 $mensagem_sucesso = "Novo bloco de conteúdo adicionado com sucesso!";
             }
+            registrar_log_admin($id_admin_logado, "Editou blocos de conteúdo.");
         } catch (PDOException $e) {
             $mensagem_erro = "Erro ao salvar o bloco de conteúdo: " . $e->getMessage();
             error_log("Erro Bloco Conteúdo: " . $e->getMessage());
@@ -68,37 +73,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_bloco'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
+    $pdo = obterConexaoPDO();
+    $log_acao_geral = false;
 
-    // Ação para salvar textos gerais (usado nas abas 'Página Inicial' e 'Sobre')
-    if ($acao === 'salvar_conteudo_geral' && isset($_POST['conteudo_geral'])) {
-        foreach ($_POST['conteudo_geral'] as $chave => $valor) {
-            $conteudo = trim($valor['conteudo']);
-            $oculto = isset($valor['oculto']) ? 1 : 0;
-            $stmt = obterConexaoPDO()->prepare("UPDATE conteudo_geral SET conteudo = ?, oculto = ?, editado_por_admin_id = ? WHERE chave = ?");
-            $stmt->execute([$conteudo, $oculto, $id_admin_logado, $chave]);
+    if ($acao === 'salvar_textos_gerais' && isset($_POST['conteudo_geral'])) {
+        try {
+            $pdo->beginTransaction();
+            foreach ($_POST['conteudo_geral'] as $chave => $valor) {
+                $conteudo = trim($valor['conteudo']);
+                $oculto = isset($valor['oculto']) ? 1 : 0;
+                $stmt = $pdo->prepare("UPDATE conteudo_geral SET conteudo = ?, oculto = ?, editado_por_admin_id = ? WHERE chave = ?");
+                $stmt->execute([$conteudo, $oculto, $id_admin_logado, $chave]);
+            }
+            $pdo->commit();
+            $mensagem_sucesso = "Conteúdo de texto atualizado com sucesso!";
+            $log_acao_geral = true;
+        } catch (PDOException $e) {
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
+            $mensagem_erro = "Erro ao salvar o conteúdo geral: " . $e->getMessage();
+            error_log("Erro Conteúdo Geral: " . $e->getMessage());
         }
-        $mensagem_sucesso = "Conteúdo de texto atualizado com sucesso!";
     }
 
-    // Ação para salvar itens do carrossel/cards (usado na aba 'Página Inicial')
     if ($acao === 'salvar_itens_pagina_inicial' && isset($_POST['conteudo'])) {
         try {
-            $pdo = obterConexaoPDO();
             $pdo->beginTransaction();
 
             foreach ($_POST['conteudo'] as $id => $dados) {
                 $titulo = $dados['titulo'];
                 $texto = $dados['texto'];
-                $oculto = isset($dados['oculto']) ? 1 : 0; // Novo campo: oculto
+                $oculto = isset($dados['oculto']) ? 1 : 0;
 
-                // Lógica de upload de imagem
                 $imagem_url = $dados['imagem_atual'];
                 if (isset($_FILES['conteudo']['name'][$id]['imagem']) && $_FILES['conteudo']['error'][$id]['imagem'] == 0) {
                     $upload_dir = '../img/';
-                    $nome_arquivo = basename($_FILES['conteudo']['name'][$id]['imagem']);
+                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+                    $extensao = pathinfo($_FILES['conteudo']['name'][$id]['imagem'], PATHINFO_EXTENSION);
+                    $nome_arquivo = uniqid('conteudo_') . '.' . $extensao;
                     $caminho_arquivo = $upload_dir . $nome_arquivo;
                     
                     if (move_uploaded_file($_FILES['conteudo']['tmp_name'][$id]['imagem'], $caminho_arquivo)) {
+                        if ($imagem_url && file_exists('../' . $imagem_url)) {
+                            @unlink('../' . $imagem_url);
+                        }
                         $imagem_url = 'img/' . $nome_arquivo;
                     } else {
                         throw new Exception("Falha ao mover o arquivo de imagem.");
@@ -106,33 +123,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $stmt = $pdo->prepare(
-                    "UPDATE conteudo_pagina_inicial SET titulo = ?, texto = ?, imagem_url = ?, oculto = ?, editado_por_admin_id = ? WHERE id = ?"
+                    "UPDATE conteudo_pagina_inicial SET titulo = ?, texto = ?, imagem_url = ?, oculto = ?, editado_por_admin_id = ?, ativo = ? WHERE id = ?"
                 );
-                $stmt->execute([$titulo, $texto, $imagem_url, $oculto, $id_admin_logado, $id]);
+                $stmt->execute([$titulo, $texto, $imagem_url, $oculto, $id_admin_logado, !$oculto, $id]);
+                // $stmt->debugDumpParams();
             }
 
             $pdo->commit();
             $mensagem_sucesso = "Conteúdo da página inicial atualizado com sucesso!";
+            $log_acao_geral = true;
 
         } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
             $mensagem_erro = "Erro ao atualizar o conteúdo: " . $e->getMessage();
             error_log("Erro em gerir_pagina_inicial.php: " . $e->getMessage());
         }
     }
-
-    // Ação para salvar os Termos de Uso
-    if ($acao === 'salvar_termos' && isset($_POST['conteudo_geral']['termos_de_uso_conteudo'])) {
-        $conteudo = $_POST['conteudo_geral']['termos_de_uso_conteudo']['conteudo'];
-        $stmt = obterConexaoPDO()->prepare("UPDATE conteudo_geral SET conteudo = ?, editado_por_admin_id = ? WHERE chave = 'termos_de_uso_conteudo'");
-        $stmt->execute([$conteudo, $id_admin_logado]);
-        $mensagem_sucesso = "Termos de Uso atualizados com sucesso!";
-    }
-
-    if (!empty($mensagem_sucesso)) {
-        registrar_log_admin($id_admin_logado, "Editou o conteúdo do site.");
+    
+    if ($log_acao_geral) {
+        registrar_log_admin($id_admin_logado, "Editou o conteúdo das páginas (inicial/sobre/termos).");
     }
 }
 
@@ -147,13 +156,12 @@ try {
 
 $conteudo_geral = [];
 try {
-    if (!isset($pdo)) {
-        $pdo = obterConexaoPDO();
-    }
+    if (!isset($pdo)) { $pdo = obterConexaoPDO(); }
     
-    $stmt_geral = $pdo->query("SELECT *, CASE WHEN chave = 'termos_de_uso_conteudo' THEN 'termos_de_uso' ELSE pagina END as pagina_grupo FROM conteudo_geral ORDER BY pagina, id");
+    $stmt_geral = $pdo->query("SELECT * FROM conteudo_geral ORDER BY pagina, id");
     foreach ($stmt_geral->fetchAll(PDO::FETCH_ASSOC) as $item) {
-        $conteudo_geral[$item['pagina']][] = $item;
+        $pagina_chave = ($item['chave'] === 'termos_de_uso_conteudo') ? 'termos_de_uso' : $item['pagina'];
+        $conteudo_geral[$pagina_chave][] = $item;
     }
 } catch (PDOException $e) {
     $mensagem_erro .= " Erro ao carregar os textos da página.";
@@ -236,13 +244,15 @@ include '../includes/navbar_logged_in.php';
         </ul>
 
         <div class="tab-content" id="myTabContent">
+            
             <div class="tab-pane fade show active" id="index-content" role="tabpanel">
-                <form action="gerir_pagina_inicial.php#index-tab" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="acao" value="salvar_itens_pagina_inicial">
+                
+                <form action="gerir_pagina_inicial.php#index-content" method="post">
+                    <input type="hidden" name="acao" value="salvar_textos_gerais">
                     <div class="card mt-3 shadow-sm">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Textos da Página Inicial</h5>
-                            <input type="text" id="filtroConteudoIndex" class="form-control form-control-sm" placeholder="Filtrar itens do carrossel/cards..." style="width: 300px;">
+                            <h5 class="mb-0">Textos Gerais da Página Inicial</h5>
+                            <input type="text" id="filtroConteudoGeralIndex" class="form-control form-control-sm" placeholder="Filtrar textos gerais..." style="width: 300px;">
                         </div>
 
                         <div class="card-body">
@@ -262,9 +272,14 @@ include '../includes/navbar_logged_in.php';
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+                            <div id="nenhumConteudoGeralIndexEncontrado" class="alert alert-warning text-center mt-3" style="display: none;">Nenhum texto encontrado para o filtro informado.</div>
                         </div>
                     </div>
+                    <div class="mt-4"><button type="submit" class="btn btn-primary btn-lg">Salvar Textos Gerais da Home</button></div>
+                </form>
 
+                <form action="gerir_pagina_inicial.php#index-content" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="acao" value="salvar_itens_pagina_inicial">
                     <?php
                     $tipo_atual = '';
                     foreach ($conteudos as $item):
@@ -274,6 +289,7 @@ include '../includes/navbar_logged_in.php';
                             ?>
                             <div class="mt-4">
                                 <h3 class="text-secondary"><i class="fas <?= $tipo_atual === 'carousel' ? 'fa-images' : 'fa-th-large' ?> me-2"></i>Itens do <?= ucfirst($tipo_atual) ?></h3><hr>
+                                <input type="text" id="filtroConteudoIndex" class="form-control form-control-sm mb-3" placeholder="Filtrar itens do carrossel/cards..." style="width: 300px;">
                             </div>
                             <div class="accordion" id="accordion-<?= $tipo_atual ?>">
                         <?php endif; ?>
@@ -316,20 +332,22 @@ include '../includes/navbar_logged_in.php';
                     <?php if (!empty($conteudos)) echo '</div>'; ?>
                     <div id="nenhumItemIndexEncontrado" class="alert alert-warning text-center mt-3" style="display: none;">Nenhum item encontrado para o filtro informado.</div>
 
-                    <div class="mt-4"><button type="submit" class="btn btn-primary btn-lg">Salvar Alterações da Página Inicial</button></div>
+                    <div class="mt-4"><button type="submit" class="btn btn-warning btn-lg">Salvar Itens de Carrossel/Cards</button></div>
                 </form>
             </div>
 
             <div class="tab-pane fade" id="sobre-content" role="tabpanel">
-                <form action="gerir_pagina_inicial.php#sobre-tab" method="post">
-                    <input type="hidden" name="acao" value="salvar_conteudo_geral">
+                <form action="gerir_pagina_inicial.php#sobre-content" method="post">
+                    <input type="hidden" name="acao" value="salvar_textos_gerais">
                     <div class="card mt-3">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>Textos da Página Sobre</h5>
+                             <h5>Textos da Página Sobre</h5>
+                             <input type="text" id="filtroConteudoGeralSobre" class="form-control form-control-sm" placeholder="Filtrar textos gerais..." style="width: 300px;">
                         </div>
                         <div class="card-body">
+                            <div id="containerConteudoGeralSobre">
                             <?php foreach ($conteudo_geral['sobre'] ?? [] as $item): ?>
-                                <div class="mb-3">
+                                <div class="mb-3" data-filter-text-geral-sobre="<?= strtolower(htmlspecialchars($item['titulo'] . ' ' . $item['conteudo'])) ?>">
                                     <label for="cg-<?= $item['chave'] ?>" class="form-label"><strong><?= htmlspecialchars($item['titulo']) ?></strong></label>
                                     <?php if ($item['tipo'] === 'textarea'): ?>
                                         <textarea class="form-control" id="cg-<?= $item['chave'] ?>" name="conteudo_geral[<?= $item['chave'] ?>][conteudo]" rows="4" placeholder="Digite o texto para esta seção..."><?= htmlspecialchars($item['conteudo']) ?></textarea>
@@ -342,6 +360,8 @@ include '../includes/navbar_logged_in.php';
                                     </div>
                                 </div>
                             <?php endforeach; ?>
+                            </div>
+                            <div id="nenhumConteudoGeralSobreEncontrado" class="alert alert-warning text-center mt-3" style="display: none;">Nenhum texto encontrado para o filtro informado.</div>
                         </div>
                     </div>
                     <div class="mt-4"><button type="submit" class="btn btn-primary btn-lg">Salvar Alterações da Página Sobre</button></div>
@@ -349,16 +369,22 @@ include '../includes/navbar_logged_in.php';
             </div>
 
             <div class="tab-pane fade" id="termos-content" role="tabpanel">
-                <form action="gerir_pagina_inicial.php#termos-tab" method="post">
-                    <input type="hidden" name="acao" value="salvar_termos">
+                <form action="gerir_pagina_inicial.php#termos-content" method="post">
+                     <input type="hidden" name="acao" value="salvar_textos_gerais">
                     <div class="card mt-3">
                         <div class="card-header"><h5>Editor dos Termos de Uso</h5></div>
                         <div class="card-body">
                             <p class="text-muted">Edite o conteúdo que aparece no pop-up de Termos de Uso. Você pode usar formatação como negrito, listas e links.</p>
-                            <?php $item_termos = $conteudo_geral['termos_de_uso'][0] ?? ['chave' => 'termos_de_uso_conteudo', 'conteudo' => '']; ?>
-                            <textarea id="editor-termos" name="conteudo_geral[<?= $item_termos['chave'] ?>][conteudo]">
-                                <?= htmlspecialchars($item_termos['conteudo']) ?>
-                            </textarea>
+                            <?php $item_termos = $conteudo_geral['termos_de_uso'][0] ?? ['chave' => 'termos_de_uso_conteudo', 'conteudo' => '', 'oculto' => 0]; ?>
+                            <div class="mb-3">
+                                <textarea id="editor-termos" name="conteudo_geral[<?= $item_termos['chave'] ?>][conteudo]">
+                                    <?= htmlspecialchars($item_termos['conteudo']) ?>
+                                </textarea>
+                            </div>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" role="switch" id="oculto-cg-<?= $item_termos['chave'] ?>" name="conteudo_geral[<?= $item_termos['chave'] ?>][oculto]" value="1" <?= $item_termos['oculto'] ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="oculto-cg-<?= $item_termos['chave'] ?>">Ocultar esta seção do site</label>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-4"><button type="submit" class="btn btn-primary btn-lg">Salvar Termos de Uso</button></div>
@@ -379,7 +405,6 @@ include '../includes/navbar_logged_in.php';
                                 <div class="alert alert-info">Nenhum serviço cadastrado para exibir.</div>
                             <?php else: ?>
                                 <?php foreach ($servicos_por_prestador as $nome_prestador => $servicos): ?>
-                                    <!-- Adicionado data-filter-text para o JS -->
                                     <div class="accordion-item mb-3 shadow-sm" data-filter-text="<?= strtolower(htmlspecialchars($nome_prestador) . ' ' . implode(' ', array_column($servicos, 'titulo')) . ' ' . implode(' ', array_column($servicos, 'descricao'))) ?>">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-prestador-<?= htmlspecialchars($servicos[0]['prestador_id']) ?>">
@@ -440,7 +465,11 @@ include '../includes/navbar_logged_in.php';
                         <?php else: ?>
                             <ul class="list-group">
                                 <?php foreach ($blocos_conteudo as $bloco): ?>
-                                    <?php $dados_bloco = json_decode($bloco['conteudo_json'], true); ?>                                    <li class="list-group-item d-flex justify-content-between align-items-center" data-filter-text-bloco="<?= strtolower(htmlspecialchars($bloco['titulo_admin'] . ' ' . $bloco['tipo_bloco'])) ?>">
+                                    <?php 
+                                    $dados_bloco = json_decode($bloco['conteudo_json'], true); 
+                                    $caminho_imagem_modal = isset($dados_bloco['imagem_url']) ? BASE_URL . '/' . $dados_bloco['imagem_url'] : '';
+                                    ?>                                    
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" data-filter-text-bloco="<?= strtolower(htmlspecialchars($bloco['titulo_admin'] . ' ' . $bloco['tipo_bloco'])) ?>">
                                         <div>
                                             <span class="badge bg-secondary me-2">Ordem: <?= $bloco['ordem'] ?></span>
                                             <strong><?= htmlspecialchars($bloco['titulo_admin']) ?></strong>
@@ -454,7 +483,8 @@ include '../includes/navbar_logged_in.php';
                                                 data-bloco-tipo="<?= $bloco['tipo_bloco'] ?>"
                                                 data-bloco-ordem="<?= $bloco['ordem'] ?>"
                                                 data-bloco-ativo="<?= $bloco['ativo'] ?>"
-                                                data-bloco-conteudo='<?= htmlspecialchars($bloco['conteudo_json'], ENT_QUOTES, 'UTF-8') ?>'>
+                                                data-bloco-conteudo='<?= htmlspecialchars($bloco['conteudo_json'], ENT_QUOTES, 'UTF-8') ?>'
+                                                data-imagem-preview="<?= $caminho_imagem_modal ?>">
                                                 Editar</button> 
                                             <a href="excluir_conteudo_pagina.php?id=<?= $bloco['id'] ?>&tabela=blocos_conteudo" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir permanentemente este bloco? Esta ação não pode ser desfeita.');">
                                                 Excluir
@@ -576,6 +606,10 @@ include '../includes/navbar_logged_in.php';
       const modalTitle = modalBloco.querySelector('.modal-title');
       const imagemPreviewContainer = document.getElementById('imagem_preview_container');
 
+      if (tinymce.get('bloco_texto_simples')) {
+          tinymce.get('bloco_texto_simples').remove();
+      }
+
       form.reset();
       imagemPreviewContainer.innerHTML = '';
       document.getElementById('bloco_id').value = '';
@@ -601,7 +635,8 @@ include '../includes/navbar_logged_in.php';
               document.getElementById('bloco_card_texto').value = conteudo.texto || '';
               document.getElementById('bloco_imagem_atual').value = conteudo.imagem_url || '';
               if (conteudo.imagem_url) {
-                  imagemPreviewContainer.innerHTML = `<img src="../${conteudo.imagem_url}" class="img-thumbnail" style="max-width: 150px;" alt="Imagem atual">`;
+                  const imagemPreviewUrl = button.getAttribute('data-imagem-preview'); 
+                  imagemPreviewContainer.innerHTML = `<img src="${imagemPreviewUrl}" class="img-thumbnail" style="max-width: 150px;" alt="Imagem atual">`;
               }
           }
 
@@ -621,17 +656,18 @@ include '../includes/navbar_logged_in.php';
   });
 
   modalBloco.addEventListener('shown.bs.modal', function() {
-      tinymce.init({
-        selector: '#bloco_texto_simples',
-        plugins: 'autolink lists link wordcount',
-        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link',
-        height: 300,
-        menubar: false
-      });
+      if (document.getElementById('bloco_tipo').value === 'texto_simples' && !tinymce.get('bloco_texto_simples')) {
+          tinymce.init({
+            selector: '#bloco_texto_simples',
+            plugins: 'autolink lists link wordcount',
+            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link',
+            height: 300,
+            menubar: false
+          });
+      }
   });
 
   document.addEventListener('DOMContentLoaded', function() {
-      // Função genérica para filtrar
       function configurarFiltro(inputId, containerSelector, itemSelector, noResultsId, dataAttribute) {
           const input = document.getElementById(inputId);
           if (!input) return;
@@ -658,7 +694,6 @@ include '../includes/navbar_logged_in.php';
           });
       }
 
-      // Filtro para a aba de SERVIÇOS
       configurarFiltro(
           'filtroServicos',
           '#accordion-servicos',
@@ -666,17 +701,31 @@ include '../includes/navbar_logged_in.php';
           'nenhumServicoEncontrado',
           'data-filter-text'
       );
+      
+      configurarFiltro(
+          'filtroConteudoGeralIndex',
+          '#containerConteudoGeralIndex',
+          '.mb-3',
+          'nenhumConteudoGeralIndexEncontrado',
+          'data-filter-text-geral-index'
+      );
+      
+      configurarFiltro(
+          'filtroConteudoGeralSobre',
+          '#containerConteudoGeralSobre',
+          '.mb-3',
+          'nenhumConteudoGeralSobreEncontrado',
+          'data-filter-text-geral-sobre'
+      );
 
-      // Filtro para a aba de CONTEÚDO DA PÁGINA INICIAL (Carrossel e Cards)
       configurarFiltro(
           'filtroConteudoIndex',
-          '#index-content',
+          '#index-content .accordion',
           '.accordion-item',
           'nenhumItemIndexEncontrado',
           'data-filter-text-index'
       );
 
-      // Filtro para a aba de BLOCOS DE CONTEÚDO
       configurarFiltro(
           'filtroBlocos',
           '#blocos-content .list-group',

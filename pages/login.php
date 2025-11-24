@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 include '../includes/header.php';
-include '../includes/navbar_logged_in.php';
+include '../includes/navbar.php';
 ?>
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">

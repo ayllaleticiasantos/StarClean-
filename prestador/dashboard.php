@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas prestadores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
@@ -14,8 +13,6 @@ $contagem_status = ['pendente' => 0, 'aceito' => 0, 'realizado' => 0, 'cancelado
 
 try {
     $pdo = obterConexaoPDO();
-
-    // Busca agendamentos PENDENTES não lidos
     $stmt_pendentes = $pdo->prepare(
         "SELECT a.id, c.nome AS nome_cliente, s.titulo AS titulo_servico, a.data, a.hora
          FROM Agendamento a
@@ -26,8 +23,6 @@ try {
     );
     $stmt_pendentes->execute([$id_prestador]);
     $notificacoes_pendentes = $stmt_pendentes->fetchAll(PDO::FETCH_ASSOC);
-
-    // --- NOVO: Busca a contagem de agendamentos por status ---
     $stmt_contagem = $pdo->prepare(
         "SELECT status, COUNT(id) as total 
          FROM Agendamento 
@@ -79,9 +74,8 @@ include '../includes/navbar_logged_in.php';
                 <p class="mb-0">Vá para <a href="meus_agendamentos.php" class="alert-link">Meus Agendamentos</a> para aceitar ou recusar.</p>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        <?php endforeach; // FIM DO FOREACH DE NOTIFICAÇÕES ?>
+        <?php endforeach; ?>
         
-        <!-- INÍCIO: Novos Cards de Contagem por Status -->
         <div class="row mt-4">
             <div class="col-6 col-md-3 mb-4">
                 <a href="gerir_agendamentos.php?status=pendente" class="text-decoration-none">
@@ -128,8 +122,6 @@ include '../includes/navbar_logged_in.php';
                 </a>
             </div>
         </div>
-        <!-- FIM: Novos Cards de Contagem por Status -->
-        
         <div class="row mt-4">
             <div class="col-12 col-sm-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm border-success">
@@ -225,7 +217,6 @@ include '../includes/navbar_logged_in.php';
     </div>
 </main>
 
-<!-- Estilos para os cards de status -->
 <style>
     .status-card {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;

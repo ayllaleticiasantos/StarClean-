@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas prestadores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
@@ -19,8 +18,6 @@ $data_fim = $_GET['data_fim'] ?? '';
 
 try {
     $pdo = obterConexaoPDO();
-
-    // --- Lógica do filtro de data ---
     $filtro_sql = "";
     $params_filtro = [];
     if (!empty($data_inicio)) {
@@ -32,8 +29,6 @@ try {
         $params_filtro[] = $data_fim;
     }
 
-    // --- 1. CALCULAR TOTAIS ---
-    // Total de serviços 'realizado'
     $sql_total_realizado = "SELECT SUM(s.preco) AS total 
                             FROM Agendamento a 
                             JOIN Servico s ON a.Servico_id = s.id 
@@ -42,7 +37,6 @@ try {
     $stmt_realizado->execute(array_merge([$id_prestador_logado], $params_filtro));
     $total_realizado = $stmt_realizado->fetchColumn() ?: 0;
 
-    // Total de serviços 'aceito'
     $sql_total_aceito = "SELECT SUM(s.preco) AS total 
                          FROM Agendamento a 
                          JOIN Servico s ON a.Servico_id = s.id 
@@ -51,19 +45,16 @@ try {
     $stmt_aceito->execute(array_merge([$id_prestador_logado], $params_filtro));
     $total_a_receber = $stmt_aceito->fetchColumn() ?: 0;
 
-    // --- 2. BUSCAR LISTAS DE SERVIÇOS ---
     $sql_base = "SELECT a.data, a.hora, c.nome AS nome_cliente, s.titulo, s.preco 
                  FROM Agendamento a
                  JOIN Cliente c ON a.Cliente_id = c.id
                  JOIN Servico s ON a.Servico_id = s.id
                  WHERE a.Prestador_id = ? AND a.status = ?" . $filtro_sql;
 
-    // Lista de serviços 'realizado'
     $stmt_lista_realizados = $pdo->prepare($sql_base . " ORDER BY a.data DESC");
     $stmt_lista_realizados->execute(array_merge([$id_prestador_logado, 'realizado'], $params_filtro));
     $servicos_realizados = $stmt_lista_realizados->fetchAll(PDO::FETCH_ASSOC);
 
-    // Lista de serviços 'aceito'
     $stmt_lista_aceitos = $pdo->prepare($sql_base . " ORDER BY a.data ASC");
     $stmt_lista_aceitos->execute(array_merge([$id_prestador_logado, 'aceito'], $params_filtro));
     $servicos_a_receber = $stmt_lista_aceitos->fetchAll(PDO::FETCH_ASSOC);
@@ -77,16 +68,13 @@ include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
 ?>
 
-<!-- ESTILOS ESPECÍFICOS PARA IMPRESSÃO DESTA PÁGINA -->
 <style>
     @media print {
-        /* Força a impressão das cores de fundo dos cards de resumo */
         .card.bg-success, .card.bg-warning {
             -webkit-print-color-adjust: exact !important; /* Chrome, Safari, Edge */
             print-color-adjust: exact !important; /* Firefox */
         }
 
-        /* Garante que o texto dentro dos cards coloridos permaneça visível */
         .card.bg-success, .card.bg-success .card-title, .card.bg-success .card-text {
             color: white !important;
         }
@@ -121,7 +109,6 @@ include '../includes/navbar_logged_in.php';
         </div>
         <?= $mensagem_erro ?>
 
-        <!-- Formulário de Filtro (sem card) -->
         <div class="mb-4 p-3 rounded no-print" style="background-color: #f8f9fa;">
             <form method="GET" action="meu_financeiro.php" class="row g-3 align-items-end">
                 <div class="col-md-5">
@@ -139,7 +126,6 @@ include '../includes/navbar_logged_in.php';
             </form>
         </div>
 
-        <!-- Cards de Resumo -->
         <div class="row mb-4">
             <div class="col-md-6 mb-3">
                 <div class="card text-white bg-success h-100">
@@ -161,7 +147,6 @@ include '../includes/navbar_logged_in.php';
             </div>
         </div>
 
-        <!-- Tabela de Serviços a Receber -->
         <h3 class="mt-5">Serviços a Realizar (A Receber)</h3>
         <div class="card shadow-sm">
             <div class="card-body">
@@ -186,7 +171,6 @@ include '../includes/navbar_logged_in.php';
             </div>
         </div>
 
-        <!-- Tabela de Histórico de Serviços -->
         <h3 class="mt-5">Histórico de Serviços Concluídos</h3>
         <div class="card shadow-sm">
             <div class="card-body">

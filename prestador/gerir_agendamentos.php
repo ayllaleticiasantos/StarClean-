@@ -2,13 +2,11 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas prestadores podem aceder a esta página
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
 }
 
-// Lógica para exibir mensagens de sucesso ou erro
 $mensagem_sucesso = '';
 if (isset($_SESSION['mensagem_sucesso'])) {
     $mensagem_sucesso = '<div class="alert alert-success">' . $_SESSION['mensagem_sucesso'] . '</div>';
@@ -21,11 +19,10 @@ if (isset($_SESSION['mensagem_erro'])) {
     unset($_SESSION['mensagem_erro']);
 }
 
-// Buscar apenas os agendamentos do prestador que está logado
 $id_prestador_logado = $_SESSION['usuario_id'];
 $agendamentos = [];
-$termo_busca = $_GET['q'] ?? ''; // Pega o termo de busca da URL
-$status_filtro = $_GET['status'] ?? ''; // NOVO: Captura o status do filtro
+$termo_busca = $_GET['q'] ?? '';
+$status_filtro = $_GET['status'] ?? '';
 
 try {
     $pdo = obterConexaoPDO();
@@ -38,9 +35,8 @@ try {
             JOIN Cliente c ON a.Cliente_id = c.id
             JOIN Servico s ON a.Servico_id = s.id
             JOIN Endereco e ON a.Endereco_id = e.id
-            WHERE a.Prestador_id = ?"; // Condição base
+            WHERE a.Prestador_id = ?";
 
-    // Adiciona o filtro se um termo de busca for fornecido
     if (!empty($termo_busca)) {
         $where_clauses[] = "(c.nome LIKE ? OR s.titulo LIKE ?)";
         $like_term = "%" . $termo_busca . "%";
@@ -62,8 +58,7 @@ try {
 } catch (PDOException $e) {
     error_log("Erro ao buscar os agendamentos: " . $e->getMessage());
     $mensagem_erro = '<div class="alert alert-danger">Erro ao carregar agendamentos. Tente novamente.</div>';
-}// Adicione esta linha para depuração:
-// var_dump($_SESSION);
+}
 
 include '../includes/header.php';
 include '../includes/navbar_logged_in.php';
@@ -90,7 +85,6 @@ include '../includes/navbar_logged_in.php';
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Meus Agendamentos</h1>
             <form method="GET" action="gerir_agendamentos.php" class="d-flex gap-2">
-                <!-- NOVO: Filtro de Status -->
                 <div class="flex-shrink-0">
                     <select name="status" class="form-select" style="width: auto;">
                         <option value="">Todos os Status</option>
@@ -103,7 +97,6 @@ include '../includes/navbar_logged_in.php';
                 </div>
                 <input class="form-control" type="search" name="q" placeholder="Buscar por cliente ou serviço..." value="<?= htmlspecialchars($termo_busca) ?>">
                 <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                <!-- CORREÇÃO: O botão de limpar deve aparecer se QUALQUER filtro estiver ativo -->
                 <?php if (!empty($termo_busca) || !empty($status_filtro)): ?>
                     <a href="gerir_agendamentos.php" class="btn btn-outline-secondary ms-2">Limpar</a>
                 <?php endif; ?>
@@ -178,12 +171,16 @@ include '../includes/navbar_logged_in.php';
                                         <td>
                                             <div class="d-flex gap-1" role="group" aria-label="Ações do Agendamento">
                                                 <?php if ($status === 'pendente'): ?>
-                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=aceito" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Aceitar">
-                                                        <i class="fas fa-check"></i>
-                                                    </a>
-                                                    <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=cancelado" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Recusar">
-                                                        <i class="fas fa-times"></i>
-                                                    </a>
+                                                    <form action="processar_agendamento.php" method="POST" class="d-inline">
+                                                        <input type="hidden" name="agendamento_id" value="<?= $agendamento['id'] ?>">
+                                                        <button type="submit" name="acao" value="aceitar" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Aceitar"><i class="fas fa-check"></i></button>
+                                                    </form>
+                                                    <form action="processar_agendamento.php" method="POST" class="d-inline">
+                                                        <input type="hidden" name="agendamento_id" value="<?= $agendamento['id'] ?>">
+                                                        <button type="submit" name="acao" value="recusar" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Recusar" onclick="return confirm('Tem certeza que deseja recusar este serviço?');">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
                                                 <?php elseif ($status === 'aceito'): ?>
                                                     <a href="processar_agendamento.php?id=<?= $agendamento['id'] ?>&acao=realizado" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Marcar como Concluído">
                                                         <i class="fas fa-clipboard-check"></i>

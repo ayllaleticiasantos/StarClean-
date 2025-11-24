@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas prestadores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
@@ -17,8 +16,6 @@ $filtro_nota = $_GET['nota'] ?? '';
 
 try {
     $pdo = obterConexaoPDO();
-
-    // 1. Buscar as avaliações para o prestador logado
     $sql_avaliacoes = "SELECT ap.nota, ap.comentario, ap.oculto, c.nome AS nome_cliente
          FROM avaliacao_prestador ap
          JOIN cliente c ON ap.Cliente_id = c.id
@@ -44,7 +41,6 @@ try {
     $stmt_avaliacoes->execute($params_avaliacoes);
     $avaliacoes = $stmt_avaliacoes->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Calcular estatísticas (média e total)
     $stmt_stats = $pdo->prepare(
         "SELECT COUNT(id) as total, AVG(nota) as media
          FROM avaliacao_prestador
@@ -87,7 +83,6 @@ include '../includes/navbar_logged_in.php';
         <h1 class="mb-4">Minhas Avaliações</h1>
         <?php if ($mensagem_erro): ?><div class="alert alert-danger"><?= $mensagem_erro ?></div><?php endif; ?>
 
-        <!-- Cards de Resumo -->
         <div class="row mb-4">
             <div class="col-md-6 mb-3">
                 <div class="card text-white bg-primary h-100">
@@ -109,7 +104,6 @@ include '../includes/navbar_logged_in.php';
             </div>
         </div>
 
-        <!-- Lista de Avaliações -->
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Comentários Recebidos</h5>

@@ -21,7 +21,7 @@ $agendamentos_mapa = [];
 $dados_status_grafico = [
     'realizado' => 0,
     'cancelado' => 0,
-    'pendente' => 0 // Adicionado para contar os pendentes
+    'pendente' => 0
 ];
 
 try {

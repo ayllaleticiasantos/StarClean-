@@ -3,7 +3,6 @@ session_start();
 require_once '../config/db.php';
 require_once '../includes/log_helper.php';
 
-// Proteção: Apenas administradores podem acessar
 $tipo_admin = $_SESSION['admin_tipo'] ?? '';
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin' || !in_array($tipo_admin, ['adminmaster', 'admmoderador'])) {
     $_SESSION['mensagem_erro'] = "Acesso negado.";
@@ -35,6 +34,5 @@ try {
     error_log("Erro em toggle_servico_visibilidade.php: " . $e->getMessage());
 }
 
-// Redireciona de volta para a aba de serviços
 header("Location: gerir_pagina_inicial.php#servicos-tab");
 exit();

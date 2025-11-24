@@ -2,7 +2,6 @@
 session_start();
 require_once '../config/db.php';
 
-// Segurança: Apenas prestadores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
@@ -11,7 +10,6 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador'
 $id_prestador_logado = $_SESSION['usuario_id'];
 $agendamento_detalhes = null;
 
-// 1. Validação do ID do Agendamento
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     $_SESSION['mensagem_erro'] = "ID do agendamento não fornecido ou inválido.";
     header("Location: gerir_agendamentos.php");
@@ -23,7 +21,6 @@ $agendamento_id = $_GET['id'];
 try {
     $pdo = obterConexaoPDO();
 
-    // 2. Busca os detalhes completos do agendamento
     $stmt = $pdo->prepare("
         SELECT a.id, s.titulo AS titulo_servico, s.descricao AS descricao_servico,
                a.data, a.hora, a.status, a.observacoes,
@@ -40,7 +37,6 @@ try {
     $stmt->execute([$agendamento_id, $id_prestador_logado]);
     $agendamento_detalhes = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // 3. Checa se o agendamento foi encontrado e pertence ao prestador
     if (!$agendamento_detalhes) {
         $_SESSION['mensagem_erro'] = "Agendamento não encontrado ou acesso não autorizado.";
         header("Location: gerir_agendamentos.php");
@@ -111,9 +107,6 @@ include '../includes/navbar_logged_in.php';
                 </p>
                 <p><strong>Observações do Cliente:</strong> <?= nl2br(htmlspecialchars($agendamento_detalhes['observacoes'] ?: 'Nenhuma observação fornecida.')) ?></p>
                 
-                <!-- ================================================== -->
-                <!-- !! NOVOS DETALHES EXIBIDOS PARA O PRESTADOR !! -->
-                <!-- ================================================== -->
                 <hr>
                 <h6 class="mt-3">Detalhes Adicionais do Local:</h6>
                 <ul>
@@ -142,16 +135,11 @@ include '../includes/navbar_logged_in.php';
                 
                 <div id="map" style="height: 300px; width: 100%; border-radius: 8px;"></div>
 
-                <!-- ================================================== -->
-                <!-- !! BOTÃO DE ROTA ADICIONADO AQUI !! -->
-                <!-- ================================================== -->
                 <?php
                 $google_maps_url = '';
-                // Prioriza o uso de coordenadas para maior precisão
                 if (!empty($agendamento_detalhes['latitude']) && !empty($agendamento_detalhes['longitude'])) {
                     $google_maps_url = "https://www.google.com/maps/dir/?api=1&destination=" . $agendamento_detalhes['latitude'] . "," . $agendamento_detalhes['longitude'];
                 } else {
-                    // Se não houver coordenadas, usa o endereço completo como fallback
                     $endereco_completo_url = urlencode(
                         $agendamento_detalhes['logradouro'] . ', ' . $agendamento_detalhes['numero'] . ', ' . $agendamento_detalhes['bairro'] . ', ' . $agendamento_detalhes['cidade'] . '-' . $agendamento_detalhes['uf']
                     );
@@ -171,34 +159,28 @@ include '../includes/navbar_logged_in.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Passa os dados do PHP para o JavaScript de forma segura
     const lat = <?= json_encode($agendamento_detalhes['latitude'] ?? null) ?>;
     const lon = <?= json_encode($agendamento_detalhes['longitude'] ?? null) ?>;
     const enderecoCompleto = `<?= htmlspecialchars($agendamento_detalhes['logradouro'] . ', ' . $agendamento_detalhes['numero'] . ' - ' . $agendamento_detalhes['bairro']) ?>`;
     const mapContainer = document.getElementById('map');
 
-    // Verifica se temos coordenadas válidas
     if (lat && lon) {
-        // Inicializa o mapa com as coordenadas do endereço
-        var map = L.map('map').setView([lat, lon], 16); // Zoom 16 para uma visão mais próxima
+        var map = L.map('map').setView([lat, lon], 16);
 
-        // Adiciona a camada do OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        // Adiciona um marcador na localização exata
         L.marker([lat, lon]).addTo(map)
             .bindPopup(`<b>Local do Serviço</b><br>${enderecoCompleto}`)
             .openPopup();
     } else {
-        // Se não houver coordenadas, exibe uma mensagem no lugar do mapa
         mapContainer.innerHTML = `
             <div class="alert alert-warning h-100 d-flex align-items-center justify-content-center">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 Localização não disponível no mapa.
             </div>`;
-        mapContainer.style.height = 'auto'; // Ajusta a altura do container
+        mapContainer.style.height = 'auto';
     }
 });
 </script>

@@ -12,7 +12,6 @@ if (isset($_SESSION['usuario_id'])) {
     
     try {
         if ($tipo_usuario === 'prestador') {
-            // Notificações para Prestador (agendamentos pendentes)
             $link_destino = BASE_URL . '/prestador/gerir_agendamentos.php';
             $stmt = $pdo->prepare("SELECT a.data as data, c.nome AS nome_cliente FROM Agendamento a JOIN Cliente c ON a.Cliente_id = c.id WHERE a.Prestador_id = ? AND a.status = 'pendente' AND a.notificacao_prestador_lida = FALSE ORDER BY a.data DESC LIMIT 15");
             $stmt->execute([$id_usuario]);
@@ -30,8 +29,7 @@ if (isset($_SESSION['usuario_id'])) {
             $stmt->execute([$id_usuario]);
             $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($tipo_usuario === 'admin') {
-            // --- NOVO: Busca notificações genéricas para o admin ---
-            $link_destino = '#'; // O link será dinâmico
+            $link_destino = '#';
             $stmt = $pdo->prepare("
                 SELECT id, mensagem, link, criado_em 
                 FROM notificacoes 
