@@ -71,7 +71,7 @@ include '../includes/navbar_logged_in.php';
                 <h4 class="alert-heading">Nova Solicitação de Agendamento!</h4>
                 <p>O cliente <strong><?= htmlspecialchars($notificacao['nome_cliente']) ?></strong> solicitou o serviço "<strong><?= htmlspecialchars($notificacao['titulo_servico']) ?></strong>" para o dia <strong><?= date('d/m/Y', strtotime($notificacao['data'])) ?></strong>.</p>
                 <hr>
-                <p class="mb-0">Vá para <a href="meus_agendamentos.php" class="alert-link">Meus Agendamentos</a> para aceitar ou recusar.</p>
+                <p class="mb-0">Vá para <a href="gerir_agendamentos.php" class="alert-link">Meus Agendamentos</a> para aceitar ou recusar.</p>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endforeach; ?>

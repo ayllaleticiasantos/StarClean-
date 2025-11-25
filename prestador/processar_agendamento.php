@@ -2,15 +2,18 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/log_helper.php';
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
+ 
+if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'prestador') {
     header("Location: ../pages/login.php");
     exit();
 }
 
 $id_prestador = $_SESSION['usuario_id'];
-$id_agendamento = $_POST['agendamento_id'] ?? null;
-$acao = $_POST['acao'] ?? null;
+
+// Unifica a captura de dados de POST e GET para compatibilidade
+$id_agendamento = $_REQUEST['agendamento_id'] ?? $_REQUEST['id'] ?? null;
+$acao = $_REQUEST['acao'] ?? null;
+
 
 if (!$id_agendamento || !$acao) {
     $_SESSION['mensagem_erro'] = "Requisição inválida.";
@@ -54,12 +57,10 @@ try {
             $mensagem_sucesso = "Agendamento recusado com sucesso.";
             break;
         case 'realizado':
-            $id_agendamento = $_GET['id'] ?? $id_agendamento; // Compatibilidade
             $novo_status = 'realizado';
             $mensagem_sucesso = "Serviço marcado como concluído!";
             break;
         case 'cancelado':
-            $id_agendamento = $_GET['id'] ?? $id_agendamento; // Compatibilidade
             $novo_status = 'cancelado';
             $mensagem_sucesso = "Agendamento cancelado com sucesso.";
             break;
