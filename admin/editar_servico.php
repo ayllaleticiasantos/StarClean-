@@ -124,7 +124,7 @@ include '../includes/navbar_logged_in.php';
                                     $selected = ($prestador['id'] == $servico_atual['prestador_id']) ? 'selected' : '';
                                 ?>
                                     <option value="<?= htmlspecialchars($prestador['id']) ?>" <?= $selected ?>>
-                                        [ID: <?= htmlspecialchars($prestador['id']) ?>] <?= htmlspecialchars($prestador['nome']) ?>
+                                         <?= htmlspecialchars($prestador['nome']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

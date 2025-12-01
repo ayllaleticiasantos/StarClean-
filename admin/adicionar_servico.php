@@ -101,7 +101,7 @@ include '../includes/navbar_logged_in.php';
                             <option value="">-- Selecione o Prestador --</option>
                             <?php foreach ($prestadores as $prestador): ?>
                                 <option value="<?= htmlspecialchars($prestador['id']) ?>">
-                                    [ID: <?= htmlspecialchars($prestador['id']) ?>] <?= htmlspecialchars($prestador['nome']) ?>
+                                    <?= htmlspecialchars($prestador['nome']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>

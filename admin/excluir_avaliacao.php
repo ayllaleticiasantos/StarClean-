@@ -3,7 +3,7 @@ session_start();
 require_once '../config/db.php';
 require_once '../includes/log_helper.php';
 
-// Segurança: Apenas administradores podem acessar
+// Por segurança: Apenas administradores podem acessar
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {
     header("Location: ../pages/login.php");
     exit();

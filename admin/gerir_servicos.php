@@ -110,7 +110,7 @@ include '../includes/navbar_logged_in.php';
                                         <td><?= htmlspecialchars($servico['id']) ?></td>
                                         <td><?= htmlspecialchars($servico['titulo']) ?></td>
                                         <td><?= htmlspecialchars($servico['descricao']) ?></td>
-                                        <td>[ID: <?= htmlspecialchars($servico['prestador_id']) ?>] <?= htmlspecialchars($servico['nome_prestador']) ?></td>
+                                        <td><?= htmlspecialchars($servico['nome_prestador']) ?></td>
                                         <td>R$ <?= number_format($servico['preco'], 2, ',', '.') ?></td>
                                         <td>
                                             <a href="editar_servico.php?id=<?= $servico['id'] ?>" class="btn btn-sm btn-warning">Editar</a>

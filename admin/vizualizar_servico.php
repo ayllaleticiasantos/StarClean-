@@ -69,7 +69,7 @@ include '../includes/navbar_logged_in.php';
             <div class="card-header"><h3><?= htmlspecialchars($servico['titulo']) ?></h3></div>
             <div class="card-body">
                 <p><strong>Descrição:</strong><br><?= nl2br(htmlspecialchars($servico['descricao'] ?: 'Nenhuma descrição fornecida.')) ?></p>
-                <p><strong>Prestador Responsável:</strong> <?= htmlspecialchars($servico['nome_prestador']) ?> (ID: <?= htmlspecialchars($servico['prestador_id']) ?>)</p>
+                <p><strong>Prestador Responsável:</strong> <?= htmlspecialchars($servico['nome_prestador']) ?></p>
                 <p><strong>Preço:</strong> <span class="fw-bold text-success">R$ <?= number_format($servico['preco'], 2, ',', '.') ?></span></p>
             </div>
             <div class="card-footer">

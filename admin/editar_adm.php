@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../includes/validation_helper.php'; // Inclui o nosso helper
+require_once '../includes/validation_helper.php'; 
 require_once '../config/db.php';
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] !== 'admin') {

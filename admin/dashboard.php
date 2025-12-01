@@ -213,7 +213,7 @@ include '../includes/navbar_logged_in.php';
         color: #fff;
     }
     .btn-custom-orange:hover {
-        background-color: #e47112; /* Um tom um pouco mais escuro para o hover */
+        background-color: #e47112;
         border-color: #d16810;
         color: #fff;
     }

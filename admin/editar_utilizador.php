@@ -187,7 +187,6 @@ include '../includes/navbar_logged_in.php';
 </main>
 <?php include '../includes/footer.php'; ?>
 <script>
- // CORREÇÃO APLICADA AQUI: O script foi ajustado para procurar o ID correto (telefone)
     function mascaraTelefone(evento) {
         if (evento.key === "Backspace") return;
         let valor = evento.target.value.replace(/\D/g, '');
