@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 15/11/2025 às 00:03
+-- Tempo de geração: 02/12/2025 às 00:32
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -44,9 +44,9 @@ CREATE TABLE `administrador` (
 --
 
 INSERT INTO `administrador` (`id`, `nome`, `sobrenome`, `email`, `password`, `tipo`, `receber_notificacoes_email`, `criado_em`, `atualizado_em`) VALUES
-(1, 'Aylla Leticia dos Santos', 'Vieira', 'ayllasantosdf@hotmail.com', '$2y$10$ayexAn5jZ2gXZdXd4uMV9uwsoQYIUFyvcy5yf9eyvi/qt3/aoyj/C', 'adminmaster', 1, '2025-10-06 22:37:24', '2025-11-02 19:28:13'),
-(2, 'StarClean', 'Serviços', 'starclean.prest.servicos@gmail.com', '$2y$10$fXpsPOQPyl2gYyQYz/JjcuZHb8PL6DoN7r6694ideWLJ0zxmi5FV6', 'adminmoderador', 1, '2025-10-06 23:07:13', '2025-11-13 12:41:51'),
-(7, 'Cinthia Reis', 'Cirilo', 'desenvolvedor.iantec@gmail.com', '$2y$10$tjCoEUhwtcHE6fps4hfwSuYSDBTJ.xWRuCE0hbT/xHaFso.5iAzO6', 'adminmaster', 1, '2025-11-08 21:09:08', '2025-11-09 20:24:12');
+(1, 'StarClean', 'Serviços', 'ayllasantosdf@hotmail.com', '$2y$10$F/4DJH41hOv3NqVhOJgV7ejVqWouGJBLr5/IqncnTcXqO8XZXfa8q', 'adminmaster', 1, '2025-10-06 22:37:24', '2025-12-01 23:19:22'),
+(2, 'StarClean', 'Serviços', 'starclean.prest.servicos@gmail.com', '$2y$10$gGa0pkrWSd7.0XAWAx06geyTPH6t2qSlmzeF9Ax/d6U4kQHF.2pYO', 'adminmaster', 1, '2025-10-06 23:07:13', '2025-11-20 00:15:54'),
+(7, 'Administrador ', 'Usuário', 'admusuario@teste.com', '$2y$10$CjEct6OavmIPTI7QbwQUseIYOJK3B9AgGsIn5CE9S0faSwTs41tJW', 'adminusuario', 1, '2025-11-08 21:09:08', '2025-12-01 23:03:08');
 
 -- --------------------------------------------------------
 
@@ -77,37 +77,42 @@ CREATE TABLE `agendamento` (
 -- Despejando dados para a tabela `agendamento`
 --
 
-INSERT INTO `agendamento` (`id`, `Cliente_id`, `Prestador_id`, `Servico_id`, `Endereco_id`, `data`, `hora`, `status`, `observacoes`, `tem_pets`, `tem_crianca`, `possui_aspirador`, `notificacao_prestador_lida`, `notificacao_cliente_lida`, `notificacao_admin_lida`) VALUES
+INSERT INTO `agendamento` (`id`, `Cliente_id`, `Prestador_id`, `Servico_id`, `Endereco_id`, `data`, `hora`, `status`, `observacoes`, `tem_pets`, `tem_crianca`, `possui_aspirador`, `notificacao_prestador_lida`, `notificacao_cliente_lida`, `notificacao_admin_lida`, `motivo_cancelamento`) VALUES
 (1, 2, 1, 15, 20, '2025-10-24', '12:00:00', 'realizado', 'Limpeza de 3 salas comerciais.', 0, 0, 0, 0, 0, 1, NULL),
-(2, 4, 1, 15, 16, '2025-10-31', '13:00:00', 'remarcado', 'escritorio\r\n', 0, 0, 0, 0, 0, 0),
-(3, 4, 1, 15, 16, '2025-10-30', '12:00:00', 'remarcado', '', 0, 0, 0, 0, 0, 0),
-(5, 4, 4, 16, 16, '2025-10-28', '12:03:00', 'realizado', '', 0, 0, 0, 0, 0, 1),
-(6, 4, 5, 18, 16, '2025-11-07', '15:00:00', 'realizado', 'Gostaria que ficasse, vindo sempre as sextas feiras.', 0, 0, 0, 0, 0, 1),
-(7, 4, 4, 38, 16, '2025-10-31', '19:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0),
-(8, 5, 1, 31, 21, '2025-11-04', '11:00:00', 'realizado', 'Gostaria que vinhesse e realizasse a limpeza com todos os equipamentos da empresa.', 0, 0, 0, 0, 0, 1),
-(9, 2, 5, 21, 20, '2025-11-30', '12:00:00', 'aceito', 'Tenho 2 cachorros, 2 crianças pequenas e não consigo tirá-las de casa. ', 0, 0, 0, 0, 1, 0),
-(10, 4, 1, 15, 16, '2025-11-07', '12:00:00', 'realizado', '', 0, 0, 0, 0, 0, 1),
-(12, 4, 1, 25, 23, '2025-11-29', '15:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0),
-(13, 5, 1, 15, 21, '2025-11-26', '12:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0),
-(14, 5, 1, 15, 31, '2025-11-26', '12:01:00', 'aceito', '', 0, 0, 0, 0, 1, 0),
-(15, 5, 1, 23, 31, '2025-11-29', '17:00:00', 'cancelado', '', 1, 0, 0, 0, 1, 0),
-(16, 5, 1, 25, 31, '2025-11-18', '12:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0),
-(17, 5, 1, 23, 31, '2025-11-14', '12:00:00', 'aceito', '', 1, 1, 0, 0, 1, 0),
-(18, 5, 1, 15, 31, '2025-11-25', '11:00:00', 'cancelado', '', 0, 0, 0, 0, 0, 0),
-(19, 5, 1, 15, 31, '2025-11-11', '13:00:00', 'aceito', '', 0, 0, 1, 1, 1, 0),
-(20, 2, 1, 15, 33, '2025-11-28', '12:00:00', 'pendente', 'Meu escritorio é pequeno, são 2 salas e uma recepção.', 0, 0, 0, 1, 0, 0),
-(21, 5, 1, 23, 31, '2025-11-27', '18:00:00', 'pendente', '', 0, 1, 0, 0, 0, 0),
-(22, 4, 4, 16, 24, '2025-11-24', '16:30:00', 'aceito', '', 1, 1, 0, 0, 0, 0),
-(23, 4, 1, 15, 24, '2025-11-11', '17:10:00', 'pendente', '', 0, 0, 1, 0, 0, 0),
-(24, 4, 4, 16, 24, '2025-11-21', '14:25:00', 'aceito', '', 0, 0, 0, 0, 0, 0),
-(25, 4, 1, 15, 24, '2025-11-27', '14:35:00', 'pendente', '', 0, 0, 0, 0, 0, 0),
-(26, 4, 1, 15, 24, '2025-11-24', '09:15:00', 'pendente', '', 0, 0, 0, 0, 0, 0),
-(27, 4, 1, 88, 24, '2025-11-19', '15:35:00', 'pendente', '', 1, 0, 1, 0, 0, 0),
-(28, 10, 1, 15, 34, '2025-11-17', '10:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0),
-(29, 2, 5, 125, 33, '2025-12-03', '10:00:00', 'aceito', '', 0, 1, 1, 0, 0, 0),
-(30, 2, 4, 108, 35, '2025-12-06', '13:00:00', 'aceito', '', 0, 0, 1, 0, 0, 0),
-(31, 10, 5, 121, 34, '2025-11-20', '10:00:00', 'aceito', '', 0, 1, 1, 0, 1, 0),
-(32, 10, 10, 18, 34, '2025-11-29', '11:00:00', 'pendente', '', 1, 1, 1, 0, 0, 0);
+(2, 4, 1, 15, 16, '2025-10-31', '13:00:00', 'remarcado', 'escritorio\r\n', 0, 0, 0, 0, 0, 0, NULL),
+(3, 4, 1, 15, 16, '2025-10-30', '12:00:00', 'remarcado', '', 0, 0, 0, 0, 0, 0, NULL),
+(5, 4, 4, 16, 16, '2025-10-28', '12:03:00', 'realizado', '', 0, 0, 0, 0, 0, 1, NULL),
+(6, 4, 5, 18, 16, '2025-11-07', '15:00:00', 'realizado', 'Gostaria que ficasse, vindo sempre as sextas feiras.', 0, 0, 0, 0, 0, 1, NULL),
+(7, 4, 4, 38, 16, '2025-10-31', '19:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0, NULL),
+(8, 5, 1, 31, 21, '2025-11-04', '11:00:00', 'realizado', 'Gostaria que vinhesse e realizasse a limpeza com todos os equipamentos da empresa.', 0, 0, 0, 0, 0, 1, NULL),
+(9, 2, 5, 21, 20, '2025-11-30', '12:00:00', 'aceito', 'Tenho 2 cachorros, 2 crianças pequenas e não consigo tirá-las de casa. ', 0, 0, 0, 0, 1, 0, NULL),
+(10, 4, 1, 15, 16, '2025-11-07', '12:00:00', 'realizado', '', 0, 0, 0, 0, 0, 1, NULL),
+(12, 4, 1, 25, 23, '2025-11-29', '15:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0, NULL),
+(13, 5, 1, 15, 21, '2025-11-26', '12:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0, NULL),
+(14, 5, 1, 15, 31, '2025-11-26', '12:01:00', 'aceito', '', 0, 0, 0, 0, 1, 0, NULL),
+(15, 5, 1, 23, 31, '2025-11-29', '17:00:00', 'cancelado', '', 1, 0, 0, 0, 1, 0, NULL),
+(16, 5, 1, 25, 31, '2025-11-18', '12:00:00', 'realizado', '', 0, 0, 0, 0, 1, 0, NULL),
+(17, 5, 1, 23, 31, '2025-11-14', '12:00:00', 'realizado', '', 1, 1, 0, 0, 1, 0, NULL),
+(18, 5, 1, 15, 31, '2025-11-25', '11:00:00', 'cancelado', '', 0, 0, 0, 0, 0, 0, NULL),
+(19, 5, 1, 15, 31, '2025-11-11', '13:00:00', 'realizado', '', 0, 0, 1, 1, 1, 0, NULL),
+(20, 2, 1, 15, 33, '2025-11-28', '10:00:00', 'cancelado', 'Meu escritorio é pequeno, são 2 salas e uma recepção.', 0, 0, 0, 1, 1, 0, NULL),
+(21, 5, 1, 23, 31, '2025-11-27', '18:00:00', 'cancelado', '', 0, 1, 0, 1, 0, 0, NULL),
+(22, 4, 4, 16, 24, '2025-11-24', '16:30:00', 'aceito', '', 1, 1, 0, 0, 0, 0, NULL),
+(23, 4, 1, 15, 24, '2025-11-11', '17:10:00', 'realizado', '', 0, 0, 1, 1, 0, 0, NULL),
+(24, 4, 4, 16, 24, '2025-11-21', '14:25:00', 'aceito', '', 0, 0, 0, 0, 0, 0, NULL),
+(25, 4, 1, 15, 24, '2025-11-27', '14:35:00', 'cancelado', '', 0, 0, 0, 1, 0, 0, NULL),
+(26, 4, 1, 15, 24, '2025-11-24', '09:15:00', 'cancelado', '', 0, 0, 0, 1, 0, 0, NULL),
+(27, 4, 1, 88, 24, '2025-11-19', '15:35:00', 'realizado', '', 1, 0, 1, 1, 0, 0, NULL),
+(28, 10, 1, 15, 34, '2025-11-17', '10:00:00', 'realizado', '', 0, 0, 0, 0, 1, 0, NULL),
+(29, 2, 5, 125, 33, '2025-12-03', '10:00:00', 'aceito', '', 0, 1, 1, 0, 1, 0, NULL),
+(30, 2, 4, 108, 35, '2025-12-06', '13:00:00', 'aceito', '', 0, 0, 1, 0, 1, 0, NULL),
+(31, 10, 5, 121, 34, '2025-11-20', '10:00:00', 'aceito', '', 0, 1, 1, 0, 1, 0, NULL),
+(32, 10, 10, 18, 34, '2025-11-29', '11:00:00', 'pendente', '', 1, 1, 1, 0, 0, 0, NULL),
+(33, 10, 1, 15, 34, '2025-11-28', '10:00:00', 'aceito', '', 0, 0, 0, 0, 0, 0, NULL),
+(34, 2, 1, 15, 35, '2025-11-28', '10:00:00', 'aceito', '', 0, 0, 0, 0, 1, 0, NULL),
+(35, 5, 4, 113, 21, '2025-12-02', '10:25:00', 'pendente', '', 0, 0, 1, 0, 0, 0, NULL),
+(36, 2, 1, 15, 33, '2025-12-06', '14:25:00', 'cancelado', '', 0, 0, 0, 0, 1, 0, NULL),
+(37, 2, 1, 88, 39, '2025-11-29', '07:40:00', 'pendente', '', 1, 0, 1, 1, 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -158,7 +163,7 @@ CREATE TABLE `blocos_conteudo` (
 
 INSERT INTO `blocos_conteudo` (`id`, `pagina`, `titulo_admin`, `tipo_bloco`, `conteudo_json`, `ordem`, `ativo`, `criado_em`, `atualizado_em`, `editado_por_admin_id`) VALUES
 (1, 'index', 'Casas dos Clientes', 'card_imagem_texto', '{\"titulo\":\"Conheca o Nosso Time\",\"texto\":\"Nossa equipe de presta\\u00e7\\u00e3o de servi\\u00e7os de limpeza \\u00e9 especializada em criar ambientes impec\\u00e1veis e saud\\u00e1veis para o seu neg\\u00f3cio ou resid\\u00eancia. Com um foco inabal\\u00e1vel em profissionalismo e efici\\u00eancia, nossos colaboradores s\\u00e3o treinados para utilizar as t\\u00e9cnicas e produtos mais adequados para cada tipo de superf\\u00edcie.\\r\\nVamos al\\u00e9m da simples remo\\u00e7\\u00e3o de sujeira, garantindo uma higieniza\\u00e7\\u00e3o profunda que contribui diretamente para o bem-estar e a sa\\u00fade de todos que frequentam o local. Seja para a manuten\\u00e7\\u00e3o di\\u00e1ria de escrit\\u00f3rios ou limpezas p\\u00f3s-obra desafiadoras, nossa equipe dedicada est\\u00e1 pronta para superar expectativas.\\r\\n\\r\\n* Leticia Santos - Especialista em ambientes pequenos.\\r\\n* Arthur Luis - Especialista em limpezas pesadas, organiza\\u00e7\\u00e3o e mais.\\r\\n* Maria Franciv\\u00e2nia - Especialista de ambinetes maiores, normalmente acompanhada pela equipe.\\r\\n* Jos\\u00e9 Carlos -  Especialista em detalhes da organiza\\u00e7\\u00e3o de ambientes.\",\"imagem_url\":\"img\\/blocos\\/6914a70dab003-Prestadores.jpg\"}', 8, 1, '2025-11-12 15:26:05', '2025-11-12 15:40:45', 1),
-(2, 'index', 'Teste', 'card_imagem_texto', '{\"titulo\":\"Conheca a nossa Logo\",\"texto\":\"\",\"imagem_url\":\"img\\/blocos\\/691512cb9b3cb-teste.png\"}', 1, 0, '2025-11-12 23:00:24', '2025-11-12 23:08:28', 1);
+(2, 'index', 'Teste', 'card_imagem_texto', '{\"titulo\":\"Conheca a nossa Logo\",\"texto\":\"\",\"imagem_url\":\"img\\/blocos\\/691512cb9b3cb-teste.png\"}', 1, 0, '2025-11-12 23:00:24', '2025-11-18 23:08:44', 1);
 
 -- --------------------------------------------------------
 
@@ -185,9 +190,9 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`id`, `nome`, `sobrenome`, `email`, `data_nascimento`, `telefone`, `cpf`, `password`, `receber_notificacoes_email`, `criado_em`, `atualizado_em`) VALUES
-(2, 'Allana Larissa', 'dos Santos', 'allanalarissa5@gmail.com', '2005-03-30', '(61)99181-7265', '077.469.001-19', '$2y$10$k3mmEMEj3zo3jPp4lt4WsOS99z8OZIdCRFgNvbS67FT.cH3.aJ6KG', 1, '2025-10-07 02:48:05', '2025-10-28 00:38:21'),
-(4, 'Pedro Lucas dos Santos', 'Vieira', 'lucaspedro1030@gmail.com', '2008-10-30', '(61) 99402-4265', '077.469.451-39', '$2y$10$t9tXsVxBXOIQDxryciP.YujHQLpvbAOwIbZwlfG61XZFkUjs1Gj52', 1, '2025-10-18 01:21:02', '2025-10-18 01:21:02'),
-(5, 'Francisco Vieira', 'da Silva', 'francisco@gmail.com', '1978-02-10', '(61) 99369-5893', '833.777.861-04', '$2y$10$RpeE/mQEcPnQPypU673Eg.9jvQQJom8duO/I5RUs6yuVShXSQp8WC', 1, '2025-10-27 08:56:15', '2025-10-27 08:56:15'),
+(2, 'Luisa', 'dos Santos', 'luisa@gmail.com', '2005-03-30', '(61)99181-7265', '817.472.150-90', '$2y$10$w3S1IL0H4KAgpAayTjalQ.LL.60RQd/insjH6bV28iq5yhxIqDRga', 1, '2025-10-07 02:48:05', '2025-12-01 23:04:28'),
+(4, 'Lucas ', 'Gomes', 'lucasgomes@gmail.com', '2008-10-30', '(61) 99402-4265', '880.758.460-36', '$2y$10$t9tXsVxBXOIQDxryciP.YujHQLpvbAOwIbZwlfG61XZFkUjs1Gj52', 1, '2025-10-18 01:21:02', '2025-12-01 23:06:45'),
+(5, 'Francisco ', 'da Silva', 'francisco@gmail.com', '1978-02-10', '(61) 99369-5893', '441.838.620-35', '$2y$10$RpeE/mQEcPnQPypU673Eg.9jvQQJom8duO/I5RUs6yuVShXSQp8WC', 1, '2025-10-27 08:56:15', '2025-12-01 23:07:42'),
 (10, 'Gabriel Gomes', 'Silva', '226f043e-af52-481b-8a83-f4bb577d338c@tempsmtp.com', '2001-11-26', '(61) 98989-9898', '079.065.551-98', '$2y$10$BzLdLA.zcjlviSHCnRz28OecQ.0UPbEje4/auJBCK/1Jm1Do7vyZ2', 1, '2025-11-09 10:17:59', '2025-11-09 17:53:08');
 
 -- --------------------------------------------------------
@@ -267,15 +272,15 @@ CREATE TABLE `conteudo_pagina_inicial` (
 --
 
 INSERT INTO `conteudo_pagina_inicial` (`id`, `tipo_conteudo`, `titulo`, `texto`, `imagem_url`, `link_url`, `texto_botao`, `ordem`, `ativo`, `criado_por_admin_id`, `editado_por_admin_id`, `data_criacao`, `data_edicao`, `oculto`) VALUES
-(1, 'carousel', 'Bem-vindos à StarClean', 'A sua plataforma para agendar serviços de limpeza com qualidade e confiança.', 'img/Sliderbar_1.png', NULL, NULL, 1, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 23:59:14', 0),
-(2, 'carousel', 'Seja um dos nossos Clientes', 'Encontre os melhores prestadores de serviços de limpeza.', 'img/sliderbar_1.png', 'pages/cadastro.php', 'Cadastre-se', 2, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 09:29:44', 0),
-(3, 'carousel', 'Seja um Prestador de Serviços', 'Junte-se a nós e ofereça seus serviços de limpeza.', 'img/sliderbar_1.png', 'pages/cadastro.php', 'Cadastre-se', 3, 0, NULL, 1, '2025-11-05 09:28:24', '2025-11-13 12:01:16', 0),
-(4, 'card', 'Higienização do Escritório', 'Este é um serviço de limpeza especializado para escritórios, garantindo um ambiente de trabalho limpo e saudável.', 'img/escritorio2.png', NULL, NULL, 1, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 09:29:44', 0),
-(5, 'card', 'Limpeza completa da sua casa.', 'Este é um serviço de limpeza especializado para residencias, garantindo que a sua casa permaneça limpa e bem cuidada.', 'img/cozinha.png', NULL, NULL, 2, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 09:29:44', 0),
-(6, 'card', 'Higienização da Biblioteca', 'Este é um serviço de limpeza especializado para bibliotecas, garantindo um ambiente de leitura limpo e organizado para sua familia.', 'img/biblioteca.png', NULL, NULL, 3, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 09:29:44', 0),
-(7, 'card', 'Higienização da Sala', 'Este é um serviço de limpeza especializado para salas de estar, garantindo um ambiente aconchegante limpo e bem cuidado.', 'img/sala.png', NULL, NULL, 4, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 09:29:44', 0),
-(8, 'card', 'Higienização do Quarto', 'Este é um serviço de limpeza especializado para casas no geral você pode contratar na diária, mensalmente e por pacotes.', 'img/quarto.png', NULL, NULL, 5, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 09:31:25', 0),
-(9, 'card', 'Outros Serviços', 'Na Star Clean, oferecemos uma variedade de serviços adicionais para atender às suas necessidades específicas.', 'img/limpando.jpg', 'pages/servicos.php', 'Ver mais', 6, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-05 09:29:44', 0);
+(1, 'carousel', 'Bem-vindos à StarClean', 'A sua plataforma para agendar serviços de limpeza com qualidade e confiança.', 'img/conteudo_691e46e8798db.png', NULL, NULL, 1, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 22:38:32', 0),
+(2, 'carousel', 'Seja um dos nossos Clientes', 'Encontre os melhores prestadores de serviços de limpeza.', 'img/conteudo_691e46e87b1bb.png', 'pages/cadastro.php', 'Cadastre-se', 2, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 22:38:32', 0),
+(3, 'carousel', 'Seja um Prestador de Serviços', 'Junte-se a nós e ofereça seus serviços de limpeza.', 'img/conteudo_691e46e87b943.png', 'pages/cadastro.php', 'Cadastre-se', 3, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 22:38:32', 0),
+(4, 'card', 'Higienização do Escritório', 'Este é um serviço de limpeza especializado para escritórios, garantindo um ambiente de trabalho limpo e saudável.', 'img/conteudo_691d04d20ea1a.png', NULL, NULL, 1, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 00:25:46', 0),
+(5, 'card', 'Limpeza completa da sua casa.', 'Este é um serviço de limpeza especializado para residencias, garantindo que a sua casa permaneça limpa e bem cuidada.', 'img/conteudo_691d04d20ece2.png', NULL, NULL, 2, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 00:25:46', 0),
+(6, 'card', 'Higienização da Biblioteca', 'Este é um serviço de limpeza especializado para bibliotecas, garantindo um ambiente de leitura limpo e organizado para sua familia.', 'img/conteudo_691d04d20ef4e.png', NULL, NULL, 3, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 00:25:46', 0),
+(7, 'card', 'Higienização da Sala', 'Este é um serviço de limpeza especializado para salas de estar, garantindo um ambiente aconchegante limpo e bem cuidado.', 'img/conteudo_691d04d20f1ce.png', NULL, NULL, 4, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 00:25:46', 0),
+(8, 'card', 'Higienização do Quarto', 'Este é um serviço de limpeza especializado para casas no geral você pode contratar na diária, mensalmente e por pacotes.', 'img/conteudo_691d04d20f481.png', NULL, NULL, 5, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 00:25:46', 0),
+(9, 'card', 'Outros Serviços', 'Na Star Clean, oferecemos uma variedade de serviços adicionais para atender às suas necessidades específicas.', 'img/conteudo_691d04d20f798.jpg', 'pages/servicos.php', 'Ver mais', 6, 1, NULL, 1, '2025-11-05 09:28:24', '2025-11-19 00:25:46', 0);
 
 -- --------------------------------------------------------
 
@@ -308,16 +313,16 @@ INSERT INTO `endereco` (`id`, `Cliente_id`, `Prestador_id`, `cep`, `logradouro`,
 (16, 4, NULL, '72238-369', 'Quadra SHPS Quadra 603 Conjunto C', 'Setor Habitacional Pôr do Sol (Ceilândia)', 'Brasília', 'DF', '18', 'Conjunto C', NULL, '2025-10-21 00:40:48', '2025-11-04 16:45:47', NULL),
 (19, 4, NULL, '72238360', 'Quadra SHPS Quadra 603', 'Setor Habitacional Pôr do Sol (Ceilândia)', 'Brasília', 'DF', '603', 'Conjunto C', NULL, '2025-10-21 22:43:18', '2025-10-21 22:43:18', NULL),
 (20, 2, NULL, '72231-117', 'Quadra QNP 10 Conjunto Q', 'Ceilândia Sul (Ceilândia)', 'Brasília', 'DF', '46', 'P.sul', NULL, '2025-10-23 02:29:54', '2025-11-08 20:27:20', NULL),
-(21, 5, NULL, '72270-500', 'Quadra QNQ 5', 'Ceilândia Norte (Ceilândia)', 'Brasília', 'DF', '17', 'Casa', NULL, '2025-10-27 08:57:31', '2025-11-04 22:56:16', NULL),
+(21, 5, NULL, '72270-501', 'Quadra QNQ 5 Conjunto c', 'Ceilândia Norte (Ceilândia)', 'Brasília', 'DF', '17', 'Casa', -15.78812398, '2025-10-27 08:57:31', '2025-11-23 21:35:48', -48.12762740),
 (22, 4, NULL, '72270500', 'Quadra QNQ 5', 'Ceilândia Norte (Ceilândia)', 'Brasília', 'DF', '1', 'Casa somente', NULL, '2025-10-29 00:54:38', '2025-11-04 16:11:04', NULL),
 (23, 4, NULL, '72270500', 'Quadra QNQ 5', 'Ceilândia Norte (Ceilândia)', 'Brasília', 'DF', '1', 'casa2', NULL, '2025-11-04 00:56:47', '2025-11-04 02:16:39', NULL),
 (24, 4, NULL, '72316-116', 'Quadra QR 208 Conjunto 15', 'Samambaia Norte (Samambaia)', 'Brasília', 'DF', '6', '', 0.00000000, '2025-11-04 16:18:26', '2025-11-05 16:09:29', NULL),
-(25, 5, NULL, '72238-369', 'Quadra SHPS Quadra 603 Conjunto C', 'Setor Habitacional Pôr do Sol (Ceilândia)', 'Brasília', 'DF', '18', 'Conjunto C', -15.85502000, '2025-11-04 23:28:47', '2025-11-04 23:28:47', -48.12433000),
-(31, 5, NULL, '73369-012', 'Quadra 3L Conjunto B', 'Arapoanga (Planaltina)', 'Brasília', 'DF', '12', '', -15.64551901, '2025-11-05 00:39:09', '2025-11-05 00:39:09', -47.64884224),
+(31, 5, NULL, '73369-012', 'Quadra 3L Conjunto B', 'Arapoanga (Planaltina)', 'Brasília', 'DF', '12', '', -15.64553290, '2025-11-05 00:39:09', '2025-11-25 16:41:58', -47.64924990),
 (32, 2, NULL, '72660-136', 'Quadra 509 Conjunto 9', 'Recanto das Emas', 'Brasília', 'DF', '18', 'Apartamento', -15.64078722, '2025-11-08 20:26:27', '2025-11-08 20:26:27', -47.80252216),
 (33, 2, NULL, '72231-117', 'Quadra QNP 10 Conjunto Q', 'Ceilândia Sul (Ceilândia)', 'Brasília', 'DF', '48', 'Casa', -15.83635752, '2025-11-08 20:31:56', '2025-11-08 20:31:56', -48.11734346),
 (34, 10, NULL, '72601-102', 'Quadra 105 Conjunto 2', 'Recanto das Emas', 'Brasília', 'DF', '12', '', -15.88552580, '2025-11-09 10:26:58', '2025-11-09 10:26:58', -48.02009960),
-(35, 2, NULL, '72151-108', 'Quadra QNL 11 Conjunto H', 'Taguatinga Norte (Taguatinga)', 'Brasília', 'DF', '22', 'Casa', -15.82935417, '2025-11-09 11:43:16', '2025-11-09 11:43:16', -48.08539861);
+(35, 2, NULL, '72151-108', 'Quadra QNL 11 Conjunto H', 'Taguatinga Norte (Taguatinga)', 'Brasília', 'DF', '22', 'Casa', -15.82927160, '2025-11-09 11:43:16', '2025-11-19 23:01:38', -48.08519486),
+(39, 2, NULL, '71593-634', 'Quadra 378 Conjunto O', 'Del Lago II (Itapoã)', 'Brasília', 'DF', '12', '', -15.74059665, '2025-11-25 23:39:50', '2025-11-25 23:39:50', -47.76226762);
 
 -- --------------------------------------------------------
 
@@ -405,7 +410,33 @@ INSERT INTO `log_atividades` (`id`, `admin_id`, `acao`, `detalhes`, `data_ocorre
 (36, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-13 12:32:49'),
 (37, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-13 12:32:55'),
 (38, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-13 12:33:13'),
-(39, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-13 12:33:17');
+(39, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-13 12:33:17'),
+(40, 1, 'Excluiu um utilizador do tipo prestador com ID 12.', NULL, '2025-11-16 22:37:47'),
+(41, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 22:38:49'),
+(42, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 22:39:55'),
+(43, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 22:59:13'),
+(44, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 22:59:31'),
+(45, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 22:59:48'),
+(46, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 23:06:44'),
+(47, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 23:08:21'),
+(48, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 23:08:44'),
+(49, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 23:09:04'),
+(50, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 23:11:35'),
+(51, 1, 'Editou o conteúdo das páginas (inicial/sobre).', NULL, '2025-11-18 23:20:36'),
+(52, 1, 'Editou o conteúdo do site.', NULL, '2025-11-18 23:29:39'),
+(53, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-18 23:44:18'),
+(54, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:12:41'),
+(55, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:25:46'),
+(56, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:29:07'),
+(57, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:29:26'),
+(58, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:29:57'),
+(59, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:30:33'),
+(60, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:31:17'),
+(61, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:32:44'),
+(62, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:33:06'),
+(63, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:34:54'),
+(64, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 00:36:20'),
+(65, 1, 'Editou o conteúdo das páginas (inicial/sobre/termos).', NULL, '2025-11-19 22:38:32');
 
 -- --------------------------------------------------------
 
@@ -429,7 +460,16 @@ INSERT INTO `log_cliente_atividades` (`id`, `cliente_id`, `acao`, `detalhes`, `d
 (1, 10, 'Criou um novo agendamento', '{\"agendamento_id\":\"31\",\"servico_id\":121}', '2025-11-09 20:49:00'),
 (2, 10, 'Editou o agendamento', '{\"agendamento_id\":\"28\",\"nova_data\":\"2025-11-17\",\"nova_hora\":\"10:00\"}', '2025-11-09 20:52:16'),
 (3, 10, 'Criou um novo agendamento', '{\"agendamento_id\":\"32\",\"servico_id\":18}', '2025-11-13 21:36:59'),
-(4, 10, 'Editou o agendamento', '{\"agendamento_id\":\"32\",\"nova_data\":\"2025-11-29\",\"nova_hora\":\"11:00\"}', '2025-11-13 21:37:18');
+(4, 10, 'Editou o agendamento', '{\"agendamento_id\":\"32\",\"nova_data\":\"2025-11-29\",\"nova_hora\":\"11:00\"}', '2025-11-13 21:37:18'),
+(5, 10, 'Criou um novo agendamento', '{\"agendamento_id\":\"33\",\"servico_id\":15}', '2025-11-15 15:54:43'),
+(6, 2, 'Criou um novo agendamento', '{\"agendamento_id\":\"34\",\"servico_id\":15}', '2025-11-15 15:56:32'),
+(7, 2, 'Editou o agendamento', '{\"agendamento_id\":\"20\",\"nova_data\":\"2025-11-28\",\"nova_hora\":\"10:00\"}', '2025-11-15 15:59:43'),
+(8, 5, 'Criou um novo agendamento', '{\"agendamento_id\":\"35\",\"servico_id\":113}', '2025-11-23 21:36:42'),
+(9, 2, 'Criou um novo agendamento', '{\"agendamento_id\":\"36\",\"servico_id\":15}', '2025-11-24 23:37:35'),
+(10, 2, 'Criou um novo agendamento', '{\"agendamento_id\":\"37\",\"servico_id\":88}', '2025-11-25 23:40:50'),
+(11, 2, 'Editou o agendamento', '{\"agendamento_id\":\"37\",\"nova_data\":\"2025-11-29\",\"nova_hora\":\"07:40:00\"}', '2025-11-25 23:41:29'),
+(12, 2, 'Cancelou o agendamento', '{\"agendamento_id\":\"36\"}', '2025-11-25 23:41:41'),
+(13, 2, 'Atualizou a avaliação do prestador', '{\"prestador_id\":1,\"nota\":\"5\"}', '2025-11-26 00:02:40');
 
 -- --------------------------------------------------------
 
@@ -451,7 +491,21 @@ CREATE TABLE `log_prestador_atividades` (
 
 INSERT INTO `log_prestador_atividades` (`id`, `prestador_id`, `acao`, `detalhes`, `data_ocorrencia`) VALUES
 (1, 5, 'Alterou o status do agendamento para \'aceito\'', '{\"agendamento_id\":\"31\"}', '2025-11-09 20:50:52'),
-(2, 5, 'Alterou o status do agendamento para \'aceito\'', '{\"agendamento_id\":\"31\"}', '2025-11-09 20:50:52');
+(2, 5, 'Alterou o status do agendamento para \'aceito\'', '{\"agendamento_id\":\"31\"}', '2025-11-09 20:50:52'),
+(3, 1, 'Alterou o status do agendamento para \'aceito\'', '{\"agendamento_id\":\"34\"}', '2025-11-15 15:57:13'),
+(4, 1, 'Alterou o status do agendamento para \'aceito\'', '{\"agendamento_id\":\"33\"}', '2025-11-15 15:57:27'),
+(5, 1, 'Tentativa de aceitar agendamento com conflito (cancelado automaticamente)', '{\"agendamento_id\":\"20\"}', '2025-11-15 16:06:48'),
+(6, 1, 'Alterou o status do agendamento para \'aceito\'', '{\"agendamento_id\":\"27\"}', '2025-11-23 21:19:12'),
+(7, 1, 'Alterou o status do agendamento para \'aceito\'', '{\"agendamento_id\":\"23\"}', '2025-11-23 21:20:14'),
+(8, 1, 'Alterou o status do agendamento para \'recusado_pelo_prestador\'', '{\"agendamento_id\":\"26\"}', '2025-11-23 21:28:41'),
+(9, 1, 'Alterou o status do agendamento para \'cancelado\'', '{\"agendamento_id\":\"21\"}', '2025-11-23 21:31:02'),
+(10, 1, 'Alterou o status do agendamento para \'cancelado\'', '{\"agendamento_id\":\"25\"}', '2025-11-24 22:59:36'),
+(11, 1, 'Alterou o status do agendamento para \'realizado\'', '{\"agendamento_id\":\"23\"}', '2025-11-25 10:43:34'),
+(12, 1, 'Alterou o status do agendamento para \'realizado\'', '{\"agendamento_id\":\"27\"}', '2025-11-25 10:43:57'),
+(13, 1, 'Alterou o status do agendamento para \'realizado\'', '{\"agendamento_id\":\"16\"}', '2025-11-25 10:44:19'),
+(14, 1, 'Alterou o status do agendamento para \'realizado\'', '{\"agendamento_id\":\"19\"}', '2025-11-25 10:44:29'),
+(15, 1, 'Alterou o status do agendamento para \'realizado\'', '{\"agendamento_id\":\"17\"}', '2025-11-25 10:46:02'),
+(16, 1, 'Alterou o status do agendamento para \'realizado\'', '{\"agendamento_id\":\"28\"}', '2025-11-25 10:46:09');
 
 -- --------------------------------------------------------
 
@@ -475,11 +529,14 @@ CREATE TABLE `notificacoes` (
 
 INSERT INTO `notificacoes` (`id`, `usuario_id`, `tipo_usuario`, `mensagem`, `link`, `lida`, `criado_em`) VALUES
 (1, 1, 'admin', 'Novo prestador cadastrado: Samuel', 'admin/gerir_utilizadores.php', 1, '2025-11-12 16:54:08'),
-(2, 7, 'admin', 'Novo prestador cadastrado: Samuel', 'admin/gerir_utilizadores.php', 0, '2025-11-12 16:54:08'),
+(2, 7, 'admin', 'Novo prestador cadastrado: Samuel', 'admin/gerir_utilizadores.php', 1, '2025-11-12 16:54:08'),
 (3, 2, 'admin', 'Novo prestador cadastrado: Samuel', 'admin/gerir_utilizadores.php', 0, '2025-11-12 16:54:08'),
 (4, 1, 'admin', 'Novo prestador cadastrado: teste', 'admin/gerir_utilizadores.php', 1, '2025-11-12 21:22:37'),
-(5, 7, 'admin', 'Novo prestador cadastrado: teste', 'admin/gerir_utilizadores.php', 0, '2025-11-12 21:22:37'),
-(6, 2, 'admin', 'Novo prestador cadastrado: teste', 'admin/gerir_utilizadores.php', 0, '2025-11-12 21:22:37');
+(5, 7, 'admin', 'Novo prestador cadastrado: teste', 'admin/gerir_utilizadores.php', 1, '2025-11-12 21:22:37'),
+(6, 2, 'admin', 'Novo prestador cadastrado: teste', 'admin/gerir_utilizadores.php', 0, '2025-11-12 21:22:37'),
+(7, 1, 'admin', 'Novo prestador cadastrado: oliver', 'admin/gerir_utilizadores.php', 1, '2025-11-16 22:34:46'),
+(8, 7, 'admin', 'Novo prestador cadastrado: oliver', 'admin/gerir_utilizadores.php', 1, '2025-11-16 22:34:46'),
+(9, 2, 'admin', 'Novo prestador cadastrado: oliver', 'admin/gerir_utilizadores.php', 0, '2025-11-16 22:34:46');
 
 -- --------------------------------------------------------
 
@@ -508,9 +565,9 @@ CREATE TABLE `prestador` (
 --
 
 INSERT INTO `prestador` (`id`, `nome`, `sobrenome`, `cpf`, `email`, `telefone`, `especialidade`, `password`, `receber_notificacoes_email`, `descricao`, `criado_em`, `atualizado_em`, `Administrador_id`) VALUES
-(1, 'Leticia Santos', 'Vieira', '071.818.111-50', 'jeleticiasantosdf@gmail.com', '6130428546', 'Limpeza de Ambientes Pequenos', '$2y$10$WJL/zSXipVh531YsCrGSEekJzq/oTKgdWW.yHk8skjYWFG8VYuBRW', 1, 'Profissional do ramo de limpeza de casas, pequenas e minimalistas desde o ano de 2016, com foco em impermeabilização garantindo que sua casa fique mais limpa, por mais tempo.', '2025-10-07 02:24:18', '2025-11-08 21:12:54', 1),
-(4, 'Maria Francivânia dos Santos', 'Rocha', '807.991.401-04', 'vaniasantosrocha@outlook.com', '(61) 99345-8309', 'Limpeza de Ambientes Pequenos', '$2y$10$KI3LXORf.8XxRrQJ9o3lz.5l5DfBv80/tSZpzgQB4dh74kcl.awvS', 1, 'Sou profissional da área da limpeza a mais de 20 anos, trabalho normalmente em casas de familia. Estou buscando a StarClean Pela oportunidade de me conectar facilmente com a carta de clientes da empresa e poder usufruir dos equipamentos.', '2025-10-23 03:39:21', '2025-10-23 03:39:21', 1),
-(5, 'Arthur Luís', 'dos Santos Vieira', '091.191.781-07', 'arthur@gmail.com', '(61) 99189-2912', 'Limpeza de Casas', '$2y$10$G4XGYvwR4xdVo7U5FQEJN./NQwlJgK1jkBIPGyO13CqpLjmgAKvDW', 1, 'Sou profissional da área da Limpeza, há 8 meses e busco na StarClean uma cartela de clientes vasta.', '2025-10-25 22:56:55', '2025-11-08 21:12:05', 1),
+(1, 'Leticia Santos', 'Vieira', '828.857.560-98', 'leticia@teste.com', '(61) 3042-8546', 'Limpeza de Ambientes Pequenos', '$2y$10$WJL/zSXipVh531YsCrGSEekJzq/oTKgdWW.yHk8skjYWFG8VYuBRW', 1, 'Profissional do ramo de limpeza de casas, pequenas e minimalistas desde o ano de 2016, com foco em impermeabilização garantindo que sua casa fique mais limpa, por mais tempo.', '2025-10-07 02:24:18', '2025-12-01 23:17:55', 1),
+(4, 'Maria Francivânia', 'Rocha', '422.067.600-70', 'vaniasantosrocha@teste.com', '(61) 99345-8309', 'Limpeza de Ambientes Pequenos', '$2y$10$KI3LXORf.8XxRrQJ9o3lz.5l5DfBv80/tSZpzgQB4dh74kcl.awvS', 1, 'Sou profissional da área da limpeza a mais de 20 anos, trabalho normalmente em casas de familia. Estou buscando a StarClean Pela oportunidade de me conectar facilmente com a carta de clientes da empresa e poder usufruir dos equipamentos.', '2025-10-23 03:39:21', '2025-12-01 23:01:16', 1),
+(5, 'Arthur Luís', 'dos Santos Vieira', '091.191.781-07', 'arthur@gmail.com', '(61) 99189-2912', 'Limpeza de Casas', '$2y$10$G4XGYvwR4xdVo7U5FQEJN./NQwlJgK1jkBIPGyO13CqpLjmgAKvDW', 1, 'Sou profissional da área da Limpeza, há 8 meses e busco na StarClean uma cartela de clientes vasta.', '2025-10-25 22:56:55', '2025-11-15 23:58:53', 1),
 (6, 'José Carlos', 'Souza', '922.930.941-97', 'josecarlos@gmail.com', '(61) 99870-9954', 'Limpeza e organização de detalhes.', '$2y$10$T2oQZL76EWnWh0UNIRyOz.ICwWr8ZsoXu1z2bbHilx6lHqLJrpPW6', 1, 'Sou especialista em realizar a organização minimalista e cheia de detalhes fazendo com que seus ambientes fiquem limpos e organizados por mais tempo.', '2025-11-12 15:46:29', '2025-11-12 15:46:29', 1),
 (10, 'Samuel', 'Mauricio', '831.827.331-17', 'samuel@gmail.com', '(61) 99972-8292', 'Limpeza de casas pequenas', '$2y$10$VU44pL8iH9OJQ.DbTr/xYO1gZsDfAcgeoiu9KK8H/pV1NuAeP8QUu', 1, '', '2025-11-12 16:54:08', '2025-11-12 16:54:08', 1);
 
@@ -610,7 +667,8 @@ INSERT INTO `servico` (`id`, `titulo`, `descricao`, `preco`, `duracao_estimada`,
 (132, 'Combo 3 Nível Brilhante', 'para escritório de 3 salas diária', 580, NULL, 5, 0),
 (133, 'Combo 3 Nível Brilhante', 'para escritório de 3 salas mensal', 2320, NULL, 5, 0),
 (134, 'Combo 3 Nível Brilhante', 'para escritório de +4 salas diária', 680, NULL, 5, 0),
-(135, 'Combo 3 Nível Brilhante', 'para escritório de +4 salas mensal', 2720, NULL, 5, 0);
+(135, 'Combo 3 Nível Brilhante', 'para escritório de +4 salas mensal', 2720, NULL, 5, 0),
+(136, 'teste', '', 0, NULL, 1, 0);
 
 --
 -- Índices para tabelas despejadas
@@ -752,7 +810,7 @@ ALTER TABLE `administrador`
 -- AUTO_INCREMENT de tabela `agendamento`
 --
 ALTER TABLE `agendamento`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de tabela `avaliacao_prestador`
@@ -788,43 +846,43 @@ ALTER TABLE `conteudo_pagina_inicial`
 -- AUTO_INCREMENT de tabela `endereco`
 --
 ALTER TABLE `endereco`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT de tabela `indisponibilidade_prestador`
 --
 ALTER TABLE `indisponibilidade_prestador`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de tabela `log_atividades`
 --
 ALTER TABLE `log_atividades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT de tabela `log_cliente_atividades`
 --
 ALTER TABLE `log_cliente_atividades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de tabela `log_prestador_atividades`
 --
 ALTER TABLE `log_prestador_atividades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de tabela `notificacoes`
 --
 ALTER TABLE `notificacoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de tabela `prestador`
 --
 ALTER TABLE `prestador`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de tabela `redefinicao_senha`
@@ -836,7 +894,7 @@ ALTER TABLE `redefinicao_senha`
 -- AUTO_INCREMENT de tabela `servico`
 --
 ALTER TABLE `servico`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=137;
 
 --
 -- Restrições para tabelas despejadas
